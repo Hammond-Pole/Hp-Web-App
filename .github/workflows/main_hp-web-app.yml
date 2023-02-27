@@ -27,12 +27,24 @@ jobs:
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+            
+      - name: entiy framework install
+        run: dotnet tool install -g dotnet-ef
+
+      - name: entiy framework create migration
+        run: dotnet ef migrations script --idempotent --startup-project DotNetCoreSqlDb/DotNetCoreSqlDb.csproj --output ${{env.DOTNET_ROOT}}/myapp/migrate.sql
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Apply EF migration script
+        uses: Azure/sql-action@v2.1
+        with:
+          connection-string: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}
+          path: ${{env.DOTNET_ROOT}}/myapp/migrate.sql
 
   deploy:
     runs-on: ubuntu-latest
