@@ -1,0 +1,53 @@
+﻿@page "/user"
+@inject IUserService userService
+@inject IJSRuntime js
+
+<h3>Users</h3>
+<small>Add as many users as you wish.</small>
+<div class="form-group">
+    <a class="btn btn-success" href="User/create"><i class="oi oi-plus"></i> Create New</a>
+</div>
+<br>
+
+@if (users == null)
+{
+    <text>Loading...</text>
+}
+else if (users.Count == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (User user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Password</td>
+                    <td>
+                        <a class="btn btn-success" href="user/edit/@user.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+@code {
+    List<User>? users { get; set; }
+
+    protected override async Task OnInitializedAsync() => users = await userService.GetUsers();
+}
