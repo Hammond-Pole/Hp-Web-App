@@ -1,0 +1,78 @@
+﻿@page "/document/Create"
+@attribute [Authorize(Roles = "Administrator")]
+
+@inject IDocumentService documentService
+@inject IQuestionService questionService
+@inject NavigationManager uriHelper
+
+<h3>Create</h3>
+
+<EditForm Model="@document" OnValidSubmit="CreateDocument">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <InputText class="form-control" id="Name" @bind-Value="document.Name" />
+    </div>
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <InputText class="form-control" id="Description" @bind-Value="document.Description" />
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+</EditForm>
+
+@if (questionField == null)
+{
+    <text>Loading...</text>
+}
+else if (questionField.Count == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <!--Add Combobox for Document Navigation Property-->
+                <th>Document</th>
+                <th>Question Field Type</th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (QuestionField question in questionField)
+            {
+                <tr>
+                    <!-- Add all columns from QuestionField-->
+                    <td> @question.Id </td>
+                    <td> <select asp-for="Document" asp-items="question.Document"></select> </td>
+                    <td> @question.QuestionFieldType </td>
+                    <td> @question.Name </td>
+                    <td> @question.Description</td>
+                    <td>
+                        <a class="btn btn-success" href="user/edit/@question.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+
+@code {
+    Document document = new();
+    List<QuestionField>? questionField = new();
+    
+    async Task CreateDocument()
+    {
+        await documentService.CreateDocument(document);
+        questionField = await questionService.GetQuestionFields();
+        uriHelper.NavigateTo("/Document");
+    }
+}

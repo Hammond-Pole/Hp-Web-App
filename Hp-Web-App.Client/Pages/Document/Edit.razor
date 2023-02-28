@@ -1,0 +1,96 @@
+﻿@page "/document/edit/{documentId:int}"
+@using Microsoft.AspNetCore.Mvc.RazorPages;
+@using Microsoft.AspNetCore.Mvc.Rendering;
+
+@attribute [Authorize(Roles = "Administrator")]
+
+@inject IDocumentService documentService
+@inject IQuestionService questionService
+@inject NavigationManager uriHelper
+
+
+<h3>Edit Document</h3>
+
+<EditForm Model="@_document" OnValidSubmit="UpdateDocument">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label for="Name">Name</label>
+        <InputText class="form-control mb-3" id="Name" @bind-Value="_document.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="Description">Description</label>
+        <InputText class="form-control" id="Description" @bind-Value="_document.Description" />
+    </div>
+    <button class="btn btn-primary" type="submit">Update</button>
+</EditForm>
+
+<br />
+<br />
+
+<h3>Questions</h3>
+@if (_questionField == null)
+{
+    <text>Loading...</text>
+}
+else if (_questionField.Count == 0)
+{
+    <text>Linked Questions.</text>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <!--Add Combobox for Document Navigation Property-->
+                <th>Name</th>
+                <th>Description</th>
+                <th>Question Field Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (QuestionField question in _questionField)
+            {
+
+                <tr>
+                    <td hidden> @question.Id </td>
+                    <td class="Name">
+                        @question.Name
+                    </td>
+                    <td class="Description">
+                        @question.Description
+                    </td>
+                    <td class="QuestionFieldType">
+                        @question.QuestionFieldType.SqlDataType
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public int documentId { get; set; }
+
+    private Document _document = new Document();
+    private List<QuestionField>? _questionField = new();
+    private List<QuestionFieldType>? _questionFieldType = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        _document = await documentService.GetDocument(documentId)!;
+        _questionField = await questionService.GetQuestionFieldsByDocument(documentId);
+        _questionFieldType = await questionService.GetQuestionFieldTypes();
+    }
+
+    async Task UpdateDocument()
+    {
+        await documentService.UpdateDocument(_document);
+        uriHelper.NavigateTo("/document");
+    }
+
+
+}
+
+

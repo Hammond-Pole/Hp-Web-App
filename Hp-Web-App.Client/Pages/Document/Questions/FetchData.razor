@@ -1,0 +1,59 @@
+﻿@page "/document/questions"
+<h3>FetchData</h3>
+
+@inject IQuestionService questionService
+@inject NavigationManager uriHelper
+
+<h3>Users</h3>
+<small>Add as many users as you wish.</small>
+<div class="form-group">
+    <a class="btn btn-success" href="document/questions/create"><i class="oi oi-plus"></i> Create New</a>
+</div>
+<br>
+
+<!-- Help me build the form that shows each of the questionfields in the database so that i can select if they already exist-->
+@if (questions == null)
+{
+    <text>Loading...</text>
+}
+else if (questions.Count == 0)
+{
+    <text>No Questions Added.</text>
+}
+else
+{
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (QuestionField question in questions)
+        {
+            <tr>
+                <td>@question.Id</td>
+                <td>@question.Name</td>
+                <td>@question.Description</td>
+                <td>
+                    <a class="btn btn-success" href="document/questions/edit">Edit</a>
+                    </td>
+                    </tr>
+                    }
+                    </tbody>
+
+
+</table>
+}
+
+@code {
+
+    // List all the questions in the database
+    List<QuestionField>? questions { get; set; }
+
+    protected override async Task OnInitializedAsync() => questions = await questionService.GetQuestionFields();
+
+}

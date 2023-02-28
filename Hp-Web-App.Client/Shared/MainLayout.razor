@@ -33,11 +33,10 @@
 
 @code {
 
-
-
     private async Task Logout()
     {
         await Logout();
         await js.InvokeVoidAsync("blazorHelpers.refresh");
+        uriHelper.NavigateTo("/", true);
     }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/user/create"
+@attribute [Authorize(Roles = "Administrator")]
 @inject IUserService userService
 @inject NavigationManager uriHelper
 

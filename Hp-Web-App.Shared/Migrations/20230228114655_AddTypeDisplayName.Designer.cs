@@ -4,6 +4,7 @@ using Hp_Web_App.Shared.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hp_Web_App.Shared.Migrations
 {
     [DbContext(typeof(DbWebAppContext))]
-    partial class DbWebAppConfigModelSnapshot : ModelSnapshot
+    [Migration("20230228114655_AddTypeDisplayName")]
+    partial class AddTypeDisplayName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,16 +196,6 @@ namespace Hp_Web_App.Shared.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionBitValue", b =>
-                {
-                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
-
-                    b.Property<bool?>("BoolValue")
-                        .HasColumnType("bit");
-
-                    b.HasDiscriminator().HasValue("QuestionBooleanValue");
-                });
-
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionDateValue", b =>
                 {
                     b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
@@ -211,36 +204,6 @@ namespace Hp_Web_App.Shared.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasDiscriminator().HasValue("QuestionDateValue");
-                });
-
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionFloatValue", b =>
-                {
-                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
-
-                    b.Property<double>("FloatValue")
-                        .HasColumnType("float");
-
-                    b.HasDiscriminator().HasValue("QuestionDecimalValue");
-                });
-
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionIntValue", b =>
-                {
-                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
-
-                    b.Property<int>("IntValue")
-                        .HasColumnType("int");
-
-                    b.HasDiscriminator().HasValue("QuestionIntegerValue");
-                });
-
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionMemoValue", b =>
-                {
-                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
-
-                    b.Property<string>("MemoValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("QuestionMemoValue");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionStringValue", b =>
