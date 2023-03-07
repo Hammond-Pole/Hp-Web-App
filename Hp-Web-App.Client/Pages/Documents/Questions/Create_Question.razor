@@ -1,0 +1,95 @@
+﻿<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IQuestionService _questionService
+@inject IDocumentService _documentService
+
+<!-- Display the error at the top of the form so that we know why something failed. -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+<!-- Edit Question Form. -->
+<EditForm Model="@_questionField">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="name" style="margin-right: 30px; width: 100px;">Name:</label>
+        <InputText class="form-control-sm" id="name" @bind-Value="_questionField.Name" />
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="description" style="margin-right: 30px; width: 100px;">Description:</label>
+        <InputText class="form-control-sm" id="description" @bind-Value="_questionField.Description" />
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="ddlQuestionFieldType" style="margin-right: 30px; width: 100px;">Format:</label>
+        <select id="ddlQuestionFieldType"
+                asp-for="QuestionFieldTypeId"
+                class="form-control-sm"
+                placeholder="Select a answer format."
+                @onchange="@((ChangeEventArgs e) =>
+                                {
+                                    _questionField.QuestionFieldTypeId = Convert.ToInt32(e.Value);
+                                })">
+            <option value="" selected disabled>Select an Answer Type</option>
+            @foreach (var item in _questionFieldType!)
+            {
+                <option value="@item.Id">@item.DisplayName</option>
+            }
+        </select>
+    </div>
+    <br />
+
+    <button @onclick="AddQuestion" class="btn btn-primary">Submit</button>
+    <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+@code {
+    // Parameter used to insert the current page into as a Modal window.
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    // Because this is to be a Modal window, the parameter is passed by the calling form.
+    [Parameter] public int documentId { get; set; }
+
+    // Private properties used only in this page.
+    private Document _document = new Document();
+    private QuestionField _questionField = new();
+    private List<QuestionFieldType>? _questionFieldType = new();
+    private string ErrorMessage = null;
+
+    // Load all required data when launching the page.
+    protected async override Task OnInitializedAsync()
+    {
+        // The document Id can never change, only set by the previous page.
+        _questionField.DocumentId = documentId;
+
+        // Get the document details.
+        _document = await _documentService.GetDocument(documentId)!;
+        _questionFieldType = await _questionService.GetQuestionFieldTypes();
+    }
+
+    #region CRUD Operations
+    async Task AddQuestion()
+    {
+        try
+        {
+            await _questionService.CreateQuestionField(_questionField);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Modal Operations
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+}

@@ -1,0 +1,115 @@
+﻿@page "/Document"
+
+<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IDocumentService documentService
+@inject IJSRuntime js
+
+<!-- Back Button Navigation. -->
+<NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
+    <span style="display: flex; align-items: center;">
+        <img src="/round-back-button.png" asp-append-version="true" width="22">
+        Home
+    </span>
+</NavLink>
+<br />
+
+<!-- Header. -->
+<h3>Document Types</h3>
+
+<!-- Show a table below with the current document types. Allow the user to add more document types. -->
+<br />
+<button @onclick="ShowAddQuestionPopup" class="btn btn-primary">Add a Document</button>
+
+<br/>
+@if (_documents == null)
+{
+    <text>Loading...</text>
+}
+else if (_documents.Count == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table class="table table-striped" style="width: 60%;" vertical-align=center cellpadding="0">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Name</th>
+                <th style="width: 60%;">Description</th>
+                <th style="width: 10%;"></th>
+                <th style="width: 10%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Document document in _documents)
+            {
+                <tr>
+                    <td>@document.Name</td>
+                    <td>@document.Description</td>
+                    <td>
+                        <a class="btn btn-success" href="Document/Edit/@document.Id">Edit</a>
+                    
+                    </td>
+                            <td><a class="btn btn-warning" id="deleted" @onclick="() => DeleteDocument(document.Id) ">Delete</a></td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+                <div class="alert alert-danger" role="alert">
+            @ErrorMessage
+                </div>
+    }
+}
+
+@code {
+    // Parameter used to enable the popup/modal window.
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+
+    // Private properties used only in this page.
+    private List<Document>? _documents { get; set; }
+    private string ErrorMessage = null;
+
+    // Load all required data when launching the page.
+    protected override async Task OnInitializedAsync() => _documents = await documentService.GetDocuments();
+
+    #region CRUD Operations
+    async Task DeleteDocument(int Id)
+    {
+        try
+        {
+
+            await documentService.DeleteDocumentById(Id);
+            _documents = await documentService.GetDocuments();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Navigation
+
+    async void ShowAddQuestionPopup()
+    {
+        // Call the add form and wait to see if there is an Ok or Cancel. 
+        var createForm = Modal.Show<Create_Document>("Add a Document Type");
+        var result = await createForm.Result;
+
+        if (!result.Cancelled)
+        {
+            _documents = await documentService.GetDocuments();
+            StateHasChanged();
+        }
+    }
+    #endregion
+}

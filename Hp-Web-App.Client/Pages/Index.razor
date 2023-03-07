@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Hp_Web_App.Client.Pages.Documents.Questions;
 @inject IJSRuntime js
 
 <PageTitle>Index</PageTitle>
@@ -11,14 +12,3 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@code {
-    [CascadingParameter] 
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-    
-    async Task DisplayGreetingAlert()
-        {
-            var authState = await authenticationStateTask;
-            var message = $"Hello {authState.User.Identity.Name}";
-            await js.InvokeVoidAsync("alert", message);
-        }
-}

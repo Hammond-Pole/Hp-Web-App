@@ -2,7 +2,7 @@
 using Hp_Web_App.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hp_Web_App.Shared.AppServices;
+namespace Hp_Web_App.Client.AppServices;
 
 public interface IUserService
 {

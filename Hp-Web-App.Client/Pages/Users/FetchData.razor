@@ -1,8 +1,9 @@
 ﻿@page "/user"
-@attribute [Authorize(Roles = "Administrator")]
 
 @inject IUserService userService
 @inject IJSRuntime js
+
+@attribute [Authorize(Roles = "Administrator")]
 
 <h3>Users</h3>
 <small>Add as many users as you wish.</small>
@@ -49,7 +50,7 @@ else
     </table>
 }
 @code {
-    List<User>? users { get; set; }
+    private List<User>? users { get; set; }
 
     protected override async Task OnInitializedAsync() => users = await userService.GetUsers();
 }

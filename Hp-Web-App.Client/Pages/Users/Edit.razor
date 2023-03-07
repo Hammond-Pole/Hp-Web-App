@@ -1,12 +1,15 @@
-﻿@page "/user/create"
-@attribute [Authorize(Roles = "Administrator")]
+﻿@page "/user/edit/{userId:int}"
+
 @inject IUserService userService
 @inject NavigationManager uriHelper
 
-<h3>Create</h3>
 
-<!--Add a form for me that is based on the User Class with a submit button that executes CreateUser-->
-<EditForm Model="@user" OnValidSubmit="CreateUser">
+@attribute [Authorize(Roles = "Administrator")]
+
+<h3>Edit</h3>
+
+<!--Create an Edit form that is bound to the user object that has a button to execute the UpdateUser method-->
+<EditForm Model="@user" OnValidSubmit="UpdateUser">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div class="form-group">
@@ -21,14 +24,24 @@
         <label for="Password">Password</label>
         <InputText class="form-control" id="Password" @bind-Value="user.Password" />
     </div>
-    <button class="btn btn-primary" type="submit">Create</button>
+    <button class="btn btn-primary" type="submit">Update</button>
 </EditForm>
 
+
+
 @code {
-    User user = new User();
-    async Task CreateUser()
+
+    [Parameter] public int userId { get; set; }
+    private User user = new User();
+
+    protected async override Task OnParametersSetAsync()
     {
-        await userService.CreateUser(user);
+        user = await userService.GetUser(userId)!;
+    }
+
+    async Task UpdateUser()
+    {
+        await userService.UpdateUser(user);
         uriHelper.NavigateTo("/user");
     }
 }

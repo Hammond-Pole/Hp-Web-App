@@ -1,0 +1,65 @@
+﻿<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+
+
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IDocumentService documentService
+
+<!-- Header not required as the Modal form has a Title. -->
+
+
+<!-- Display the error at the top of the form so that we know why something failed. -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+<!-- Create Document Form. -->
+<EditForm model="@_document">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="name" style="margin-right: 30px; width: 100px;">Name:</label>
+        <InputText class="form-control-sm" id="name" @bind-Value="_document.Name" />
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="description" style="margin-right: 30px; width: 100px;">Description:</label>
+        <InputText class="form-control-sm" id="description" @bind-Value="_document.Description" />
+    </div>
+    <br />
+    <button @onclick="CreateDocument" class="btn btn-primary">Submit</button>
+    <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+
+@code {
+    // Parameter used to insert the current page into as a Modal window.
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    // Private properties used only in this page.
+    private Document _document = new();
+    private string ErrorMessage = null;
+    
+    #region CRUD Operations
+    async Task CreateDocument()
+    {
+        try
+        {
+            await documentService.CreateDocument(_document);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Modal Operations
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+}
