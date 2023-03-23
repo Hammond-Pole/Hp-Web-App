@@ -188,7 +188,7 @@ namespace Hp_Web_App.Shared.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("UserRoleId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

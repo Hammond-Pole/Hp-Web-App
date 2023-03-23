@@ -1,0 +1,117 @@
+﻿<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+@using Microsoft.AspNetCore.Components.Forms
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IDataService _dataService
+
+<!-- Display the error at the top of the form so that we know why something failed. -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+
+<!--Create an Edit form that is bound to the user object that has a button to execute the UpdateUser method-->
+<EditForm Model="@_user">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="name" style="margin-right: 30px; width: 100px;"> Full Name:</label>
+        <InputText class="form-control-sm" id="name" @bind="_user.Name" />
+    </div>
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="email" style="margin-right: 30px; width: 100px;">Email:</label>
+        <InputText class="form-control-sm" id="email" @bind="_user.Email" />
+    </div>
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="password" style="margin-right: 30px; width: 100px;">Password:</label>
+        <InputText class="form-control-sm" id="password" @bind="_user.Password" />
+    </div>
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="ddlUserRole" style="margin-right: 30px; width: 100px;">Role:</label>
+        <select id="ddlUserRole"
+                asp-for="RoleId"
+                class="form-control-sm"
+                @onchange="@((ChangeEventArgs e) =>
+                                {
+                                    _user.UserRoleId = Convert.ToInt32(e.Value);
+                                })">
+            @foreach (var role in _userRoles)
+            {
+                <option value="@role.Name">@role.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="ddlUserCompany" style="margin-right: 30px; width: 100px;">Company:</label>
+        <select id="ddlUserCompany"
+                asp-for="CompanyId"
+                class="form-control-sm"
+                @onchange="@((ChangeEventArgs e) =>
+                                {
+                                    _user.CompanyId = Convert.ToInt32(e.Value);
+                                })">
+            @foreach (var company in _companies!)
+            {
+                <option value="@company.Id">@company.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="isactive" style="margin-right: 30px; width: 100px;">Active:</label>
+        <InputCheckbox class="form-control-sm" id="isactive" @bind="_user.IsActive" />
+    </div>
+    <br />
+
+    <button @onclick="UpdateUser" class="btn btn-primary">Submit</button>
+    <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+
+
+@code {
+    // Parameter used to insert the current page into as a Modal window.
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    // Parameters are set in the in the Uri.
+    [Parameter] public int userId { get; set; }
+
+    // Private properties used only in this page.
+    private User _user = new User();
+    private List<Company> _companies = new();
+    private List<UserRole> _userRoles = new();
+    private string ErrorMessage = null;
+
+    // Load all required data when launching the page.
+    protected async override Task OnInitializedAsync()
+    {
+        _user = await _dataService.GetUserAsync(userId);
+        _companies = await _dataService.GetCompaniesAsync();
+        _userRoles = await _dataService.GetUserRolesAsync();
+    }
+
+    #region CRUD Operations
+    async Task UpdateUser()
+    {
+        try
+        {
+            await _dataService.UpdateUserAsync(_user);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Modal Operations
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+}

@@ -11,7 +11,7 @@ namespace Hp_Web_App.Shared.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Role",
+                name: "UserRoleId",
                 table: "Users",
                 type: "nvarchar(max)",
                 nullable: true);
@@ -21,7 +21,7 @@ namespace Hp_Web_App.Shared.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Role",
+                name: "UserRoleId",
                 table: "Users");
         }
     }

@@ -1,0 +1,105 @@
+﻿<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IDataService _dataService
+
+<!-- Header not required as the Modal form has a Title. -->
+<!-- Display the error at the top of the form so that we know why something failed. -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+<!-- Create Document Form. -->
+<EditForm model="@_company">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="name" style="margin-right: 30px; width: 100px;">Name:</label>
+        <InputText class="form-control-sm" id="name" @bind="_company.Name" />
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="ddlCompanyType" style="margin-right: 30px; width: 100px;">Type:</label>
+        <select id="ddlCompanyType"
+                asp-for="CompanyTypeId"
+                class="form-control-sm"
+                @onchange="@((ChangeEventArgs e) =>
+                                {
+                                    _company.CompanyTypeId = Convert.ToInt32(e.Value);
+                                })">
+            <option value="" selected disabled>Select a Type.</option>
+            @foreach (var companyType in _companyTypes)
+            {
+                <option value="@companyType.Id">@companyType.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="ddlDocument" style="margin-right: 30px; width: 100px;">Type:</label>
+        <select id="ddlDocument"
+                asp-for="CompanyDocument"
+                class="form-control-sm"
+                @onchange="@((ChangeEventArgs e) =>
+                                {
+                                    _companyDoc = Convert.ToInt32(e.Value);
+                                })">
+            <option value="" selected disabled>Select a Type.</option>
+
+            @foreach (var document in _documents)
+            {
+                <option value="@document.Id">@document.Name</option>
+            }
+        </select>
+    </div>
+    <br />
+    <button @onclick="Submit" class="btn btn-primary">Submit</button>
+    <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+</EditForm>
+
+
+@code {
+    // Parameter used to insert the current page into as a Modal window.
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    // Private properties used only in this page.
+    private Company _company = new();
+    private List<CompanyType> _companyTypes = new();
+    private List<Document> _documents = new();
+    private CompanyDocument _companyDocument = new();
+    private int _companyDoc;
+    private string ErrorMessage = string.Empty;
+
+    // Load all required data when launching the page.
+    protected async override Task OnInitializedAsync()
+    {
+        _companyTypes = await _dataService.GetCompanyTypesAsync();
+        _documents = await _dataService.GetDocumentsAsync();
+
+    }
+
+    #region CRUD Operations
+    async Task Submit()
+    {
+        try
+        {
+            _company = await _dataService.CreateCompanyAsync(_company);
+            _companyDocument.CompanyId = _company.Id;
+            _companyDocument.DocumentId = _companyDoc; 
+        await _dataService.CreateCompanyDocumentAsync(_companyDocument);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Modal Operations
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+}

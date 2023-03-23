@@ -1,0 +1,130 @@
+﻿@page "/company"
+
+<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IDataService _dataService
+@inject IJSRuntime js
+
+<!-- Back Button Navigation. -->
+<NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
+    <span style="display: flex; align-items: center;">
+        <text> <i class="oi oi-arrow-circle-left"></i> Home</text>
+    </span>
+</NavLink>
+<br />
+
+<!-- Header. -->
+<h3>Companies</h3>
+
+@if (_companies == null)
+{
+    <text>Loading...</text>
+}
+else if (_companies.Count == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <br />
+    <table class="table table-striped" style="width: 70%;" vertical-align=center cellpadding="0">
+        <thead>
+            <tr>
+                <th style="width: 50%;">Name</th>
+                <th style="width: 40%;">Type</th>
+                <th style="width: 5%;"></th>
+                <th style="width: 5%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Company company in _companies)
+            {
+                <tr>
+                    <td>@company.Name</td>
+                    <td>@company.CompanyType.Name</td>
+                    <td><a class="btn btn-success" href="Company/Edit/@company.Id">Edit</a></td>
+                    <td><a class="btn btn-warning" id="deleted" @onclick="() => Delete(company) ">Delete</a></td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <!-- Show a table above with the current users. Allow the user to add more users. -->
+    <button @onclick="ShowCreatePopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Company</button>
+
+}
+@code {
+    // Parameter used to enable the popup/modal window.
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+
+    // Private properties used only in this page.
+    private List<CompanyType>? _companyTypes { get; set; }
+    private List<Company>? _companies { get; set; }
+
+    private string ErrorMessage = string.Empty;
+
+    // Load all required data when launching the page.
+    protected override async Task OnInitializedAsync()
+    {
+        _companies = await _dataService.GetCompaniesAsync();
+        _companyTypes = await _dataService.GetCompanyTypesAsync();
+    }
+
+    #region CRUD Operations
+    async Task Delete(Company company)
+    {
+        try
+        {
+            await _dataService.DeleteCompanyAsync(company);
+            _companies = await _dataService.GetCompaniesAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Navigation
+    async void ShowCreatePopup()
+    {
+        var options = new ModalOptions()
+            {
+                DisableBackgroundCancel = true
+            };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var createForm = Modal.Show<Create_Company>("Add a User", options);
+        var result = await createForm.Result;
+
+        if (!result.Cancelled)
+        {
+            _companies = await _dataService.GetCompaniesAsync();
+            StateHasChanged();
+        }
+    }
+
+    async void ShowEditPopup(int editUser)
+    {
+        var options = new ModalOptions()
+            {
+                DisableBackgroundCancel = true
+            };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var createForm = Modal.Show<Edit_Company>("Edit Company", options);
+        var result = await createForm.Result;
+
+        if (!result.Cancelled)
+        {
+            _companies = await _dataService.GetCompaniesAsync();
+            StateHasChanged();
+        }
+    }
+    #endregion
+}

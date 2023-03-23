@@ -1,0 +1,28 @@
+﻿@inject IDataService _dataService
+
+<div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+    <label for="@QuestionFieldLabel" style="margin-right: 30px; width: 100px;">@QuestionFieldLabel</label>
+    <input type="number" class="form-control-sm" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+</div>
+
+@code {
+
+    [Parameter] public int DocumentId { get; set; }
+    [Parameter] public int QuestionFieldId { get; set; }
+    [Parameter] public string QuestionFieldLabel { get; set; }
+    [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
+
+    // This is the dynamic object we are passing back to the parent.
+    private QuestionIntValue _questionIntValue = new();
+
+    private async Task OnValueChanged(ChangeEventArgs e)
+    {
+        _questionIntValue.DocumentId = DocumentId;
+        _questionIntValue.QuestionFieldID = QuestionFieldId;
+        _questionIntValue.DateValueChanged = DateTime.Now;
+        _questionIntValue.IntValue = Convert.ToInt32(e.Value);
+
+        // Invoke the callback sending back the Value Object.
+        await ValueChanged.InvokeAsync(_questionIntValue);
+    }
+}

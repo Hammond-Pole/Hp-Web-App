@@ -1,0 +1,160 @@
+﻿@page "/company/edit/{companyId:int}"
+
+<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+@using Hp_Web_App.Client.Pages.Companies.CompanyDocuments;
+
+<!-- Only Administrators are allowed to browse to this page. -->
+@attribute [Authorize(Roles = "Administrator")]
+
+<!-- Dependency Injection. -->
+@inject IDataService _dataService
+@inject NavigationManager uriHelper
+@inject IJSRuntime js
+
+<!-- Back Button Navigation. -->
+<NavLink class="nav-link" href="document" style="padding: 0 0 0 0">
+    <span style="display: flex; align-items: center;">
+        <img src="/round-back-button.png" asp-append-version="true" width="22">
+        Company
+    </span>
+</NavLink>
+<br />
+
+<!-- Header. -->
+<h3>Edit @_company.Name Details</h3>
+
+<!-- Edit Company Form. -->
+<EditForm Model="@_company" style="width: 40%;">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="ddlCompanyType" style="margin-right: 30px; width: 100px;">Type:</label>
+        <select id="ddlCompanyType"
+                asp-for="CompanyTypeId"
+                class="form-control-sm"
+                @onchange="@((ChangeEventArgs e) =>
+                                {
+                                    _company.CompanyTypeId = Convert.ToInt32(e.Value);
+                                })">
+            @foreach (var companyType in _companyTypes)
+            {
+                <option value="@companyType.Id">@companyType.Name</option>
+            }
+        </select>
+    </div>
+    <br />
+</EditForm>
+
+<!-- Table of Current Documents added to the Company. -->
+<br />
+<h3>Allocated Documents</h3>
+
+@if (_companyDocuments == null)
+{
+    <!-- If this is showing, we are waiting for the data. -->
+    <text>Loading...</text>
+}
+else if (_companyDocuments.Count == 0)
+{
+    <!-- If this is showing, let the user add new questions. -->
+    <text>There are no documents currently attached to this company.</text>
+    <br />
+    <button @onclick="ShowAddPopup" class="btn btn-primary">Add a Document</button>
+}
+else
+{
+    <!-- Show a table with the currently attached questions. Allow the user to add more questions. -->
+    <table class="table table-striped" style="width: 60%;" vertical-align=center cellpadding="0">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Name</th>
+                <th style="width: 50%;">Description</th>
+                <th style="width: 10%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (CompanyDocument document in _companyDocuments)
+            {
+                <tr style="">
+                    <td>@document.Document.Name</td>
+                    <td>@document.Document.Description</td>
+                    <td><a class="btn btn-warning" id="deleteq" @onclick="() => Delete(document) ">Delete</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button @onclick="ShowAddPopup" class="btn btn-primary">Add a Document</button>
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ErrorMessage
+        </div>
+    }
+}
+
+
+@code {
+    // Parameter used to enable the popup/modal window.
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+
+    // Parameters are set in the in the Uri.
+    [Parameter] public int companyId { get; set; }
+
+    // Private properties used only in this page.
+    private Company _company = new();
+    private List<Document> _documents = new();
+    private List<CompanyType>? _companyTypes = new();
+    private List<CompanyDocument>? _companyDocuments = new();
+    private string ErrorMessage = null;
+
+    // Load all required data when launching the page.
+    protected async override Task OnInitializedAsync()
+    {
+        _company = await _dataService.GetCompanyAsync(companyId)!;
+        _companyTypes = await _dataService.GetCompanyTypesAsync();
+        _documents = await _dataService.GetDocumentsAsync();
+        _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(_company.Id);
+    }
+
+    #region CRUD Operations
+    async Task Update()
+    {
+        await _dataService.UpdateCompanyAsync(_company);
+    }
+
+    async Task Delete(CompanyDocument companyDocument)
+    {
+        try
+        {
+            await _dataService.DeleteCompanyDocumentAsync(companyDocument);
+            _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(_company.Id);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Navigation
+
+    async void ShowAddPopup()
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(Add_CompanyDocuments.companyId), companyId }
+        };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var questionForm = Modal.Show<Add_CompanyDocuments>("Add a Document", parameters);
+        var result = await questionForm.Result;
+
+        if (!result.Cancelled)
+        {
+            _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(companyId);
+            StateHasChanged();
+        }
+    }
+    #endregion
+}
