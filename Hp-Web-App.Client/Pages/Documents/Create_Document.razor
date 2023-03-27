@@ -1,6 +1,5 @@
-﻿<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
-
-
+﻿@using Microsoft.AspNetCore.Components.Forms
+<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
 
@@ -8,8 +7,6 @@
 @inject IDataService _dataService
 
 <!-- Header not required as the Modal form has a Title. -->
-
-
 <!-- Display the error at the top of the form so that we know why something failed. -->
 @if (!string.IsNullOrEmpty(ErrorMessage))
 {
@@ -18,19 +15,25 @@
     </div>
 }
 <!-- Create Document Form. -->
-<EditForm model="@_document">
+<EditForm model="@_document" OnValidSubmit="@CreateDocument">
     <DataAnnotationsValidator />
-    <ValidationSummary />
     <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
-        <label for="name" style="margin-right: 30px; width: 100px;">Name:</label>
-        <InputText class="form-control-sm" id="name" @bind="_document.Name" />
+        <label class="col-md-4" for="name" style="margin-right: 30px; width: 100px;">Name:</label>
+        <InputText class="col-md-8" id="name" @bind-Value="_document.Name" style="border-radius:.2rem;" />
     </div>
-    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
-        <label for="description" style="margin-right: 30px; width: 100px;">Description:</label>
-        <InputText class="form-control-sm" id="description" @bind="_document.Description" />
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <ValidationMessage For="@(() => _document.Name)" />
+    </div>
+
+    <div class="form-group-sm" style="display: flex; align-items: center;">
+        <label class="col-md-4" for="description" style="margin-right: 30px; width: 100px;">Description:</label>
+        <InputTextArea class="col-md-8" id="description" @bind-Value="_document.Description" style="border-radius:.2rem;" />
+    </div>
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <ValidationMessage For="@(() => _document.Description)" />
     </div>
     <br />
-    <button @onclick="CreateDocument" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
     <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
 </EditForm>
 
@@ -42,7 +45,7 @@
     // Private properties used only in this page.
     private Document _document = new();
     private string ErrorMessage = string.Empty;
-    
+
     #region CRUD Operations
     async Task CreateDocument()
     {
