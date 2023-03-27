@@ -24,8 +24,8 @@
             </div>
             <div style="height:10px; width:100%"></div>
             <div class="form-group-sm">
-                <label for="passwprd" style="width:100%">Password</label>
-                <InputText style="width:100%" id="email" @bind-Value="_model.Password" type="password" placeholder="Password" />
+                <label for="password" style="width:100%">Password</label>
+                <InputText style="width:100%" id="password" @bind-Value="_model.Password" type="password" placeholder="Password" />
                 <ValidationMessage For="@(() => _model.Password)" />
             </div>
             <div style="height:10px; width:100%"></div>
@@ -36,9 +36,11 @@
                 }
                 else
                 {
-                    <button id="login" class="btn btn-primary" disabled>Login</button>
+                    <button id="login" class="btn btn-primary" disabled>Processing...</button>
                 }
             </div>
+
+
         </EditForm>
     </div>
 </div>
@@ -48,15 +50,16 @@
     private class Model
     {
         [Required]
-        [StringLength(50, ErrorMessage = "Name is too long.")]
-        [DataType(DataType.EmailAddress)]
+        [StringLength(50, ErrorMessage = "Email is too long.")]
+        // Add a validation with a message that if the Email is not a valid email it should show "Not a valid email".
+        [EmailAddress(ErrorMessage = "Not a valid email")]
         public string? Email { get; set; }
         [Required]
         public string? Password { get; set; }
     }
 
     private Model _model = new Model();
-    private UserSession _userSession = new UserSession();
+    private UserSession? _userSession = new UserSession();
     private bool _isBusy = false;
     private async Task Authenticate()
     {
@@ -66,7 +69,6 @@
             if (_userSession == null)
             {
                 await js.InvokeVoidAsync("alert", "Invalid email or password");
-                _isBusy = !_isBusy;
                 return;
             }
 
@@ -82,7 +84,7 @@
         }
         finally
         {
-            _isBusy = !_isBusy;
+            _isBusy = false;
         }
     }
 }

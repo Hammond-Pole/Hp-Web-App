@@ -27,14 +27,13 @@
 <!-- Edit Document Form. -->
 <EditForm Model="@_document">
     <DataAnnotationsValidator />
-    <ValidationSummary />
     <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
         <label for="name" style="margin-right: 20px; width: 100px;">Name</label>
-        <InputText class="form-control-sm" id="name" @bind-Value="_document.Name" />
+        <InputText class="form-control-sm" disabled id="name" @bind-Value="_document.Name" />
     </div>
     <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
         <label for="description" style="margin-right: 20px; width: 100px;">Description</label>
-        <InputText class="form-control-sm" id="description" @bind-Value="_document.Description" />
+        <InputTextArea class="form-control-sm" rows="4" disabled id="description" @bind-Value="_document.Description" style="width:300px" />
     </div>
     <br />
 </EditForm>
