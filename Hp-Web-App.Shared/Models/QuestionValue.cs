@@ -1,4 +1,6 @@
-﻿namespace Hp_Web_App.Shared.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Hp_Web_App.Shared.Models
 {
     public abstract class QuestionValue // base class
     {
@@ -15,6 +17,8 @@
 
     public class QuestionStringValue : QuestionValue // subclass
     {
+        [StringLength(255)]
+        [Required]
         public string? StringValue { get; set; }
     }
     public class QuestionBitValue : QuestionValue // subclass

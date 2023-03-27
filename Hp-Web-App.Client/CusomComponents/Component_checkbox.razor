@@ -1,0 +1,28 @@
+﻿@inject IDataService _dataService
+
+<div class="form-group-sm">
+    <label for="@QuestionFieldLabel" style="margin-right: 30px; width: 100px;">@QuestionFieldLabel</label>
+    <input type="checkbox" class="form-control-sm" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+</div>
+
+@code {
+    // These parameters are added to label the component and to pass the value to the parent component.
+    [Parameter] public int DocumentId { get; set; }
+    [Parameter] public int QuestionFieldId { get; set; }
+    [Parameter] public string QuestionFieldLabel { get; set; }
+    [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
+
+    // This is the dynamic object we are passing back to the parent.
+    private QuestionBitValue _questionBitValue = new();
+
+    private async Task OnValueChanged(ChangeEventArgs e)
+    {
+        _questionBitValue.DocumentId = DocumentId;
+        _questionBitValue.QuestionFieldID = QuestionFieldId;
+        _questionBitValue.DateValueChanged = DateTime.Now;
+        _questionBitValue.BoolValue = Convert.ToBoolean(e.Value);
+
+        // Invoke the callback sending back the Value Object.
+        await ValueChanged.InvokeAsync(_questionBitValue);
+    }
+}

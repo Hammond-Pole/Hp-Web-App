@@ -17,10 +17,108 @@ namespace Hp_Web_App.Shared.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("ProductVersion", "7.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.Company", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyTypeId");
+
+                    b.ToTable("Companies");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CompanyTypeId = 5,
+                            Name = "Hammond Pole"
+                        });
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.CompanyDocument", b =>
+                {
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CompanyId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("CompanyDocuments");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.CompanyType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CompanyTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Customers would typically be purchasing or selling.",
+                            Name = "Customer"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Any organization that sells to Hammond Pole.",
+                            Name = "Supplier"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Any company that supplies services to Hammond Pole.",
+                            Name = "Contractor"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "These are specifically for Estate Agents and their staff.",
+                            Name = "Agency"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "",
+                            Name = "Other"
+                        });
+                });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.Document", b =>
                 {
@@ -39,6 +137,51 @@ namespace Hp_Web_App.Shared.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.DocumentsAttached", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("QuestionFieldId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("QuestionFieldId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DocumentsAttached");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionField", b =>
@@ -78,6 +221,9 @@ namespace Hp_Web_App.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ComponentName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DisplayName")
                         .HasColumnType("nvarchar(max)");
 
@@ -95,6 +241,7 @@ namespace Hp_Web_App.Shared.Migrations
                         new
                         {
                             Id = 1,
+                            ComponentName = "date",
                             DisplayName = "Date",
                             SqlDataType = "DateTime",
                             SystemType = "System.DateTime"
@@ -102,6 +249,7 @@ namespace Hp_Web_App.Shared.Migrations
                         new
                         {
                             Id = 2,
+                            ComponentName = "checkbox",
                             DisplayName = "Yes / No",
                             SqlDataType = "Bit",
                             SystemType = "System.Boolean"
@@ -109,6 +257,7 @@ namespace Hp_Web_App.Shared.Migrations
                         new
                         {
                             Id = 3,
+                            ComponentName = "text",
                             DisplayName = "Text",
                             SqlDataType = "Varchar(500)",
                             SystemType = "System.String"
@@ -116,6 +265,7 @@ namespace Hp_Web_App.Shared.Migrations
                         new
                         {
                             Id = 4,
+                            ComponentName = "number",
                             DisplayName = "Whole Number",
                             SqlDataType = "Int",
                             SystemType = "System.Int32"
@@ -123,6 +273,7 @@ namespace Hp_Web_App.Shared.Migrations
                         new
                         {
                             Id = 5,
+                            ComponentName = "decimal",
                             DisplayName = "Decimal",
                             SqlDataType = "Float",
                             SystemType = "System.Double"
@@ -130,6 +281,7 @@ namespace Hp_Web_App.Shared.Migrations
                         new
                         {
                             Id = 6,
+                            ComponentName = "Memo",
                             DisplayName = "Memo",
                             SqlDataType = "Varchar(max)",
                             SystemType = "System.String"
@@ -176,8 +328,14 @@ namespace Hp_Web_App.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -185,12 +343,63 @@ namespace Hp_Web_App.Shared.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
+                    b.Property<int>("UserRoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("UserRoleId");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CompanyId = 1,
+                            Email = "alanj@hpd.co.za",
+                            IsActive = true,
+                            Name = "Admin",
+                            Password = "1234",
+                            UserRoleId = 1
+                        });
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("UserRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Administrators can Edit or Create Users, Documents, Companies and Questions",
+                            Name = "Administrator"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Users can upload or use non administrative features.",
+                            Name = "User"
+                        });
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionBitValue", b =>
@@ -253,18 +462,80 @@ namespace Hp_Web_App.Shared.Migrations
                     b.HasDiscriminator().HasValue("QuestionStringValue");
                 });
 
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.Company", b =>
+                {
+                    b.HasOne("Hp_Web_App.Shared.Models.CompanyType", "CompanyType")
+                        .WithMany("Companies")
+                        .HasForeignKey("CompanyTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CompanyType");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.CompanyDocument", b =>
+                {
+                    b.HasOne("Hp_Web_App.Shared.Models.Company", "Company")
+                        .WithMany("CompanyDocuments")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Hp_Web_App.Shared.Models.Document", "Document")
+                        .WithMany("CompanyDocuments")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.DocumentsAttached", b =>
+                {
+                    b.HasOne("Hp_Web_App.Shared.Models.Company", "Company")
+                        .WithMany("DocumentsAttached")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Hp_Web_App.Shared.Models.Document", "Document")
+                        .WithMany("DocumentsAttached")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Hp_Web_App.Shared.Models.QuestionField", null)
+                        .WithMany("DocumentsAttached")
+                        .HasForeignKey("QuestionFieldId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Hp_Web_App.Shared.Models.User", "User")
+                        .WithMany("DocumentsAttached")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Document");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionField", b =>
                 {
                     b.HasOne("Hp_Web_App.Shared.Models.Document", "Document")
                         .WithMany("QuestionFields")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Hp_Web_App.Shared.Models.QuestionFieldType", "QuestionFieldType")
                         .WithMany("QuestionFields")
                         .HasForeignKey("QuestionFieldTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Document");
@@ -277,23 +548,72 @@ namespace Hp_Web_App.Shared.Migrations
                     b.HasOne("Hp_Web_App.Shared.Models.QuestionField", null)
                         .WithMany("Values")
                         .HasForeignKey("QuestionFieldID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.User", b =>
+                {
+                    b.HasOne("Hp_Web_App.Shared.Models.Company", "Company")
+                        .WithMany("Users")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Hp_Web_App.Shared.Models.UserRole", "UserRole")
+                        .WithMany("Users")
+                        .HasForeignKey("UserRoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("UserRole");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.Company", b =>
+                {
+                    b.Navigation("CompanyDocuments");
+
+                    b.Navigation("DocumentsAttached");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.CompanyType", b =>
+                {
+                    b.Navigation("Companies");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.Document", b =>
                 {
+                    b.Navigation("CompanyDocuments");
+
+                    b.Navigation("DocumentsAttached");
+
                     b.Navigation("QuestionFields");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionField", b =>
                 {
+                    b.Navigation("DocumentsAttached");
+
                     b.Navigation("Values");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionFieldType", b =>
                 {
                     b.Navigation("QuestionFields");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.User", b =>
+                {
+                    b.Navigation("DocumentsAttached");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.UserRole", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

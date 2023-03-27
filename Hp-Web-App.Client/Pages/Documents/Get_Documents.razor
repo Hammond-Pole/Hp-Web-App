@@ -5,26 +5,25 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDocumentService documentService
+@inject IDataService _dataService
 @inject IJSRuntime js
 
 <!-- Back Button Navigation. -->
 <NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
     <span style="display: flex; align-items: center;">
-        <img src="/round-back-button.png" asp-append-version="true" width="22">
-        Home
+        <text> <i class="oi oi-arrow-circle-left"></i> Home</text>
     </span>
 </NavLink>
 <br />
 
 <!-- Header. -->
-<h3>Document Types</h3>
+<h3>Documents</h3>
 
 <!-- Show a table below with the current document types. Allow the user to add more document types. -->
 <br />
-<button @onclick="ShowAddQuestionPopup" class="btn btn-primary">Add a Document</button>
+<button @onclick="ShowAddQuestionPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Document</button>
 
-<br/>
+<br />
 @if (_documents == null)
 {
     <text>Loading...</text>
@@ -35,7 +34,7 @@ else if (_documents.Count == 0)
 }
 else
 {
-    <table class="table table-striped" style="width: 60%;" vertical-align=center cellpadding="0">
+    <table class="table table-striped" style="width: 40%;" vertical-align=center cellpadding="0">
         <thead>
             <tr>
                 <th style="width: 30%;">Name</th>
@@ -50,22 +49,18 @@ else
                 <tr>
                     <td>@document.Name</td>
                     <td>@document.Description</td>
-                    <td>
-                        <a class="btn btn-success" href="Document/Edit/@document.Id">Edit</a>
-                    
-                    </td>
-                            <td><a class="btn btn-warning" id="deleted" @onclick="() => DeleteDocument(document.Id) ">Delete</a></td>
+                    <td><a class="btn btn-success" href="Document/Edit/@document.Id">Edit</a></td>
+                    <td><a class="btn btn-warning" id="deleted" @onclick="() => DeleteDocument(document.Id) ">Delete</a></td>
                 </tr>
             }
-
         </tbody>
     </table>
 
     @if (!string.IsNullOrEmpty(ErrorMessage))
     {
-                <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger" role="alert">
             @ErrorMessage
-                </div>
+        </div>
     }
 }
 
@@ -78,16 +73,15 @@ else
     private string ErrorMessage = null;
 
     // Load all required data when launching the page.
-    protected override async Task OnInitializedAsync() => _documents = await documentService.GetDocuments();
+    protected override async Task OnInitializedAsync() => _documents = await _dataService.GetDocumentsAsync();
 
     #region CRUD Operations
     async Task DeleteDocument(int Id)
     {
         try
         {
-
-            await documentService.DeleteDocumentById(Id);
-            _documents = await documentService.GetDocuments();
+            await _dataService.DeleteDocumentAsync(Id);
+            _documents = await _dataService.GetDocumentsAsync();
             StateHasChanged();
         }
         catch (Exception ex)
@@ -101,13 +95,18 @@ else
 
     async void ShowAddQuestionPopup()
     {
-        // Call the add form and wait to see if there is an Ok or Cancel. 
-        var createForm = Modal.Show<Create_Document>("Add a Document Type");
+        var options = new ModalOptions()
+            {
+                DisableBackgroundCancel = true
+            };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var createForm = Modal.Show<Create_Document>("Add a Document Type", options);
         var result = await createForm.Result;
 
         if (!result.Cancelled)
         {
-            _documents = await documentService.GetDocuments();
+            _documents = await _dataService.GetDocumentsAsync();
             StateHasChanged();
         }
     }

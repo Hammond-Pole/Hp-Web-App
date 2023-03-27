@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Blazored.Modal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +10,7 @@ builder.Services.AddBlazoredModal();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IDocumentService, DocumentService> ();
-builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddDbContext<DbWebAppContext>(options =>

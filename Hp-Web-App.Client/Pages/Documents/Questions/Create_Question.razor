@@ -1,10 +1,10 @@
-﻿<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+﻿@using Microsoft.AspNetCore.Components.Forms
+<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IQuestionService _questionService
-@inject IDocumentService _documentService
+@inject IDataService _dataService
 
 <!-- Display the error at the top of the form so that we know why something failed. -->
 @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -22,11 +22,11 @@
         <label for="name" style="margin-right: 30px; width: 100px;">Name:</label>
         <InputText class="form-control-sm" id="name" @bind-Value="_questionField.Name" />
     </div>
-    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
         <label for="description" style="margin-right: 30px; width: 100px;">Description:</label>
         <InputText class="form-control-sm" id="description" @bind-Value="_questionField.Description" />
     </div>
-    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+    <div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
         <label for="ddlQuestionFieldType" style="margin-right: 30px; width: 100px;">Format:</label>
         <select id="ddlQuestionFieldType"
                 asp-for="QuestionFieldTypeId"
@@ -60,7 +60,7 @@
     private Document _document = new Document();
     private QuestionField _questionField = new();
     private List<QuestionFieldType>? _questionFieldType = new();
-    private string ErrorMessage = null;
+    private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
@@ -69,8 +69,8 @@
         _questionField.DocumentId = documentId;
 
         // Get the document details.
-        _document = await _documentService.GetDocument(documentId)!;
-        _questionFieldType = await _questionService.GetQuestionFieldTypes();
+        _document = await _dataService.GetDocumentAsync(documentId)!;
+        _questionFieldType = await _dataService.GetQuestionFieldTypesAsync();
     }
 
     #region CRUD Operations
@@ -78,7 +78,7 @@
     {
         try
         {
-            await _questionService.CreateQuestionField(_questionField);
+            await _dataService.CreateQuestionFieldAsync(_questionField);
             await Close();
         }
         catch (Exception ex)

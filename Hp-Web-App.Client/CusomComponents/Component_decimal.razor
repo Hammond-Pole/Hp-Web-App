@@ -1,0 +1,24 @@
+﻿@inject IDataService _dataService
+
+<div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
+    <label for="@QuestionFieldLabel" style="margin-right: 30px; width: 100px;">@QuestionFieldLabel</label>
+    <input type="number" class="form-control-sm" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+</div>
+
+@code {
+
+    [Parameter] public int DocumentId { get; set; }
+    [Parameter] public int QuestionFieldId { get; set; }
+    [Parameter] public string QuestionFieldLabel { get; set; }
+    [Parameter]
+    public double Value { get; set; }
+    [Parameter]
+    public EventCallback<dynamic> ValueChanged { get; set; }
+
+    private async Task OnValueChanged(ChangeEventArgs e)
+    {
+        string value = e.Value.ToString();
+        Console.WriteLine($"The new value is {value}");
+        await ValueChanged.InvokeAsync(e);
+    }
+}
