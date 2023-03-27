@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.5.0
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: xt0rted/setup-dotnet@v1.5.0
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
@@ -35,7 +35,7 @@ jobs:
         run: dotnet ef migrations script --idempotent --startup-project Hp-Web-App.Client/Hp-Web-App.Client.csproj --output ${{env.DOTNET_ROOT}}/myapp/migrate.sql
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp

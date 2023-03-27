@@ -1,6 +1,8 @@
 ﻿@page "/Authentication/Login";
 
 @using Hp_Web_App.Client.Authentication;
+@using System.ComponentModel.DataAnnotations;
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject IUserService userService
 @inject IJSRuntime js
@@ -9,28 +11,35 @@
 
 
 <div class="row">
-    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+    <div class="col-lg-3 offset-lg-4 pt-4 pb-4 border">
         <div class="mb-3 text-center">
             <h3>LOGIN</h3>
         </div>
-        <div class="mb-3">
-            <label>Email</label>
-            <input @bind="@model.Email" class="form-control" placeholder="Email" />
-        </div>
-        <div class="mb-3">
-            <label>Password</label>
-            <input @bind="@model.Password" type="password" class="form-control" placeholder="Password" />
-        </div>
-        <div class="mb-3 d-grid gap-2">
-            @if (!_isBusy)
-            {
-                <button id="login"  class="btn btn-primary" @onclick="Authenticate">Login</button>
-            }
-            else
-            {
-                <button id="login" class="btn btn-primary" disabled="disabled">Login</button>
-            }
-        </div>
+        <EditForm Model="_model" Ch>
+            <DataAnnotationsValidator />
+            <div class="form-group-sm">
+                <label for="email" style="width:100%">Email</label>
+                <InputText style="width:100%" id="email" @bind-Value="_model.Email" placeholder="Email" />
+                <ValidationMessage For="@(() => _model.Email)" />
+            </div>
+            <div style="height:10px; width:100%"></div>
+            <div class="form-group-sm">
+                <label for="passwprd" style="width:100%">Password</label>
+                <InputText style="width:100%" id="email" @bind-Value="_model.Password" type="password" placeholder="Password" />
+                <ValidationMessage For="@(() => _model.Password)" />
+            </div>
+            <div style="height:10px; width:100%"></div>
+            <div class="mb-3 text-center">
+                @if (!_isBusy)
+                {
+                    <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }">Login</button>
+                }
+                else
+                {
+                    <button id="login" class="btn btn-primary" disabled>Login</button>
+                }
+            </div>
+        </EditForm>
     </div>
 </div>
 
@@ -38,21 +47,22 @@
 
     private class Model
     {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        [Required]
+        [StringLength(50, ErrorMessage = "Name is too long.")]
+        [DataType(DataType.EmailAddress)]
+        public string? Email { get; set; }
+        [Required]
+        public string? Password { get; set; }
     }
 
-    private Model model = new Model();
+    private Model _model = new Model();
     private UserSession _userSession = new UserSession();
     private bool _isBusy = false;
     private async Task Authenticate()
     {
-        // Disable the Login button.
-        _isBusy = !_isBusy;
-
         try
         {
-            _userSession = await userService.Login(model.Email, model.Password);
+            _userSession = await userService.Login(_model.Email, _model.Password);
             if (_userSession == null)
             {
                 await js.InvokeVoidAsync("alert", "Invalid email or password");
@@ -73,6 +83,6 @@
         finally
         {
             _isBusy = !_isBusy;
-        }  
+        }
     }
 }
