@@ -2,13 +2,14 @@
 
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 @using Hp_Web_App.Client.Pages.Companies.CompanyDocuments;
+@using Microsoft.AspNetCore.Components.Forms
 
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
 @inject IDataService _dataService
-@inject NavigationManager uriHelper
+@inject NavigationManager _navigationManager
 @inject IJSRuntime js
 
 <!-- Back Button Navigation. -->
