@@ -77,7 +77,7 @@ body {
     color: var(--bs-body-color);
     text-align: var(--bs-body-text-align);
     background-color: var(--bs-body-bg);
-    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent
 }
 
@@ -302,7 +302,7 @@ caption {
 
 th {
     text-align: inherit;
-    text-align: match-parent
+    text-align: -webkit-match-parent
 }
 
 tbody, td, tfoot, th, thead, tr {

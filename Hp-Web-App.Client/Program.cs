@@ -1,3 +1,4 @@
+using Hp_Web_App.Shared.Functions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
@@ -11,6 +12,7 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDataService, DataService>();
+builder.Services.AddScoped<IHelperFunctions, HelperFunctions>();
 builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddDbContext<DbWebAppContext>(options =>

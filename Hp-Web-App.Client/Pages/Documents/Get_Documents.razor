@@ -1,4 +1,5 @@
 ﻿@page "/Document"
+@using Hp_Web_App.Client.Shared
 
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 <!-- Only Administrators are allowed to browse to this page. -->
@@ -7,6 +8,7 @@
 <!-- Dependency Injection. -->
 @inject IDataService _dataService
 @inject IJSRuntime js
+@inject NavigationManager _navigationManager
 
 <!-- Back Button Navigation. -->
 <NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
@@ -19,50 +21,20 @@
 <!-- Header. -->
 <h3>Documents</h3>
 
+
 <!-- Show a table below with the current document types. Allow the user to add more document types. -->
+<DynamicTable TModel="Document" Items="_documents" OnEdit="OnEditItem" OnDelete="OnDeleteItem" />
 <br />
 <button @onclick="ShowAddQuestionPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Document</button>
 
 <br />
-@if (_documents == null)
+@if (!string.IsNullOrEmpty(ErrorMessage))
 {
-    <text>Loading...</text>
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
 }
-else if (_documents.Count == 0)
-{
-    <text>No Records Found.</text>
-}
-else
-{
-    <table class="table table-striped" style="width: 40%;" vertical-align=center cellpadding="0">
-        <thead>
-            <tr>
-                <th style="width: 30%;">Name</th>
-                <th style="width: 60%;">Description</th>
-                <th style="width: 10%;"></th>
-                <th style="width: 10%;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (Document document in _documents)
-            {
-                <tr>
-                    <td>@document.Name</td>
-                    <td>@document.Description</td>
-                    <td><a class="btn btn-success" href="Document/Edit/@document.Id">Edit</a></td>
-                    <td><a class="btn btn-warning" id="deleted" @onclick="() => DeleteDocument(document.Id) ">Delete</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
 
-    @if (!string.IsNullOrEmpty(ErrorMessage))
-    {
-        <div class="alert alert-danger" role="alert">
-            @ErrorMessage
-        </div>
-    }
-}
 
 @code {
     // Parameter used to enable the popup/modal window.
@@ -76,8 +48,9 @@ else
     protected override async Task OnInitializedAsync() => _documents = await _dataService.GetDocumentsAsync();
 
     #region CRUD Operations
-    async Task DeleteDocument(int Id)
+    async Task OnDeleteItem(Document document)
     {
+        int Id = document.Id; // Assuming the item has an Id property
         try
         {
             await _dataService.DeleteDocumentAsync(Id);
@@ -109,6 +82,14 @@ else
             _documents = await _dataService.GetDocumentsAsync();
             StateHasChanged();
         }
+    }
+
+    async void OnEditItem(Document document)
+    {
+        int Id = document.Id; // Assuming the item has an Id property
+
+        //Navigate to the Edit_Document page.
+        _navigationManager.NavigateTo("Document/Edit/" + Id);
     }
     #endregion
 }

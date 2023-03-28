@@ -1,4 +1,5 @@
 ﻿@page "/user"
+@using Hp_Web_App.Client.Shared
 
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 <!-- Only Administrators are allowed to browse to this page. -->
@@ -19,48 +20,10 @@
 <!-- Header. -->
 <h3>Users</h3>
 
-@if (_users == null)
-{
-    <text>Loading...</text>
-}
-else if (_users.Count == 0)
-{
-    <text>No Records Found.</text>
-}
-else
-{
-    <br />
-    <table class="table table-striped" style="width: 70%;" vertical-align=center cellpadding="0">
-        <thead>
-            <tr>
-                <th style="width: 20%;">Name</th>
-                <th style="width: 40%;">Email</th>
-                <th style="width: 10%;">Role</th>
-                <th style="width: 20%;">Company</th>
-                <th style="width: 5%;"></th>
-                <th style="width: 5%;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (User user in _users)
-            {
-                <tr>
-                    <td>@user.Name</td>
-                    <td>@user.Email</td>
-                    <td>@user.UserRole.Name</td>
-                    <td>@user.Company.Name</td>
-                    <td><a class="btn btn-primary" id="edit" @onclick="() => ShowEditPopup(user.Id) ">Edit</a></td>
-                    <td><a class="btn btn-warning" id="deleted" @onclick="() => Delete(user) ">Delete</a></td>
-                </tr>
-            }
+<DynamicTable TModel="User" Items="_users" OnEdit="ShowEditPopup" OnDelete="OnDeleteItem" />
+<br />
+<button @onclick="ShowAddPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a User</button>
 
-        </tbody>
-    </table>
-
-    <!-- Show a table above with the current users. Allow the user to add more users. -->
-    <button @onclick="ShowAddPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a User</button>
-
-}
 @code {
     // Parameter used to enable the popup/modal window.
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
@@ -81,7 +44,7 @@ else
     }
 
     #region CRUD Operations
-    async Task Delete(User user)
+    async Task OnDeleteItem(User user)
     {
         try
         {
@@ -93,9 +56,7 @@ else
         {
             ErrorMessage = ex.Message;
         }
-    }
-    #endregion
-
+    }    
     #region Navigation
     async void ShowAddPopup()
     {
@@ -115,11 +76,12 @@ else
         }
     }
 
-    async void ShowEditPopup(int editUser)
+    async void ShowEditPopup(User editUser)
     {
+        int userId = editUser.Id;
         var parameters = new ModalParameters
         {
-            { nameof(Edit_Users.userId), editUser }
+            { nameof(Edit_Users.userId), userId }
         };
         var options = new ModalOptions()
             {
@@ -136,5 +98,6 @@ else
             StateHasChanged();
         }
     }
+    #endregion
     #endregion
 }

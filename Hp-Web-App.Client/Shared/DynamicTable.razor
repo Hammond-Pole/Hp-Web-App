@@ -1,0 +1,112 @@
+﻿@typeparam TModel
+@using System.Reflection
+@using System.ComponentModel.DataAnnotations;
+@using System.ComponentModel.DataAnnotations.Schema;
+@using Hp_Web_App.Client.Pages.Users;
+@using Hp_Web_App.Shared.Functions;
+
+@inject IHelperFunctions _helperFunctions
+
+<style>
+    .dynamic-table {
+        width: auto;
+        display: inline-table;
+    }
+
+        .dynamic-table th, .dynamic-table td {
+            width: auto;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+</style>
+
+@if (Items is null)
+{
+    <text>Loading...</text>
+}
+else if (Items.Count() == 0)
+{
+    <text>No Records Found.</text>
+}
+else
+{
+    <table table class="table dynamic-table">
+        <thead>
+            <tr>
+                @foreach (var property in GetProperties())
+                {
+                    <th>@_helperFunctions.ConvertPascalCaseToSpaced(@property.Name)</th>
+                }
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Items)
+            {
+                <tr>
+                    @foreach (var property in GetProperties())
+                    {
+                        <td>@GetPropertyValue(item, property)</td>
+                    }
+                    <td>
+                        <!-- Add this block -->
+                        <button class="btn btn-primary btn-sm" @onclick="() => ShowEditPopup(item)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteItem(item)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    // Parameter used to enable the popup/modal window.
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+
+    [Parameter] public IEnumerable<TModel> Items { get; set; }
+    [Parameter] public EventCallback<TModel> OnEdit { get; set; }
+    [Parameter] public EventCallback<TModel> OnDelete { get; set; }
+
+    #region Dynamic Table Data Retrieval
+    private PropertyInfo[] GetProperties()
+    {
+        return typeof(TModel).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.GetCustomAttribute<ExcludeFromTableAttribute>() == null)
+            .ToArray();
+    }
+
+    private string GetPropertyValue(object item, PropertyInfo property)
+    {
+        var value = property.GetValue(item);
+
+        if (value != null && IsComplexType(property.PropertyType))
+        {
+            var nameProperty = value.GetType().GetProperty("Name");
+            if (nameProperty != null)
+            {
+                return nameProperty.GetValue(value)?.ToString();
+            }
+            return string.Join(", ", value.GetType().GetProperties().Select(p => p.GetValue(value)));
+        }
+
+        return value?.ToString();
+    }
+
+    private bool IsComplexType(Type type)
+    {
+        return !type.IsPrimitive && !type.IsEnum && type != typeof(string) && type != typeof(decimal) && type != typeof(DateTime) && type != typeof(DateTimeOffset) && type != typeof(TimeSpan) && type != typeof(Guid);
+    }
+    #endregion
+
+    #region Edit and Delete button events
+    private async Task ShowEditPopup(TModel item)
+    {
+        await OnEdit.InvokeAsync(item);
+    }
+
+    private async Task DeleteItem(TModel item)
+    {
+        await OnDelete.InvokeAsync(item);
+    }
+    #endregion
+}
