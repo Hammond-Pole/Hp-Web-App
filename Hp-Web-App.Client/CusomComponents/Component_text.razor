@@ -1,8 +1,8 @@
 ﻿@inject IDataService _dataService
 
-<div class="form-group-sm" style="display: flex; align-items: center; margin-bottom: 10px;">
-    <label for="@QuestionFieldLabel" style="margin-right: 30px; width: 100px;">@QuestionFieldLabel:</label>
-    <input type="text" class="form-control-sm" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+<div class="custom-component">
+    <label for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
+    <input type="text" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
 </div>
 
 @code {

@@ -1,8 +1,8 @@
 ﻿@inject IDataService _dataService
 
-<div class="form-group-sm">
-    <label for="@QuestionFieldLabel" style="margin-right: 30px; width: 100px;">@QuestionFieldLabel:</label>
-    <input type="date" class="form-control-sm" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+<div class="custom-component">
+    <label for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
+    <input type="date"  id="@QuestionFieldLabel" @onchange="OnValueChanged" />
 </div>
 
 @code {

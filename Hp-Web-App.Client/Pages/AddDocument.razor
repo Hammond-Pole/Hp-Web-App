@@ -1,72 +1,51 @@
 ﻿@page "/uploaddocument"
 @using Hp_Web_App.Client.CusomComponents;
 @using Hp_Web_App.Client.Pages.Documents.Questions;
+
 @inject IJSRuntime JSRuntime
 @inject IDataService _dataService
 @inject ProtectedSessionStorage _sessionStorage
 @inject IConfiguration _config
+
 @attribute [Authorize(Roles = "Administrator, User")]
 
 <PageTitle>Upload a Document</PageTitle>
 
-<label for="ddlDocument" style="margin-right: 5px; width: 120px;">Document Type:</label>
-<select id="ddlDocument" class="form-control-sm" @onchange="OnChange">
-    <option value="" selected disabled>Select a Document.</option>
-    @foreach (var document in _documents)
-    {
-        <option value="@document.Id">@document.Name</option>
-    })
-</select>
+<div class="card col-6">
+    <div class="card-header">
+        <div class="custom-header-dropdown">
+            <label for="ddlDocument" class="bold-label">Document:</label>
+            <select id="ddlDocument" class="form-select" @onchange="OnChange">
+                <option value="" selected disabled>Select a Document.</option>
+                @foreach (var document in _documents)
+                {
+                    <option value="@document.Id">@document.Name</option>
+                })
+            </select>
+        </div>
+    </div>
 
-<div>
-    <br />
-    @foreach (var question in _questionField)
-    {
-        selectedType = question.QuestionFieldType.ComponentType;
-
-        // Setup the dictionary of Parameters for each question.
-        var FieldMeta = new Dictionary<string, dynamic>();
-        FieldMeta.Add("DocumentId", _documentsId);
-        FieldMeta.Add("QuestionFieldId", question.Id);
-        FieldMeta.Add("QuestionFieldLabel", question.Name);
-        FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
-        <DynamicComponent Type=@selectedType Parameters="FieldMeta" />
-    }
-</div>
-
-<div class="drag-drop-zone">
-    <InputFile OnChange="ViewFile" />
-    @status
-</div>
-@if (fileName != null)
-{
-    <h3>@fileName</h3>
-    <pre>@fileTextContents</pre>
-}
-<button @onclick="Save" class="btn btn-primary">Save</button>
-
-<table class="table table-striped" style="width: 60%;" vertical-align=center cellpadding="0">
-    <thead>
-        <tr>
-            <th>DocumentId</th>
-            <th>QuestionFieldID</th>
-            <th>CurrentValue</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (QuestionDateValue document in _questionDateValues)
+    <div class="card-body">
+        @foreach (var question in _questionField)
         {
-            <tr>
-                <td>@document.DocumentId</td>
-                <td>@document.QuestionFieldID</td>
-                <td>@document.DateValue</td>
+            selectedType = question.QuestionFieldType.ComponentType;
 
-            </tr>
+            // Setup the dictionary of Parameters for each question.
+            var FieldMeta = new Dictionary<string, dynamic>();
+            FieldMeta.Add("DocumentId", question.DocumentId);
+            FieldMeta.Add("QuestionFieldId", question.Id);
+            FieldMeta.Add("QuestionFieldLabel", question.Name);
+            FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
+            <DynamicComponent Type=@selectedType Parameters="FieldMeta" />
         }
-    </tbody>
-</table>
 
-<h5>notificationString</h5>
+        <div class="drag-drop-zone">
+            <InputFile OnChange="ViewFile" />
+            @status
+        </div>
+        <button @onclick="Save" class="btn btn-primary">Save</button>
+    </div>
+</div>
 
 @code {
 

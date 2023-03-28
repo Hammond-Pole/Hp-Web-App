@@ -69,6 +69,28 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
+.custom-component {
+    display: flex;
+    align-items: center;
+    padding-bottom: .8rem
+}
+
+    .custom-component .bold-label {
+        width: 180px; /* Set a fixed width for the label */
+        font-weight: bold;
+    }
+
+.custom-header-dropdown {
+    display: flex;
+    align-items: center;
+    padding-right: .8rem;
+    width: 560px;
+}
+    .custom-header-dropdown .bold-label {
+        width: 130px; /* Set a fixed width for the label */
+        font-weight: bold;
+    }
+
 #Custom-Feaures {
 }
 
