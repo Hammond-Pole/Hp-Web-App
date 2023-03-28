@@ -15,7 +15,7 @@
 }
 
 <!--Add a form for me that is based on the User Class with a submit button that executes CreateUser-->
-<EditForm Model="@_user" OnValidSubmit="@CreateUser">
+<EditForm Model="@_user" OnValidSubmit="@CreateUser" class="card-body">
     <DataAnnotationsValidator />
 
     <div class="form-group">
@@ -23,21 +23,18 @@
         <InputText id="name" class="form-control" @bind-Value="_user.Name" />
         <ValidationMessage For="@(() => _user.Name)" />
     </div>
-    <div style="margin-top: 8px;"></div>
 
     <div class="form-group">
         <label for="email">Email:</label>
         <InputText id="email" class="form-control" @bind-Value="_user.Email" />
         <ValidationMessage For="@(() => _user.Email)" />
     </div>
-    <div style="margin-top: 8px;"></div>
 
     <div class="form-group">
         <label for="password">Password:</label>
         <InputText id="password" class="form-control" @bind-Value="_user.Password" />
         <ValidationMessage For="@(() => _user.Password)" />
     </div>
-    <div style="margin-top: 8px;"></div>
 
     <div class="form-group">
         <label for="ddlUserRole">Role:</label>
@@ -52,7 +49,6 @@
         </InputSelect>
         <ValidationMessage For="@(() => _user.UserRoleId)" />
     </div>
-    <div style="margin-top: 8px;"></div>
 
     <div class="form-group">
         <label for="ddlUserCompany">Company:</label>
@@ -67,7 +63,6 @@
         </InputSelect>
         <ValidationMessage For="@(() => _user.CompanyId)" />
     </div>
-    <div style="margin-top: 12px;"></div>
 
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Submit</button>

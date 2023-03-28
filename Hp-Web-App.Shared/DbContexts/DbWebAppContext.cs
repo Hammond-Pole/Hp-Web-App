@@ -1,6 +1,5 @@
 ﻿using Hp_Web_App.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Xml;
 
 namespace Hp_Web_App.Shared.DbContexts
 {
@@ -34,6 +33,11 @@ namespace Hp_Web_App.Shared.DbContexts
             {
                 relationship.DeleteBehavior = DeleteBehavior.NoAction;
             }
+
+            modelBuilder.Entity<DocumentsAttached>()
+                .HasMany(e => e.QuestionValues)
+                .WithOne(e => e.DocumentsAttached)
+                .HasForeignKey(e => e.DocumentsAttachedId);
 
             modelBuilder.Entity<QuestionFieldType>().Ignore(e => e.ComponentType);
             

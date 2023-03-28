@@ -13,4 +13,6 @@ public class DocumentsAttached
     public User? User { get; set; }
     public Company? Company { get; set; }
     public Document? Document { get; set; }
+
+    public ICollection<QuestionValue>? QuestionValues { get; set; }
 }

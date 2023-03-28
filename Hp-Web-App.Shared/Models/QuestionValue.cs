@@ -8,6 +8,8 @@ namespace Hp_Web_App.Shared.Models
         public int DocumentId { get; set; }
         public int QuestionFieldID { get; set; }
         public DateTime? DateValueChanged { get; set; }
+        public int? DocumentsAttachedId { get; set; }
+        public DocumentsAttached? DocumentsAttached { get; set; } // navigation property
     }
 
     public class QuestionDateValue : QuestionValue // subclass
