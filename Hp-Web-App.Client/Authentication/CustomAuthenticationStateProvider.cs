@@ -28,8 +28,17 @@ namespace Hp_Web_App.Client.Authentication
                 var claimsPrinciple = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, userSession.UserName),
-                        new Claim(ClaimTypes.Role, userSession.Role)
+                        new Claim(ClaimTypes.Role, userSession.Role),
+                        new Claim("SessionId", userSession.SessionId.ToString())
                     }, "CustomAuth"));
+
+                // Add session validation here
+                var storedSessionIdResult = await _sessionStorage.GetAsync<string>("SessionId");
+                if (storedSessionIdResult.Success && storedSessionIdResult.Value != userSession.SessionId.ToString())
+                {
+                    // Session ID mismatch, set the user as unauthenticated
+                    return await Task.FromResult(new AuthenticationState(_anonymous));
+                }
 
                 return await Task.FromResult(new AuthenticationState(claimsPrinciple));
             }
@@ -38,7 +47,11 @@ namespace Hp_Web_App.Client.Authentication
                 return await Task.FromResult(new AuthenticationState(_anonymous));
             }
         }
-        
+
+
+
+
+
         public async Task UpdateAuthenticationState(UserSession userSession)
         {
             ClaimsPrincipal claimsPrincipal;
