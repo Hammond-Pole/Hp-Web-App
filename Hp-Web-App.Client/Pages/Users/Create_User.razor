@@ -4,7 +4,8 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IUserService _userService
+@inject ICompanyService _companyService
 
 <!-- Display the error at the top of the form so that we know why something failed. -->
 @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -40,8 +41,8 @@
         <label for="ddlUserRole">Role:</label>
         <InputSelect id="ddlUserRole"
                      class="form-select"
-                     @bind-Value="_user.UserRoleId">
-            <option value="" disabled selected>Select a Role</option>
+                     TValue="int"
+                     @bind-Value="_userRoleId">
             @foreach (var role in _userRoles)
             {
                 <option value="@role.Id">@role.Name</option>
@@ -54,8 +55,8 @@
         <label for="ddlUserCompany">Company:</label>
         <InputSelect id="ddlUserCompany"
                      class="form-select"
-                     @bind-Value="_user.CompanyId">
-            <option value="" disabled selected>Select a Company</option>
+                     TValue="int"
+                     @bind-Value="_companyId">
             @foreach (var company in _companies!)
             {
                 <option value="@company.Id">@company.Name</option>
@@ -66,7 +67,7 @@
 
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Submit</button>
-        <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+        <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
     </div>
 </EditForm>
 
@@ -77,15 +78,17 @@
 
     // Private properties used only in this page.
     private User _user = new User();
-    private List<Company>? _companies = new();
-    private List<UserRole>? _userRoles = new();
+    private List<Company> _companies = new();
+    private List<UserRole> _userRoles = new();
     private string ErrorMessage = string.Empty;
+    private int _userRoleId = 1;
+    private int _companyId = 1;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {
-        _companies = await _dataService.GetCompaniesAsync();
-        _userRoles = await _dataService.GetUserRolesAsync();
+        _companies = await _companyService.GetCompaniesAsync();
+        _userRoles = await _userService.GetUserRolesAsync();
     }
 
     #region CRUD Operations
@@ -93,7 +96,9 @@
     {
         try
         {
-            await _dataService.CreateUserAsync(_user);
+            _user.UserRoleId = _userRoleId;
+            _user.CompanyId = _companyId;
+            await _userService.CreateUserAsync(_user);
             await Close();
         }
         catch (Exception ex)

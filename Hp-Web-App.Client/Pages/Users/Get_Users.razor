@@ -6,14 +6,12 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IUserService _userService
 @inject IJSRuntime js
 
 <!-- Back Button Navigation. -->
-<NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
-    <span style="display: flex; align-items: center;">
-        <text> <i class="oi oi-arrow-circle-left"></i> Home</text>
-    </span>
+<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+    <span class="oi oi-home" aria-hidden="true"></span> Home
 </NavLink>
 <br />
 
@@ -26,21 +24,16 @@
 
 @code {
     // Parameter used to enable the popup/modal window.
-    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    [CascadingParameter] public IModalService Modal { get; set; }
 
     // Private properties used only in this page.
-    private List<User>? _users { get; set; }
-    private List<UserRole>? _userRoles { get; set; }
-    private List<Company>? _companies { get; set; }
-
+    private List<User> _users { get; set; }
     private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
     protected override async Task OnInitializedAsync()
     {
-        _users = await _dataService.GetUsersAsync();
-        _companies = await _dataService.GetCompaniesAsync();
-        _userRoles = await _dataService.GetUserRolesAsync();
+        _users = await _userService.GetUsersAsync();
     }
 
     #region CRUD Operations
@@ -48,15 +41,22 @@
     {
         try
         {
-            await _dataService.DeleteUserAsync(user);
-            _users = await _dataService.GetUsersAsync();
+            // Validate that the userId is on -1 if it is then show an error message.
+            if (user.Id == -1)
+            {
+                await js.InvokeVoidAsync("alert", "This user cannot be deleted!");
+                return;
+            }
+
+            await _userService.DeleteUserAsync(user.Id);
+            _users = await _userService.GetUsersAsync();
             StateHasChanged();
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
         }
-    }    
+    }
     #region Navigation
     async void ShowAddPopup()
     {
@@ -71,7 +71,7 @@
 
         if (!result.Cancelled)
         {
-            _users = await _dataService.GetUsersAsync();
+            _users = await _userService.GetUsersAsync();
             StateHasChanged();
         }
     }
@@ -79,6 +79,13 @@
     async void ShowEditPopup(User editUser)
     {
         int userId = editUser.Id;
+
+        // Validate that the userId is on -1 if it is then show an error message.
+        if (userId == -1)
+        {
+            await js.InvokeVoidAsync("alert", "This user cannot be edited!");
+            return;
+        }
         var parameters = new ModalParameters
         {
             { nameof(Edit_Users.userId), userId }
@@ -94,7 +101,7 @@
 
         if (!result.Cancelled)
         {
-            _users = await _dataService.GetUsersAsync();
+            _users = await _userService.GetUsersAsync();
             StateHasChanged();
         }
     }

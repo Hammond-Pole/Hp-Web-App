@@ -1,9 +1,15 @@
 ﻿@page "/uploaddocument"
 @using Hp_Web_App.Client.CusomComponents;
 @using Hp_Web_App.Client.Pages.Documents.Questions;
+@using Microsoft.AspNetCore.Components.Forms;
+@using Hp_Web_App.Shared.Authentication;
 
 @inject IJSRuntime JSRuntime
-@inject IDataService _dataService
+@inject IDocumentService _documentService
+@inject IQuestionService _questionService
+@inject IUserService _userService
+@inject ICompanyService _companyService
+
 @inject ProtectedSessionStorage _sessionStorage
 @inject IConfiguration _config
 
@@ -28,7 +34,7 @@
     <div class="card-body">
         @foreach (var question in _questionField)
         {
-            selectedType = question.QuestionFieldType.ComponentType;
+            _selectedType = question.QuestionFieldType.ComponentType;
 
             // Setup the dictionary of Parameters for each question.
             var FieldMeta = new Dictionary<string, dynamic>();
@@ -36,21 +42,122 @@
             FieldMeta.Add("QuestionFieldId", question.Id);
             FieldMeta.Add("QuestionFieldLabel", question.Name);
             FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
-            <DynamicComponent Type=@selectedType Parameters="FieldMeta" />
+            <DynamicComponent Type=@_selectedType Parameters="FieldMeta" />
         }
 
-        <div class="drag-drop-zone">
-            <InputFile OnChange="ViewFile" />
-            @status
-        </div>
-        <button @onclick="Save" class="btn btn-primary">Save</button>
+        <!-- Only show these components when the user selects a document. -->
+        @if (_showFileUpload)
+        {
+            <div class="drag-drop-zone">
+                <InputFile OnChange="ViewFile" />
+                @_status
+            </div>
+
+            <!-- Display the Success Message on the form so that we know what happend. -->
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger card-body" role="alert">
+                    @_errorMessage
+                </div>
+            }
+            <!-- Display the Success Message on the form so that we know what happend. -->
+            @if (!string.IsNullOrEmpty(_successMessage))
+            {
+                <div class="alert alert-success card-body" role="alert">
+                    @_successMessage
+                    @_loadedFile.Name
+                </div>
+            }
+            <div class="card-body" style="padding:0 0 0 0">
+                <button @onclick="Save" class="btn btn-primary">Save</button>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info" role="alert">
+                <text>Select a document from the list to begin!</text>
+            </div>
+        }
     </div>
 </div>
+
+
 
 @code {
 
     #region Update Question Values
-    // Create a method that handles the OnValueChanged EventCallback.
+    private void OnValueChanged(dynamic value)
+    {
+        var questionType = _questionField.Where(x => x.Id == value.QuestionFieldID)
+                                         .Select(x => x.QuestionFieldTypeId)
+                                         .FirstOrDefault();
+        switch (questionType)
+        {
+            case 1:
+                UpdateOrAddValue(_questionDateValues, (QuestionDateValue)value, x => x.DateValue = value.DateValue);
+                break;
+            case 2:
+                UpdateOrAddValue(_questionBitValues, (QuestionBitValue)value, x => x.BoolValue = value.BoolValue);
+                break;
+            case 3:
+                UpdateOrAddValue(_questionStringValues, (QuestionStringValue)value, x => x.StringValue = value.StringValue);
+                break;
+            case 4:
+                UpdateOrAddValue(_questionIntValues, (QuestionIntValue)value, x => x.IntValue = value.IntValue);
+                break;
+            case 5:
+                UpdateOrAddValue(_questionFloatValues, (QuestionFloatValue)value, x => x.FloatValue = value.FloatValue);
+                break;
+            case 6:
+                UpdateOrAddValue(_questionMemoValues, (QuestionMemoValue)value, x => x.MemoValue = value.MemoValue);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(questionType), questionType, null);
+        }
+        StateHasChanged();
+    }
+
+    private void UpdateOrAddValue<T>(List<T> list, QuestionValue value, Action<T> updateAction) where T : QuestionValue
+    {
+        var existingValue = list.FirstOrDefault(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID);
+
+        if (existingValue != null)
+        {
+            updateAction(existingValue);
+        }
+        else
+        {
+            list.Add((T)value);
+        }
+    }
+    #endregion
+
+    #region Variable Initialization
+    // Constants
+    private const string _defaultStatus = "Drop a text file here to view it, or click to choose a file";
+    private const int _maxFileSize = 3 * 1024 * 1024; // 3MB
+
+    // State
+    private string _status = _defaultStatus;
+    private string _errorMessage = string.Empty;
+    private string _successMessage = string.Empty;
+    private bool _showFileUpload = false;
+
+    // File handling
+    private IBrowserFile _loadedFile = null!;
+    private MemoryStream? _fileStream;
+
+    // Document Answer Variables
+    private Type? _selectedType;
+
+    // Lists
+    private List<Document> _documents = new();
+    private List<CompanyDocument> _companyDocuments = new();
+    private List<QuestionField> _questionField = new();
+    private List<QuestionFieldType> _questionFieldType = new();
+
+    // Question Lists
+    private List<QuestionValue> _questionValues = new();
     private List<QuestionDateValue> _questionDateValues = new();
     private List<QuestionBitValue> _questionBitValues = new();
     private List<QuestionStringValue> _questionStringValues = new();
@@ -58,157 +165,25 @@
     private List<QuestionFloatValue> _questionFloatValues = new();
     private List<QuestionMemoValue> _questionMemoValues = new();
 
-    private void OnValueChanged(dynamic value)
-    {
-        // lookup the QuestionFieldTypeId from the QuestionFieldID in the value object.
-        var questionType = _questionField.Where(x => x.Id == value.QuestionFieldID).Select(x => x.QuestionFieldTypeId).FirstOrDefault();
-        switch (questionType)
-        {
-            case 1:
-                //do something for QuestionDateValue
-                var existingDateValue = _questionDateValues.Where(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID).FirstOrDefault();
-                if (existingDateValue != null)
-                {
-                    existingDateValue.DateValue = value.DateValue;
-                }
-                else
-                {
-                    _questionDateValues.Add(value);
-                }
-                StateHasChanged();
-                break;
-            case 2:
-                //do something for QuestionBitValue
-                var existingBitValue = _questionBitValues.Where(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID).FirstOrDefault();
-                if (existingBitValue != null)
-                {
-                    existingBitValue.BoolValue = value.BoolValue;
-                }
-                else
-                {
-                    _questionBitValues.Add(value);
-                }
-                StateHasChanged();
-                break;
-            case 3:
-                //do something for QuestionStringValue
-                // Check if there is a matching DocumentId and QuestionFieldId. Update the value if it exists.
-                var existingValue = _questionStringValues.Where(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID).FirstOrDefault();
-                if (existingValue != null)
-                {
-                    existingValue.StringValue = value.StringValue;
-                }
-                else
-                {
-                    _questionStringValues.Add(value);
-                }
-                StateHasChanged();
-                break;
-            case 4:
-                //do something for QuestionIntValue
-                var existingIntValue = _questionIntValues.Where(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID).FirstOrDefault();
-                if (existingIntValue != null)
-                {
-                    existingIntValue.IntValue = value.IntValue;
-                }
-                else
-                {
-                    _questionIntValues.Add(value);
-                }
-                StateHasChanged();
-                break;
-            case 5:
-                //do something for QuestionFloatValue
-                var existingFloatValue = _questionFloatValues.Where(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID).FirstOrDefault();
-                if (existingFloatValue != null)
-                {
-                    existingFloatValue.FloatValue = value.FloatValue;
-                }
-                else
-                {
-                    _questionFloatValues.Add(value);
-                }
-                StateHasChanged();
-                break;
-            case 6:
-                //do something for QuestionMemoValue
-                var existingMemoValue = _questionMemoValues.Where(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID).FirstOrDefault();
-                if (existingMemoValue != null)
-                {
-                    existingMemoValue.MemoValue = value.MemoValue;
-                }
-                else
-                {
-                    _questionMemoValues.Add(value);
-                }
-                StateHasChanged();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(questionType), questionType, null);
-        }
-
-
-    }
-    #endregion
-
-    #region Variable Initialization
-
-    // File Upload Variables.
-    IFileListEntry file;
-    const string DefaultStatus = "Drop a text file here to view it, or click to choose a file";
-    const int MaxFileSize = 3 * 1024 * 1024; // 3MB
-    string status = DefaultStatus;
-
-    string fileName;
-    string fileTextContents;
-
-    // Document Answer Variables.
-    private Type selectedType;
-
-
-    private List<Document> _documents = new();
-
-    private List<CompanyDocument> _companyDocuments = new();
-    private List<QuestionField> _questionField = new();
-    private List<QuestionFieldType> _questionFieldType = new();
-    private List<QuestionValue> _questionValues = new();
+    // Related Objects
+    private DocumentsAttached _documentsAttached = new();
     private User _user = new();
 
+    // Identifiers
     private int _documentsId;
 
-    private string userSession { get; set; }
-    private string usersName { get; set; }
+    // Properties
+    public string UserSession { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+
     #endregion
 
     #region Initialization
     protected override async Task OnInitializedAsync()
     {
-        // Get the current session data.
-        var userSessionStorageResult = await _sessionStorage.GetAsync<UserSession>("UserSession");
-        userSession = userSessionStorageResult.Value.UserName;
-
-        // Get the users information from the session data and get the list of documents they have access to.
-        _user = await _dataService.GetUserByEmailAsync(userSession);
-        usersName = _user.Name;
-
-        _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(_user.CompanyId);
-
-        // for each document id in the _companyDocuments list, get the document and add it to the _documents list.
-        // do not duplicate the id's.
-        foreach (var item in _companyDocuments)
-        {
-            var document = await _dataService.GetDocumentAsync(item.DocumentId);
-            if (!_documents.Any(x => x.Id == document.Id))
-            {
-                _documents.Add(document);
-            }
-        }
-        _questionFieldType = await _dataService.GetQuestionFieldTypesAsync();
-
-        foreach (var item in _questionFieldType)
-        {
-            item.ComponentType = Type.GetType($"Hp_Web_App.Client.CusomComponents.Component_{item.ComponentName}");
-        }
+        await LoadUserSessionAsync();
+        await LoadUniqueCompanyDocumentsAsync();
+        await LoadQuestionFieldTypesWithComponentsAsync();
         StateHasChanged();
     }
     #endregion
@@ -216,54 +191,213 @@
     #region Document Questions
     public async void OnChange(ChangeEventArgs e)
     {
-        _questionField = await _dataService.GetQuestionFieldsByDocumentAsync(Convert.ToInt32(e.Value));
+        _status = _defaultStatus;
+        _loadedFile = null;
+        _questionField = await _documentService.GetQuestionFieldsByDocumentAsync(Convert.ToInt32(e.Value));
         _documentsId = Convert.ToInt32(e.Value);
+        _showFileUpload = true;
 
+        // Clear all lists when the document selection changes.
+        ClearQuestionValueLists();
         StateHasChanged();
     }
     #endregion
 
-
-    #region File Upload
-    async Task ViewFile(IFileListEntry[] files)
+    #region Helper Functions
+    private async Task LoadUserSessionAsync()
     {
-        var file = files.FirstOrDefault();
-        if (file == null)
-        {
-            return;
-        }
-        else if (file.Size > MaxFileSize)
-        {
-            status = $"That's too big. Max size: {MaxFileSize} bytes.";
-        }
-        else
-        {
-            status = "Loading...";
+        var userSessionResult = await _sessionStorage.GetAsync<UserSession>("UserSession");
+        UserSession = userSessionResult.Value.UserName!;
 
-            using (var reader = new StreamReader(file.Data))
+        _user = await _userService.GetUserByEmailAsync(UserSession);
+        UserSession = _user.Name;
+    }
+
+    private async Task LoadUniqueCompanyDocumentsAsync()
+    {
+        var companyDocuments = await _documentService.GetCompanyDocumentsByCompanyAsync(_user.CompanyId);
+
+        foreach (var item in companyDocuments)
+        {
+            var document = await _documentService.GetDocumentAsync(item.DocumentId);
+            if (!_documents.Any(x => x.Id == document.Id))
             {
-                fileTextContents = await reader.ReadToEndAsync();
-                fileName = file.Name;
+                _documents.Add(document);
             }
-            status = DefaultStatus;
         }
     }
 
-    async Task Save()
+    private async Task LoadQuestionFieldTypesWithComponentsAsync()
     {
-        // Change the filename to "DocumentName_UsersName_Date" and append the extension.
-        var document = await _dataService.GetDocumentAsync(_documentsId);
-        var newFileName = $"{document.Name}_{_user.Name}_{DateTime.Now.ToString("yyyyMMddhhmmss")}{Path.GetExtension(fileName)}";
-        fileName = fileName + " => " + newFileName;
+        var questionFieldTypes = await _questionService.GetQuestionFieldTypesAsync();
 
-        string path = Path.Combine(_config.GetValue<string>("FileShare")!, _user.Name!, newFileName);
-        Directory.CreateDirectory(Path.Combine(_config.GetValue<string>("FileShare")!, _user.Name!));
+        foreach (var fieldType in questionFieldTypes)
+        {
+            fieldType.ComponentType = Type.GetType($"Hp_Web_App.Client.CusomComponents.Component_{fieldType.ComponentName}");
+        }
+    }
 
-        // Write the fileTextContents to the path.
-        await System.IO.File.WriteAllTextAsync(path, fileTextContents);
+    private async Task ClearAndReloadDataAsync()
+    {
+        ClearQuestionValueLists();
+        await LoadUniqueCompanyDocumentsAsync();
+        StateHasChanged();
+    }
+
+    private void ClearQuestionValueLists()
+    {
+        _questionDateValues.Clear();
+        _questionBitValues.Clear();
+        _questionStringValues.Clear();
+        _questionIntValues.Clear();
+        _questionFloatValues.Clear();
+        _questionMemoValues.Clear();
+    }
+
+    private List<string> GetNonEmptyQuestionValueListNames()
+    {
+        var nonEmptyLists = new List<string>();
+
+        if (_questionDateValues.Any()) nonEmptyLists.Add(nameof(_questionDateValues));
+        if (_questionBitValues.Any()) nonEmptyLists.Add(nameof(_questionBitValues));
+        if (_questionStringValues.Any()) nonEmptyLists.Add(nameof(_questionStringValues));
+        if (_questionIntValues.Any()) nonEmptyLists.Add(nameof(_questionIntValues));
+        if (_questionFloatValues.Any()) nonEmptyLists.Add(nameof(_questionFloatValues));
+        if (_questionMemoValues.Any()) nonEmptyLists.Add(nameof(_questionMemoValues));
+
+        return nonEmptyLists;
+    }
+
+    #endregion
+
+    #region File Upload
+    async Task ViewFile(InputFileChangeEventArgs e)
+    {
+        _errorMessage = string.Empty;
+        _loadedFile = null;
+        // Save the instance of the file into an IBrowserFile object.
+        _loadedFile = e.File;
+        _status = e.File.Name;
+
+        // Validate that the stream is empty.
+        if (_fileStream is not null)
+        {
+            _fileStream.Dispose();
+        }
+
+        // Create a new stream and copy the file into it.
+        _fileStream = new MemoryStream();
+        await _loadedFile.OpenReadStream().CopyToAsync(_fileStream);
 
         StateHasChanged();
     }
 
+    async Task Save()
+    {
+        // Only continue if the file has been copied to the filestream.
+        if (_loadedFile is null || _fileStream is null)
+        {
+            _errorMessage = "No file has been selected. Please select a file to continue.";
+
+            return;
+        }
+
+        try
+        {
+            _fileStream.Position = 0;
+
+            // Get the document details from the database.
+            var document = await _documentService.GetDocumentAsync(_documentsId);
+            var company = await _companyService.GetCompanyAsync(_user.CompanyId);
+
+            // Change the filename to "DocumentName_UsersName_CompanyName_Date" and append the extension.
+            var newFileName = $"{document.Name}_{_user.Name}_{company.Name.Replace(" ","")}_{DateTime.Now.ToString("yyyyMMddhhmmss")}{Path.GetExtension(_loadedFile.Name)}";
+            string saveDirectory = Path.Combine(_config.GetValue<string>("FileShare")!, _user.Name!);
+            Directory.CreateDirectory(saveDirectory);
+            string filePath = Path.Combine(_config.GetValue<string>("FileShare")!, _user.Name!, newFileName);
+
+            // Save the file to the directory.
+            await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+            await _fileStream.CopyToAsync(fileStream);
+
+
+            _documentsAttached.UploadDate = DateTime.Now;
+            _documentsAttached.DocumentId = _documentsId;
+            _documentsAttached.UserId = _user.Id;
+            _documentsAttached.CompanyId = _user.CompanyId;
+            _documentsAttached.FileName = newFileName;
+            _documentsAttached.FileDescription = string.Empty;
+            _documentsAttached.FileUrl = filePath;
+
+            // Retrieve the Id of the newly inserted document.
+            _documentsAttached = await _documentService.CreateDocumentsAttachedAsync(_documentsAttached);
+
+            // Check which lists have data. That would mean that they have answered questions.
+            List<string> nonEmptyLists = GetNonEmptyQuestionValueListNames();
+
+            // For each list that has data, call the AddQuestionValuesAsync(List<T> questionValues) to add it to the database.
+            foreach (var item in nonEmptyLists)
+            {
+                switch (item)
+                {
+                    case nameof(_questionDateValues):
+                        foreach (var date in _questionDateValues)
+                        {
+                            date.DocumentsAttachedId = _documentsAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionDateValues);
+                        break;
+                    case nameof(_questionBitValues):
+                        foreach (var date in _questionBitValues)
+                        {
+                            date.DocumentsAttachedId = _documentsAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionBitValues);
+                        break;
+                    case nameof(_questionStringValues):
+                        foreach (var date in _questionStringValues)
+                        {
+                            date.DocumentsAttachedId = _documentsAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionStringValues);
+                        break;
+                    case nameof(_questionIntValues):
+                        foreach (var date in _questionIntValues)
+                        {
+                            date.DocumentsAttachedId = _documentsAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionIntValues);
+                        break;
+                    case nameof(_questionFloatValues):
+                        foreach (var date in _questionFloatValues)
+                        {
+                            date.DocumentsAttachedId = _documentsAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionFloatValues);
+                        break;
+                    case nameof(_questionMemoValues):
+                        foreach (var date in _questionMemoValues)
+                        {
+                            date.DocumentsAttachedId = _documentsAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionMemoValues);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(item), item, null);
+                }
+            }
+            _successMessage = "Upload Successful.";
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+            return;
+        }
+
+
+        StateHasChanged();
+    }
     #endregion
 }

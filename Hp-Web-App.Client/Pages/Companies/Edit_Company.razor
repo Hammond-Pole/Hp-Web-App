@@ -2,22 +2,21 @@
 
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 @using Hp_Web_App.Client.Pages.Companies.CompanyDocuments;
+@using Hp_Web_App.Client.Shared
 @using Microsoft.AspNetCore.Components.Forms
 
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IDocumentService _documentService
+@inject ICompanyService _companyService
 @inject NavigationManager _navigationManager
 @inject IJSRuntime js
 
 <!-- Back Button Navigation. -->
-<NavLink class="nav-link" href="document" style="padding: 0 0 0 0">
-    <span style="display: flex; align-items: center;">
-        <img src="/round-back-button.png" asp-append-version="true" width="22">
-        Company
-    </span>
+<NavLink class="nav-link" href="company">
+    <span class="oi oi-briefcase" aria-hidden="true"></span> Companies
 </NavLink>
 <br />
 
@@ -25,23 +24,21 @@
 <h3>Edit @_company.Name Details</h3>
 
 <!-- Edit Company Form. -->
-<EditForm Model="@_company" style="width: 40%;">
+<EditForm Model="@_company" OnValidSubmit="Submit" style="width: 40%;">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
         <label for="ddlCompanyType" style="margin-right: 30px; width: 100px;">Type:</label>
-        <select id="ddlCompanyType"
-                asp-for="CompanyTypeId"
-                class="form-control-sm"
-                @onchange="@((ChangeEventArgs e) =>
-                                {
-                                    _company.CompanyTypeId = Convert.ToInt32(e.Value);
-                                })">
+        <InputSelect id="ddlCompanyType"
+                     asp-for="CompanyTypeId"
+                     class="form-control-sm"
+                     @bind-Value="_company.CompanyTypeId">
             @foreach (var companyType in _companyTypes)
             {
                 <option value="@companyType.Id">@companyType.Name</option>
             }
-        </select>
+        </InputSelect>
+        <button type="submit" class="btn btn-primary m-lg-4 ">Update Type</button>
     </div>
     <br />
 </EditForm>
@@ -50,47 +47,17 @@
 <br />
 <h3>Allocated Documents</h3>
 
-@if (_companyDocuments == null)
+<!-- Show a table below with the current document types. Allow the user to add more document types. -->
+<DynamicTable TModel="CompanyDocument" Items="_company.CompanyDocuments" OnDelete="OnDeleteItem" />
+<br />
+<button @onclick="ShowAddPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Document</button>
+
+<br />
+@if (!string.IsNullOrEmpty(ErrorMessage))
 {
-    <!-- If this is showing, we are waiting for the data. -->
-    <text>Loading...</text>
-}
-else if (_companyDocuments.Count == 0)
-{
-    <!-- If this is showing, let the user add new questions. -->
-    <text>There are no documents currently attached to this company.</text>
-    <br />
-    <button @onclick="ShowAddPopup" class="btn btn-primary">Add a Document</button>
-}
-else
-{
-    <!-- Show a table with the currently attached questions. Allow the user to add more questions. -->
-    <table class="table table-striped" style="width: 60%;" vertical-align=center cellpadding="0">
-        <thead>
-            <tr>
-                <th style="width: 20%;">Name</th>
-                <th style="width: 50%;">Description</th>
-                <th style="width: 10%;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (CompanyDocument document in _companyDocuments)
-            {
-                <tr style="">
-                    <td>@document.Document.Name</td>
-                    <td>@document.Document.Description</td>
-                    <td><a class="btn btn-warning" id="deleteq" @onclick="() => Delete(document) ">Delete</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <button @onclick="ShowAddPopup" class="btn btn-primary">Add a Document</button>
-    @if (!string.IsNullOrEmpty(ErrorMessage))
-    {
-        <div class="alert alert-danger" role="alert">
-            @ErrorMessage
-        </div>
-    }
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
 }
 
 
@@ -104,31 +71,38 @@ else
     // Private properties used only in this page.
     private Company _company = new();
     private List<Document> _documents = new();
-    private List<CompanyType>? _companyTypes = new();
-    private List<CompanyDocument>? _companyDocuments = new();
-    private string ErrorMessage = null;
+    private List<CompanyType> _companyTypes = new();
+    private List<CompanyDocument> _companyDocuments = new();
+    private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {
-        _company = await _dataService.GetCompanyAsync(companyId)!;
-        _companyTypes = await _dataService.GetCompanyTypesAsync();
-        _documents = await _dataService.GetDocumentsAsync();
-        _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(_company.Id);
+        _company = await _companyService.GetCompanyAsync(companyId)!;
+        _companyTypes = await _companyService.GetCompanyTypesAsync();
     }
 
     #region CRUD Operations
-    async Task Update()
-    {
-        await _dataService.UpdateCompanyAsync(_company);
-    }
-
-    async Task Delete(CompanyDocument companyDocument)
+    async Task Submit()
     {
         try
         {
-            await _dataService.DeleteCompanyDocumentAsync(companyDocument);
-            _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(_company.Id);
+            await _companyService.UpdateCompanyAsync(_company);
+            await js.InvokeVoidAsync("alert", "Updated!");
+        }
+        catch (Exception ex)
+        {
+            await js.InvokeVoidAsync("alert", "Error: {ex.message}", ex.Message);
+        }
+        
+    }
+
+    async Task OnDeleteItem(CompanyDocument companyDocument)
+    {
+        try
+        {
+            await _documentService.DeleteCompanyDocumentAsync(companyDocument);
+            _companyDocuments = await _documentService.GetCompanyDocumentsByCompanyAsync(_company.Id);
             StateHasChanged();
         }
         catch (Exception ex)
@@ -153,7 +127,7 @@ else
 
         if (!result.Cancelled)
         {
-            _companyDocuments = await _dataService.GetCompanyDocumentsByCompanyAsync(companyId);
+            _companyDocuments = await _documentService.GetCompanyDocumentsByCompanyAsync(companyId);
             StateHasChanged();
         }
     }

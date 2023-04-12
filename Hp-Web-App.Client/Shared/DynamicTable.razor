@@ -38,7 +38,10 @@ else
                 {
                     <th>@_helperFunctions.ConvertPascalCaseToSpaced(@property.Name)</th>
                 }
-                <th>Actions</th>
+                @if (OnEdit.HasDelegate || OnDelete.HasDelegate)
+                {
+                    <th>Actions</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -51,8 +54,14 @@ else
                     }
                     <td>
                         <!-- Add this block -->
-                        <button class="btn btn-primary btn-sm" @onclick="() => ShowEditPopup(item)">Edit</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteItem(item)">Delete</button>
+                        @if (OnEdit.HasDelegate)
+                        {
+                            <button class="btn btn-primary btn-sm" style="margin-right: 0.5rem" @onclick="() => ShowEditPopup(item)">Edit</button>
+                        }
+                        @if (OnDelete.HasDelegate)
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteItem(item)">Delete</button>
+                        }
                     </td>
                 </tr>
             }
@@ -63,7 +72,7 @@ else
     // Parameter used to enable the popup/modal window.
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
-    [Parameter] public IEnumerable<TModel> Items { get; set; }
+    [Parameter] public IEnumerable<TModel>? Items { get; set; }
     [Parameter] public EventCallback<TModel> OnEdit { get; set; }
     [Parameter] public EventCallback<TModel> OnDelete { get; set; }
 
@@ -77,20 +86,30 @@ else
 
     private string GetPropertyValue(object item, PropertyInfo property)
     {
-        var value = property.GetValue(item);
+        object? value = property.GetValue(item);
 
-        if (value != null && IsComplexType(property.PropertyType))
+        if (value == null)
         {
-            var nameProperty = value.GetType().GetProperty("Name");
-            if (nameProperty != null)
-            {
-                return nameProperty.GetValue(value)?.ToString();
-            }
-            return string.Join(", ", value.GetType().GetProperties().Select(p => p.GetValue(value)));
+            return string.Empty;
         }
 
-        return value?.ToString();
+        Type valueType = value.GetType();
+
+        if (IsComplexType(valueType))
+        {
+            var nameProperty = valueType.GetProperty("Name");
+            if (nameProperty != null)
+            {
+                object? nameValue = nameProperty.GetValue(value);
+                return nameValue?.ToString() ?? string.Empty;
+            }
+
+            return string.Join(", ", valueType.GetProperties().Select(p => p.GetValue(value)?.ToString() ?? "null"));
+        }
+
+        return value.ToString() ?? string.Empty;
     }
+
 
     private bool IsComplexType(Type type)
     {

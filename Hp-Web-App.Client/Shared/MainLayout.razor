@@ -1,9 +1,9 @@
 ﻿@using Authentication
 @inherits LayoutComponentBase
 
-@inject IJSRuntime js
+@inject IJSRuntime JSRuntime
 @inject AuthenticationStateProvider authStateProvider
-@inject NavigationManager uriHelper
+@inject NavigationManager NavigationManager
 
 <PageTitle>Document Manager</PageTitle>
 
@@ -16,7 +16,7 @@
         <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
-                    <a @onclick="Logout" href="javascript:void(0)">Logout</a>
+                    <a @onclick="LogoutAndClearSession">Logout</a>
                 </Authorized>
                 <NotAuthorized>
                     <a href="authentication/login">Login</a>
@@ -32,10 +32,11 @@
 
 @code {
 
-    private async Task Logout()
+    public async Task LogoutAndClearSession()
     {
-        await Logout();
-        await js.InvokeVoidAsync("blazorHelpers.refresh");
-        uriHelper.NavigateTo("/", true);
+        await JSRuntime.InvokeVoidAsync("blazorHelpers.clearSession");
+        await JSRuntime.InvokeVoidAsync("blazorHelpers.refresh");
+        NavigationManager.NavigateTo("/", true);
     }
+
 }

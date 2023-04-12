@@ -1,8 +1,6 @@
-﻿@inject IDataService _dataService
-
-<div class="custom-component">
+﻿<div class="custom-component">
     <label for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <input type="" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+    <select id="@QuestionFieldLabel" @onchange="OnValueChanged" />
 </div>
 
 @code {

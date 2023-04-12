@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hp-Web-App.Shared", "Hp-Web
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazored.Modal", "Blazored.Modal\Blazored.Modal.csproj", "{A9F76BC5-15FD-49B8-931F-E3649315A024}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hp_Web_App.Tests", "Hp_Web_App.Tests\Hp_Web_App.Tests.csproj", "{95CA1CAA-9B3F-42E4-A9AF-A70AAE111666}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A9F76BC5-15FD-49B8-931F-E3649315A024}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9F76BC5-15FD-49B8-931F-E3649315A024}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9F76BC5-15FD-49B8-931F-E3649315A024}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95CA1CAA-9B3F-42E4-A9AF-A70AAE111666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95CA1CAA-9B3F-42E4-A9AF-A70AAE111666}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95CA1CAA-9B3F-42E4-A9AF-A70AAE111666}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95CA1CAA-9B3F-42E4-A9AF-A70AAE111666}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
