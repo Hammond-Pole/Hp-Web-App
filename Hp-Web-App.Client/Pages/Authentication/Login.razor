@@ -2,9 +2,10 @@
 
 @using Hp_Web_App.Client.Authentication;
 @using System.ComponentModel.DataAnnotations;
+@using Hp_Web_App.Shared.Authentication;
 @using Microsoft.AspNetCore.Components.Forms
 
-@inject IUserService userService
+@inject IUserService _userService
 @inject IJSRuntime js
 @inject AuthenticationStateProvider authStateProvider
 @inject NavigationManager uriHelper
@@ -30,14 +31,9 @@
             </div>
             <div style="height:10px; width:100%"></div>
             <div class="mb-3 text-center">
-                @if (!_isBusy)
-                {
-                    <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }">Login</button>
-                }
-                else
-                {
-                    <button id="login" class="btn btn-primary" disabled>Processing...</button>
-                }
+
+                    <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }" disabled="@_isBusy">Login</button>
+
             </div>
 
 
@@ -51,22 +47,23 @@
     {
         [Required]
         [StringLength(50, ErrorMessage = "Email is too long.")]
-        // Add a validation with a message that if the Email is not a valid email it should show "Not a valid email".
         [EmailAddress(ErrorMessage = "Not a valid email")]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
+
         [Required]
-        public string? Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 
     private Model _model = new Model();
-    private UserSession? _userSession = new UserSession();
     private bool _isBusy = false;
+
     private async Task Authenticate()
     {
         try
         {
-            _userSession = await userService.Login(_model.Email, _model.Password);
-            if (_userSession == null)
+            (UserSession userSession, LoginError loginError) = await _userService.Login(_model.Email, _model.Password);
+
+            if (!loginError.Equals(LoginError.None))
             {
                 await js.InvokeVoidAsync("alert", "Invalid email or password");
                 return;
@@ -75,12 +72,12 @@
             var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
             await customAuthStateProvider.UpdateAuthenticationState(new UserSession
                 {
-                    UserName = _userSession.UserName,
-                    Role = _userSession.Role,
-                    SessionId = _userSession.SessionId,
-                    CompanyId = _userSession.CompanyId
+                    UserName = userSession.UserName,
+                    Role = userSession.Role,
+                    SessionId = userSession.SessionId,
+                    CompanyId = userSession.CompanyId
                 });
-            uriHelper.NavigateTo("/", true);
+            uriHelper.NavigateTo("/uploaddocument", true);
         }
         finally
         {

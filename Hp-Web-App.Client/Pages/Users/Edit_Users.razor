@@ -4,7 +4,8 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IUserService _userService
+@inject ICompanyService _companyService
 
 <!-- Display the error at the top of the form so that we know why something failed. -->
 @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -39,7 +40,7 @@
                      @bind-Value="_user.UserRoleId">
             @foreach (var role in _userRoles)
             {
-                <option value="@role.Name">@role.Name</option>
+                <option value="@role.Id">@role.Name</option>
             }
         </InputSelect>
     </div>
@@ -79,14 +80,14 @@
     private User _user = new User();
     private List<Company> _companies = new();
     private List<UserRole> _userRoles = new();
-    private string ErrorMessage = null;
+    private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {
-        _user = await _dataService.GetUserAsync(userId);
-        _companies = await _dataService.GetCompaniesAsync();
-        _userRoles = await _dataService.GetUserRolesAsync();
+        _user = await _userService.GetUserAsync(userId);
+        _companies = await _companyService.GetCompaniesAsync();
+        _userRoles = await _userService.GetUserRolesAsync();
     }
 
     #region CRUD Operations
@@ -94,7 +95,7 @@
     {
         try
         {
-            await _dataService.UpdateUserAsync(_user);
+            await _userService.UpdateUserAsync(_user);
             await Close();
         }
         catch (Exception ex)

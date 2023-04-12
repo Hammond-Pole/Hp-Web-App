@@ -6,15 +6,13 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IDocumentService _documentService
 @inject IJSRuntime js
 @inject NavigationManager _navigationManager
 
 <!-- Back Button Navigation. -->
-<NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
-    <span style="display: flex; align-items: center;">
-        <text> <i class="oi oi-arrow-circle-left"></i> Home</text>
-    </span>
+<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+    <span class="oi oi-home" aria-hidden="true"></span> Home
 </NavLink>
 <br />
 
@@ -42,19 +40,19 @@
 
     // Private properties used only in this page.
     private List<Document>? _documents { get; set; }
-    private string ErrorMessage = null;
+    private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
-    protected override async Task OnInitializedAsync() => _documents = await _dataService.GetDocumentsAsync();
+    protected override async Task OnInitializedAsync() => _documents = await _documentService.GetDocumentsAsync();
 
     #region CRUD Operations
     async Task OnDeleteItem(Document document)
     {
-        int Id = document.Id; // Assuming the item has an Id property
+        int Id = document.Id;
         try
         {
-            await _dataService.DeleteDocumentAsync(Id);
-            _documents = await _dataService.GetDocumentsAsync();
+            await _documentService.DeleteDocumentAsync(Id);
+            _documents = await _documentService.GetDocumentsAsync();
             StateHasChanged();
         }
         catch (Exception ex)
@@ -79,7 +77,7 @@
 
         if (!result.Cancelled)
         {
-            _documents = await _dataService.GetDocumentsAsync();
+            _documents = await _documentService.GetDocumentsAsync();
             StateHasChanged();
         }
     }

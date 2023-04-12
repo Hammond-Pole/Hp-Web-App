@@ -6,15 +6,14 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject ICompanyService _companyService
+@inject IUserService _userService
 @inject IJSRuntime js
 @inject NavigationManager _navigationManager
 
 <!-- Back Button Navigation. -->
-<NavLink class="nav-link" href="/" style="padding: 0 0 0 0">
-    <span style="display: flex; align-items: center;">
-        <text> <i class="oi oi-arrow-circle-left"></i> Home</text>
-    </span>
+<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+    <span class="oi oi-home" aria-hidden="true"></span> Home
 </NavLink>
 <br />
 
@@ -32,7 +31,6 @@
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
 
     // Private properties used only in this page.
-    private List<CompanyType>? _companyTypes { get; set; }
     private List<Company>? _companies { get; set; }
 
     private string ErrorMessage = string.Empty;
@@ -40,8 +38,7 @@
     // Load all required data when launching the page.
     protected override async Task OnInitializedAsync()
     {
-        _companies = await _dataService.GetCompaniesAsync();
-        _companyTypes = await _dataService.GetCompanyTypesAsync();
+        _companies = await _companyService.GetCompaniesAsync();
     }
 
     #region CRUD Operations
@@ -49,8 +46,21 @@
     {
         try
         {
-            await _dataService.DeleteCompanyAsync(company);
-            _companies = await _dataService.GetCompaniesAsync();
+            // Validate that the company Id is on 1 if it is then show an error message.
+            if (company.Id == 1)
+            {
+                await js.InvokeVoidAsync("alert", "This company cannot be deleted!");
+                return;
+            }
+            var users = await _userService.GetUserByCompanyAsync(company.Id);
+
+            if (users.Count > 0)
+            {
+                await js.InvokeVoidAsync("alert", "This company cannot be deleted because it has users!");
+                return;
+            }
+            await _companyService.DeleteCompanyAsync(company.Id);
+            _companies = await _companyService.GetCompaniesAsync();
             StateHasChanged();
         }
         catch (Exception ex)
@@ -74,7 +84,7 @@
 
         if (!result.Cancelled)
         {
-            _companies = await _dataService.GetCompaniesAsync();
+            _companies = await _companyService.GetCompaniesAsync();
             StateHasChanged();
         }
     }
@@ -82,6 +92,11 @@
     async void OnEditItem(Company company)
     {
         int Id = company.Id; // Assuming the item has an Id property
+        if (Id == 1)
+        {
+            await js.InvokeVoidAsync("alert", "This company cannot be edited!");
+            return;
+        }
 
         //Navigate to the Edit_Document page.
         _navigationManager.NavigateTo("Company/Edit/" + Id);

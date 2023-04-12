@@ -2,22 +2,21 @@
 
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 @using Hp_Web_App.Client.Pages.Documents.Questions;
+@using Hp_Web_App.Client.Shared
 @using Microsoft.AspNetCore.Components.Forms
 
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IDocumentService _documentService
+@inject IQuestionService _questionService
 @inject NavigationManager uriHelper
 @inject IJSRuntime js
 
 <!-- Back Button Navigation. -->
-<NavLink class="nav-link" href="document" style="padding: 0 0 0 0">
-    <span style="display: flex; align-items: center;">
-        <img src="/round-back-button.png" asp-append-version="true" width="22">
-        Documents
-    </span>
+<NavLink class="nav-link" href="document">
+    <span class="oi oi-document" aria-hidden="true"></span> Documents
 </NavLink>
 <br />
 
@@ -42,51 +41,18 @@
 <br />
 <h3>Allocated Questions</h3>
 
-@if (_questionField == null)
-{
-    <!-- If this is showing, we are waiting for the data. -->
-    <text>Loading...</text>
-}
-else if (_questionField.Count == 0)
-{
-    <!-- If this is showing, let the user add new questions. -->
-    <text>There are no questions currently attached to this document.</text>
-    <br />
-    <button @onclick="ShowAddQuestionPopup" class="btn btn-primary">Add a Question</button>
-}
-else
-{
-    <!-- Show a table with the currently attached questions. Allow the user to add more questions. -->
-    <table class="table table-striped" style="width: 60%;" vertical-align=center cellpadding="0">
-        <thead>
-            <tr>
-                <th style="width: 20%;">Name</th>
-                <th style="width: 50%;">Description</th>
-                <th style="width: 20%;">Answer Format</th>
-                <th style="width: 10%;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (QuestionField question in _questionField)
-            {
-                <tr style="">
-                    <td>@question.Name</td>
-                    <td>@question.Description</td>
-                    <td>@question.QuestionFieldType.DisplayName </td>
-                    <td><a class="btn btn-warning" id="deleteq" @onclick="() => DeleteQuestion(question.Id) ">Delete</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <button @onclick="ShowAddQuestionPopup" class="btn btn-primary">Add a Question</button>
-    @if (!string.IsNullOrEmpty(ErrorMessage))
-    {
-        <div class="alert alert-danger" role="alert">
-            @ErrorMessage
-        </div>
-    }
-}
+<!-- Show a table below with the current document types. Allow the user to add more document types. -->
+<DynamicTable TModel="QuestionField" Items="_document.QuestionFields" OnDelete="OnDeleteItem" />
+<br />
+<button @onclick="ShowAddQuestionPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Question</button>
 
+<br />
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
 
 @code {
     // Parameter used to enable the popup/modal window.
@@ -97,30 +63,27 @@ else
 
     // Private properties used only in this page.
     private Document _document = new Document();
-    private List<QuestionField>? _questionField = new();
-    private List<QuestionFieldType>? _questionFieldType = new();
-    private string ErrorMessage = null;
+    private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {
-        _document = await _dataService.GetDocumentAsync(documentId)!;
-        _questionField = await _dataService.GetQuestionFieldsByDocumentAsync(documentId);
-        _questionFieldType = await _dataService.GetQuestionFieldTypesAsync();
+        _document = await _documentService.GetDocumentAsync(documentId);
     }
 
     #region CRUD Operations
     async Task UpdateDocument()
     {
-        await _dataService.UpdateDocumentAsync(_document);
+        await _documentService.UpdateDocumentAsync(_document);
     }
 
-    async Task DeleteQuestion(int Id)
+    async Task OnDeleteItem(QuestionField questionField)
     {
+        int Id = questionField.Id;
         try
         {
-            await _dataService.DeleteQuestionByIdAsync(Id);
-            _questionField = await _dataService.GetQuestionFieldsByDocumentAsync(documentId);
+            await _questionService.DeleteQuestionByIdAsync(Id);
+            _document = await _documentService.GetDocumentAsync(documentId);
             StateHasChanged();
         }
         catch (Exception ex)
@@ -145,7 +108,7 @@ else
 
         if (!result.Cancelled)
         {
-            _questionField = await _dataService.GetQuestionFieldsByDocumentAsync(documentId);
+            _document = await _documentService.GetDocumentAsync(documentId);
             StateHasChanged();
         }
     }

@@ -4,7 +4,8 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <!-- Dependency Injection. -->
-@inject IDataService _dataService
+@inject IDocumentService _documentService
+@inject ICompanyService _companyService
 
 <!-- Header not required as the Modal form has a Title. -->
 <!-- Display the error at the top of the form so that we know why something failed. -->
@@ -61,8 +62,8 @@
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {
-        _companyTypes = await _dataService.GetCompanyTypesAsync();
-        _documents = await _dataService.GetDocumentsAsync();
+        _companyTypes = await _companyService.GetCompanyTypesAsync();
+        _documents = await _documentService.GetDocumentsAsync();
 
     }
 
@@ -71,7 +72,7 @@
     {
         try
         {
-            _company = await _dataService.CreateCompanyAsync(_company);
+            _company = await _companyService.CreateCompanyAsync(_company);
             await Close();
         }
         catch (Exception ex)

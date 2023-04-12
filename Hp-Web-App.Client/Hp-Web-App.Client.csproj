@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BlazorInputFile" Version="0.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -28,6 +28,7 @@
 
 	<ItemGroup>
 		<Folder Include="Authentication\" />
+		<Folder Include="wwwroot\css\js\" />
 	</ItemGroup>
 
 </Project>

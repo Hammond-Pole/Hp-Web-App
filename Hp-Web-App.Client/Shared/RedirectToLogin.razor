@@ -1,0 +1,13 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+@inject IHostEnvironment Environment
+
+<AuthorizeView>
+    <NotAuthorized>
+        @{
+            var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var loginUrl = $"/Authentication/Login?returnUrl={returnUrl}";
+            NavigationManager.NavigateTo(loginUrl, forceLoad: true);
+        }
+    </NotAuthorized>
+</AuthorizeView>

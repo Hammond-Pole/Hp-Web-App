@@ -1,4 +1,4 @@
-﻿using Hp_Web_App.Shared.Models;
+﻿using Hp_Web_App.Shared.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Security.Claims;
