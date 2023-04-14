@@ -4,6 +4,7 @@ using Hp_Web_App.Shared.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hp_Web_App.Shared.Migrations
 {
     [DbContext(typeof(DbWebAppContext))]
-    partial class DbWebAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230413082754_AddIsActiveforQuestionField")]
+    partial class AddIsActiveforQuestionField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,15 +162,12 @@ namespace Hp_Web_App.Shared.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("FileDescription")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("QuestionFieldId")
@@ -315,25 +315,23 @@ namespace Hp_Web_App.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DateValueChanged")
+                    b.Property<DateTime?>("DateValueChanged")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DocumentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DocumentsAttachedId")
+                    b.Property<int?>("DocumentsAttachedId")
                         .HasColumnType("int");
 
                     b.Property<int>("QuestionFieldID")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("QuestionValueType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("DocumentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("DocumentsAttachedId");
 
@@ -341,7 +339,7 @@ namespace Hp_Web_App.Shared.Migrations
 
                     b.ToTable("QuestionValues");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("QuestionValue");
+                    b.HasDiscriminator<string>("QuestionValueType").HasValue("QuestionValue");
 
                     b.UseTphMappingStrategy();
                 });
@@ -433,35 +431,65 @@ namespace Hp_Web_App.Shared.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionValues", b =>
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionBitValue", b =>
                 {
                     b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
 
                     b.Property<bool?>("BoolValue")
                         .HasColumnType("bit");
 
+                    b.HasDiscriminator().HasValue("QuestionBooleanValue");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionDateValue", b =>
+                {
+                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
+
                     b.Property<DateTime?>("DateValue")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("FloatValue")
+                    b.HasDiscriminator().HasValue("QuestionDateValue");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionFloatValue", b =>
+                {
+                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
+
+                    b.Property<double>("FloatValue")
                         .HasColumnType("float");
 
-                    b.Property<int?>("IntValue")
+                    b.HasDiscriminator().HasValue("QuestionDecimalValue");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionIntValue", b =>
+                {
+                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
+
+                    b.Property<int>("IntValue")
                         .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("QuestionIntegerValue");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionMemoValue", b =>
+                {
+                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
 
                     b.Property<string>("MemoValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("QuestionValueId")
-                        .HasColumnType("int");
+                    b.HasDiscriminator().HasValue("QuestionMemoValue");
+                });
+
+            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionStringValue", b =>
+                {
+                    b.HasBaseType("Hp_Web_App.Shared.Models.QuestionValue");
 
                     b.Property<string>("StringValue")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.HasIndex("QuestionValueId");
-
-                    b.HasDiscriminator().HasValue("QuestionValues");
+                    b.HasDiscriminator().HasValue("QuestionStringValue");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.Company", b =>
@@ -547,29 +575,18 @@ namespace Hp_Web_App.Shared.Migrations
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionValue", b =>
                 {
-                    b.HasOne("Hp_Web_App.Shared.Models.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Hp_Web_App.Shared.Models.DocumentsAttached", "DocumentsAttached")
                         .WithMany("QuestionValues")
                         .HasForeignKey("DocumentsAttachedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Hp_Web_App.Shared.Models.QuestionField", "QuestionField")
+                    b.HasOne("Hp_Web_App.Shared.Models.QuestionField", null)
                         .WithMany("Values")
                         .HasForeignKey("QuestionFieldID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Document");
-
                     b.Navigation("DocumentsAttached");
-
-                    b.Navigation("QuestionField");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.User", b =>
@@ -589,14 +606,6 @@ namespace Hp_Web_App.Shared.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("UserRole");
-                });
-
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionValues", b =>
-                {
-                    b.HasOne("Hp_Web_App.Shared.Models.QuestionValue", null)
-                        .WithMany("QuestionValues")
-                        .HasForeignKey("QuestionValueId")
-                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.Company", b =>
@@ -637,11 +646,6 @@ namespace Hp_Web_App.Shared.Migrations
             modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionFieldType", b =>
                 {
                     b.Navigation("QuestionFields");
-                });
-
-            modelBuilder.Entity("Hp_Web_App.Shared.Models.QuestionValue", b =>
-                {
-                    b.Navigation("QuestionValues");
                 });
 
             modelBuilder.Entity("Hp_Web_App.Shared.Models.User", b =>

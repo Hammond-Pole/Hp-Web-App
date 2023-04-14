@@ -7,10 +7,12 @@ namespace Hp_Web_App.Shared.AppServices;
 public class QuestionService : IQuestionService
 {
     private readonly DbWebAppContext _context;
+    private readonly IDocumentService _documentService;
 
-    public QuestionService(DbWebAppContext context)
+    public QuestionService(DbWebAppContext context, IDocumentService documentService)
     {
         _context = context;
+        _documentService = documentService;
     }
 
     #region Question
@@ -20,6 +22,7 @@ public class QuestionService : IQuestionService
             .Include(qf => qf.QuestionFieldType)
             .Include(d => d.Document)
             .Where(qf => qf.Id == id)
+            .Where(qf => qf.IsVisible == true)
             .FirstOrDefaultAsync();
         return questionField ?? new QuestionField();
     }
@@ -28,17 +31,36 @@ public class QuestionService : IQuestionService
         var questionFields = await _context.Set<QuestionField>()
             .Include(qf => qf.QuestionFieldType)
             .Include(d => d.Document)
+            .Where(qf => qf.IsVisible == true)
             .ToListAsync();
         return questionFields ?? new List<QuestionField>();
     }
+    public async Task<List<QuestionField>> GetQuestionFieldsByDocumentAsync(int id)
+    {
+        var questionFields = await _context.Set<QuestionField>()
+            .Include(qf => qf.QuestionFieldType)
+            .Include(d => d.Document)
+            .Where(qf => qf.DocumentId == id)
+            .Where(qf => qf.IsVisible == true)
+            .ToListAsync();
+        return questionFields ?? new List<QuestionField>();
+    }
+
     public async Task<QuestionField> CreateQuestionFieldAsync(QuestionField questionField)
     {
         if (questionField == null)
         {
             return new QuestionField();
         }
+        
+        var existingQuestionFieldType = await GetQuestionFieldTypeAsync(questionField.QuestionFieldTypeId);
+        if (existingQuestionFieldType == null)
+        {
+            throw new Exception("Field Type has not been set.");
+        }
 
-        _context.Add(questionField);
+        questionField.QuestionFieldType = existingQuestionFieldType;
+        _context.QuestionFields.Add(questionField);
         await _context.SaveChangesAsync();
         return questionField;
     }
@@ -54,10 +76,23 @@ public class QuestionService : IQuestionService
     }
     public async Task DeleteQuestionByIdAsync(int id)
     {
-        await _context
-            .QuestionValues
-            .Where (x => x.Id == id)
-            .ExecuteDeleteAsync();
+        // Find any questionValue records exist.
+        var _questionValues = await GetQuestionValuesByQuestionFieldIdAsync(id);
+
+        if (_questionValues.Count == 0)
+        {
+            await _context
+                .QuestionFields
+                .Where(x => x.Id == id)
+                .ExecuteDeleteAsync();
+        }
+        else
+        {
+            await _context
+                .QuestionFields
+                .Where(x => x.Id == id)
+                .ExecuteUpdateAsync(qf => qf.SetProperty(x => x.IsVisible, false));
+        }
     }
     #endregion
 
@@ -67,19 +102,70 @@ public class QuestionService : IQuestionService
         var questionFieldTypes = await _context.Set<QuestionFieldType>().ToListAsync();
         return questionFieldTypes ?? new List<QuestionFieldType>();
     }
+    public async Task<QuestionFieldType> GetQuestionFieldTypeAsync(int id)
+    {
+        var questionFieldType = await _context.Set<QuestionFieldType>()
+            .Where(qft => qft.Id == id)
+            .FirstOrDefaultAsync();
+        return questionFieldType ?? new QuestionFieldType();
+    }
     #endregion
 
     #region QuestionValue
-    public async Task<List<T>> CreateQuestionValuesAsync<T>(List<T> questionValues) where T : class
+    public async Task<List<QuestionValues>> CreateQuestionValuesAsync(List<QuestionValues> questionValues) 
     {
         if (questionValues == null)
         {
-            return new List<T>();
+            return new List<QuestionValues>();
+        }
+
+        foreach (var questionValue in questionValues)
+        {
+            var existingDocument = await _context.Documents.FindAsync(questionValue.DocumentId);
+            if (existingDocument == null)
+            {
+                throw new Exception($"DocumentsAttached with ID {questionValue.DocumentsAttachedId} not found.");
+            }
+            questionValue.Document = existingDocument;
+
+            var existingQuestionField = await _context.QuestionFields.FindAsync(questionValue.QuestionFieldID);
+            if (existingQuestionField == null)
+            {
+                throw new Exception($"QuestionField with ID {questionValue.QuestionFieldID} not found.");
+            }
+            questionValue.QuestionField = existingQuestionField;
+
+            var existingDocumentAttached = await _context.DocumentsAttached.FindAsync(questionValue.DocumentsAttachedId);
+            if ( existingDocumentAttached == null)
+            {
+                throw new Exception($"DocumentAttached with ID {questionValue.DocumentsAttachedId} not found.");
+            }
+            questionValue.DocumentsAttached = existingDocumentAttached;
+            
         }
 
         _context.AddRange(questionValues);
         await _context.SaveChangesAsync();
         return questionValues;
     }
+
+
+    public async Task<List<QuestionValues>> GetQuestionValuesByQuestionFieldIdAsync(int id)
+    {
+        var questionValues = await _context.Set<QuestionValues>()
+            .Where(qv => qv.QuestionFieldID == id)
+            .ToListAsync();
+
+        return questionValues ?? new List<QuestionValues>();
+    }
+
+    public async Task<List<QuestionValues>> GetAllQuestionValuesAsync()
+    {
+        var oldQuestionValues = await _context.Set<QuestionValues>()
+            .ToListAsync() ;
+        return oldQuestionValues ?? new List<QuestionValues>();
+    }
+
+
     #endregion
 }

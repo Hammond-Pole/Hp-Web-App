@@ -8,10 +8,10 @@ public class Document
     public int Id { get; set; }
     [Required]
     [StringLength(25, ErrorMessage = "Name is too long.")]
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     [Required]
     [StringLength(250, ErrorMessage = "Desc is too long.")]
-    public string? Description { get; set; }
+    public string Description { get; set; } = string.Empty;
     [ExcludeFromTable]
     public ICollection<QuestionField>? QuestionFields { get; set; } // navigation property
     [ExcludeFromTable]

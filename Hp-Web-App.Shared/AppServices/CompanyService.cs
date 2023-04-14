@@ -1,7 +1,6 @@
 ﻿using Hp_Web_App.Shared.DbContexts;
 using Hp_Web_App.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Hp_Web_App.Shared.AppServices;
 public class CompanyService : ICompanyService
@@ -70,7 +69,6 @@ public class CompanyService : ICompanyService
 
         return companies ?? new List<Company> { };
     }
-
     public async Task<Company> CreateCompanyAsync(Company company)
     {
         if (company == null)

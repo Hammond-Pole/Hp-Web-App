@@ -38,13 +38,19 @@
         <InputSelect id="ddlQuestionFieldType"
                      class="form-select"
                      @bind-Value="_questionField.QuestionFieldTypeId">
-            <option value="" disabled selected>Select an Answer Type</option>
             @foreach (var item in _questionFieldType!)
             {
                 <option value="@item.Id">@item.DisplayName</option>
             }
         </InputSelect>
         <ValidationMessage For="@(() => _questionField.QuestionFieldTypeId)" />
+    </div>
+
+    <div style="margin-top: 8px;"></div>
+    <div class="form-group">
+        <label for="visible">Is Visible:</label>
+        <InputCheckbox id="visible" class="form-check-input" @bind-Value="_questionField.IsVisible" />
+        <ValidationMessage For="@(() => _questionField.IsVisible)" />
     </div>
     <div style="margin-top: 12px;"></div>
 
@@ -73,6 +79,8 @@
     {
         // The document Id can never change, only set by the previous page.
         _questionField.DocumentId = documentId;
+        _questionField.QuestionFieldTypeId = 3;
+        _questionField.IsVisible = true;
 
         // Get the document details.
         _document = await _documentService.GetDocumentAsync(documentId)!;

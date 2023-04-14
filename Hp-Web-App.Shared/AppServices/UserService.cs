@@ -18,6 +18,7 @@ public class UserService : IUserService
         _companyService = companyService;
     }
 
+    #region Authentication
     public async Task<(UserSession, LoginError)> Login(string email, string password)
     {
         if (string.IsNullOrEmpty(email))
@@ -51,6 +52,7 @@ public class UserService : IUserService
         if (typedPassword == storedPassword) return true;
         return false;
     }
+    #endregion
 
     #region User
     public async Task<User> GetUserAsync(int id)
@@ -76,6 +78,8 @@ public class UserService : IUserService
     public async Task<List<User>> GetUserByCompanyAsync(int companyId)
     {
         var users = await _context.Set<User>()
+            .Include(u => u.UserRole)
+            .Include(u => u.Company)
             .Where(u => u.CompanyId == companyId)
             .ToListAsync();
         return users ?? new List<User>();
@@ -119,7 +123,6 @@ public class UserService : IUserService
         await _context.SaveChangesAsync();
         return user;
     }
-
     public async Task UpdateUserAsync(User user)
     {
         if (user == null)

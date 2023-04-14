@@ -43,7 +43,10 @@
     private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
-    protected override async Task OnInitializedAsync() => _documents = await _documentService.GetDocumentsAsync();
+    protected override async Task OnInitializedAsync() 
+    {
+        _documents = await _documentService.GetDocumentsAsync();
+    }
 
     #region CRUD Operations
     async Task OnDeleteItem(Document document)
@@ -51,9 +54,17 @@
         int Id = document.Id;
         try
         {
-            await _documentService.DeleteDocumentAsync(Id);
-            _documents = await _documentService.GetDocumentsAsync();
-            StateHasChanged();
+            var _companies = await _documentService.GetCompanyDocumentsByDocumentAsync(Id);
+            if (_companies.Count == 0)
+            {
+                await _documentService.DeleteDocumentAsync(Id);
+                _documents = await _documentService.GetDocumentsAsync();
+                StateHasChanged();
+            }
+            else
+            {
+                await js.InvokeVoidAsync("alert", "This document type cannot be deleted because it is being used by a company!");
+            }
         }
         catch (Exception ex)
         {
@@ -63,7 +74,6 @@
     #endregion
 
     #region Navigation
-
     async void ShowAddQuestionPopup()
     {
         var options = new ModalOptions()

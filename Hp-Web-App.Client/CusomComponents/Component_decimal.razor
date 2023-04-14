@@ -1,6 +1,6 @@
 ﻿<div class="custom-component">
-    <label for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <input type="number"  id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+    <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
+    <input title="@QuestionFieldDescription" type="number" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
 </div>
 
 @code {
@@ -8,6 +8,7 @@
     [Parameter] public int DocumentId { get; set; }
     [Parameter] public int QuestionFieldId { get; set; }
     [Parameter] public string QuestionFieldLabel { get; set; }
+    [Parameter] public string QuestionFieldDescription { get; set; } = string.Empty;
     [Parameter]
     public double Value { get; set; }
     [Parameter]
