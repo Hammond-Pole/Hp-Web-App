@@ -6,10 +6,12 @@ namespace Hp_Web_App.Shared.AppServices;
 public class DocumentService : IDocumentService
 {
     private readonly DbWebAppContext _context;
+    private readonly ICompanyService _companyService;
 
-    public DocumentService(DbWebAppContext context)
+    public DocumentService(DbWebAppContext context, ICompanyService companyService)
     {
         _context = context;
+        _companyService = companyService;
     }
 
     #region Document
@@ -53,17 +55,36 @@ public class DocumentService : IDocumentService
     }
     public async Task DeleteDocumentAsync(int id)
     {
-        await _context
-            .Documents
-            .Where(d => d.Id == id)
-            .ExecuteDeleteAsync();
+        var _companies = await GetCompanyDocumentsByDocumentAsync(id);
+
+        if (_companies.Count == 0)
+        {
+            await _context
+                .Documents
+                .Where(d => d.Id == id)
+                .ExecuteDeleteAsync();
+        }
+        else
+        {
+            throw new Exception("Document is in use");
+        }
     }
     #endregion
 
     #region Documents Attached
     public async Task<List<DocumentsAttached>> GetDocumentsAttachedByUserAsync(int userId)
     {
-        var documentsAttached = await _context.DocumentsAttached.Where(d => d.UserId == userId).ToListAsync();
+        var documentsAttached = await _context.DocumentsAttached
+                                    .Where(d => d.UserId == userId)
+                                    .ToListAsync();
+        return documentsAttached ?? new List<DocumentsAttached>();
+    }
+
+    public async Task<List<DocumentsAttached>> GetDocumentsAttachedByUserForCompanyAsync(int companyId)
+    { 
+        var documentsAttached = await _context.DocumentsAttached
+                                    .Where(d => d.CompanyId == companyId)
+                                    .ToListAsync();
         return documentsAttached ?? new List<DocumentsAttached>();
     }
     public async Task<DocumentsAttached> CreateDocumentsAttachedAsync(DocumentsAttached documentsAttached)
@@ -106,7 +127,10 @@ public class DocumentService : IDocumentService
     #region QuestionDocument
     public async Task<List<QuestionField>> GetQuestionFieldsByDocumentAsync(int Id)
     {
-        var questionFields = await _context.Set<QuestionField>().Where(q => q.DocumentId == Id).ToListAsync();
+        var questionFields = await _context.Set<QuestionField>()
+                                .Where(q => q.DocumentId == Id)
+                                .Where(q => q.IsVisible == true)
+                                .ToListAsync();
         return questionFields ?? new List<QuestionField>();
     }
     #endregion

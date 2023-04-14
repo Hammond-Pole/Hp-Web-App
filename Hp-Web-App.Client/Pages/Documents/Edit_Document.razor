@@ -42,7 +42,7 @@
 <h3>Allocated Questions</h3>
 
 <!-- Show a table below with the current document types. Allow the user to add more document types. -->
-<DynamicTable TModel="QuestionField" Items="_document.QuestionFields" OnDelete="OnDeleteItem" />
+<DynamicTable TModel="QuestionField" Items="_questionFields" OnDelete="OnDeleteItem" />
 <br />
 <button @onclick="ShowAddQuestionPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Question</button>
 
@@ -63,12 +63,14 @@
 
     // Private properties used only in this page.
     private Document _document = new Document();
+    private List<QuestionField> _questionFields = new List<QuestionField>();
     private string ErrorMessage = string.Empty;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {
         _document = await _documentService.GetDocumentAsync(documentId);
+        _questionFields = await _questionService.GetQuestionFieldsByDocumentAsync(documentId);
     }
 
     #region CRUD Operations
@@ -83,7 +85,7 @@
         try
         {
             await _questionService.DeleteQuestionByIdAsync(Id);
-            _document = await _documentService.GetDocumentAsync(documentId);
+            _questionFields = await _questionService.GetQuestionFieldsByDocumentAsync(documentId);
             StateHasChanged();
         }
         catch (Exception ex)
@@ -97,18 +99,22 @@
 
     async void ShowAddQuestionPopup()
     {
+        var options = new ModalOptions()
+        {
+            DisableBackgroundCancel = true
+        };
         var parameters = new ModalParameters
         {
             { nameof(Create_Question.documentId), documentId }
         };
 
         // Call the add form and wait to see if there is an Ok or Cancel.
-        var questionForm = Modal.Show<Create_Question>("Add a Question", parameters);
+        var questionForm = Modal.Show<Create_Question>("Add a Question", parameters, options);
         var result = await questionForm.Result;
 
         if (!result.Cancelled)
         {
-            _document = await _documentService.GetDocumentAsync(documentId);
+            _questionFields = await _questionService.GetQuestionFieldsByDocumentAsync(documentId);
             StateHasChanged();
         }
     }

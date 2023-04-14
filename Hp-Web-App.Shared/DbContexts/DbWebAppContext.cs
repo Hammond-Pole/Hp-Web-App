@@ -26,12 +26,6 @@ public class DbWebAppContext : DbContext
     public DbSet<QuestionField> QuestionFields { get; set; }
     public DbSet<QuestionFieldType> QuestionFieldTypes { get; set; }
     public DbSet<QuestionValue> QuestionValues { get; set; }
-    public virtual DbSet<QuestionStringValue> QuestionStringValues { get; set; }
-    public virtual DbSet<QuestionDateValue> QuestionDateValues { get; set; }
-    public virtual DbSet<QuestionBitValue> QuestionBitValues { get; set; }
-    public virtual DbSet<QuestionIntValue> QuestionIntValues { get; set; }
-    public virtual DbSet<QuestionFloatValue> QuestionFloatValues { get; set; }
-    public virtual DbSet<QuestionMemoValue> QuestionMemoValues { get; set; }
     public DbSet<Company> Companies { get; set; }
     public DbSet<CompanyType> CompanyTypes { get; set; }
     public DbSet<CompanyDocument> CompanyDocuments { get; set; }
@@ -103,16 +97,6 @@ public class DbWebAppContext : DbContext
             .HasOne(qf => qf.Document) // QuestionField has one Document
             .WithMany(d => d.QuestionFields) // Document has many QuestionFields
             .HasForeignKey(qf => qf.DocumentId); // DocumentId is the foreign key property for dependent entity
-
-        modelBuilder.Entity<QuestionValue>()
-            .HasDiscriminator<string>("QuestionValueType")
-            .HasValue<QuestionDateValue>("QuestionDateValue")
-            .HasValue<QuestionStringValue>("QuestionStringValue")
-            .HasValue<QuestionBitValue>("QuestionBooleanValue")
-            .HasValue<QuestionIntValue>("QuestionIntegerValue")
-            .HasValue<QuestionFloatValue>("QuestionDecimalValue")
-            .HasValue<QuestionMemoValue>("QuestionMemoValue");
-        ;
 
         // Seed data for QuestionFieldType table
         modelBuilder.Entity<QuestionFieldType>().HasData(

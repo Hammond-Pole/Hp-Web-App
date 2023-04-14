@@ -1,6 +1,6 @@
 ﻿<div class="custom-component">
-    <label for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <input type="date"  id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+    <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
+    <input title="@QuestionFieldDescription" type="date" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
 </div>
 
 @code {
@@ -8,10 +8,11 @@
     [Parameter] public int DocumentId { get; set; }
     [Parameter] public int QuestionFieldId { get; set; }
     [Parameter] public string QuestionFieldLabel { get; set; } = string.Empty;
+    [Parameter] public string QuestionFieldDescription { get; set; } = string.Empty;
     [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
 
     // This is the dynamic object we are passing back to the parent.
-    private QuestionDateValue _questionDateValue = new();
+    private QuestionValues _questionDateValue = new();
 
     private async Task OnValueChanged(ChangeEventArgs e)
     {

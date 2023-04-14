@@ -67,6 +67,8 @@ else
             }
         </tbody>
     </table>
+
+
 }
 @code {
     // Parameter used to enable the popup/modal window.
@@ -79,13 +81,26 @@ else
     #region Dynamic Table Data Retrieval
     private PropertyInfo[] GetProperties()
     {
-        return typeof(TModel).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        List<PropertyInfo> properties = typeof(TModel).GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.GetCustomAttribute<ExcludeFromTableAttribute>() == null)
-            .ToArray();
+            .ToList();
+
+        if (typeof(QuestionValues).IsAssignableFrom(typeof(TModel)))
+        {
+            properties.Add(typeof(QuestionValues).GetProperty("ActualValue"));
+        }
+
+        return properties.ToArray();
     }
 
     private string GetPropertyValue(object item, PropertyInfo property)
     {
+        if (property.Name == "QuestionValues")
+        {
+            var actualValue = (item as QuestionValues)?.ActualValue;
+            return actualValue?.ToString() ?? string.Empty;
+        }
+
         object? value = property.GetValue(item);
 
         if (value == null)
@@ -97,18 +112,24 @@ else
 
         if (IsComplexType(valueType))
         {
-            var nameProperty = valueType.GetProperty("Name");
-            if (nameProperty != null)
+            var properties = valueType.GetProperties();
+            foreach (var prop in properties)
             {
-                object? nameValue = nameProperty.GetValue(value);
-                return nameValue?.ToString() ?? string.Empty;
-            }
+                // Check if the property has the ExcludeFromTable attribute
+                var excludeFromTableAttribute = prop.GetCustomAttributes(typeof(ExcludeFromTableAttribute), true).FirstOrDefault();
 
-            return string.Join(", ", valueType.GetProperties().Select(p => p.GetValue(value)?.ToString() ?? "null"));
+                // If the property doesn't have the ExcludeFromTable attribute, return its value
+                if (excludeFromTableAttribute == null)
+                {
+                    object? propValue = prop.GetValue(value);
+                    return propValue?.ToString() ?? string.Empty;
+                }
+            }
         }
 
         return value.ToString() ?? string.Empty;
     }
+
 
 
     private bool IsComplexType(Type type)

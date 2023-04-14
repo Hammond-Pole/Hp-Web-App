@@ -4,10 +4,14 @@ namespace Hp_Web_App.Shared.AppServices;
 public interface IQuestionService
 {
     Task<QuestionField> CreateQuestionFieldAsync(QuestionField questionField);
-    Task<List<T>> CreateQuestionValuesAsync<T>(List<T> questionValues) where T : class;
+    Task<List<QuestionValues>> CreateQuestionValuesAsync(List<QuestionValues> questionValues);
     Task DeleteQuestionByIdAsync(int id);
+    Task<List<QuestionValues>> GetAllQuestionValuesAsync();
     Task<QuestionField> GetQuestionFieldAsync(int id);
     Task<List<QuestionField>> GetQuestionFieldsAsync();
+    Task<List<QuestionField>> GetQuestionFieldsByDocumentAsync(int id);
+    Task<QuestionFieldType> GetQuestionFieldTypeAsync(int id);
     Task<List<QuestionFieldType>> GetQuestionFieldTypesAsync();
+    Task<List<QuestionValues>> GetQuestionValuesByQuestionFieldIdAsync(int id);
     Task UpdateQuestionFieldAsync(QuestionField questionField);
 }

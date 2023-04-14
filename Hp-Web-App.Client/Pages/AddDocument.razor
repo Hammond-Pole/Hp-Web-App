@@ -1,6 +1,7 @@
 ﻿@page "/uploaddocument"
 @using Hp_Web_App.Client.CusomComponents;
 @using Hp_Web_App.Client.Pages.Documents.Questions;
+@using Hp_Web_App.Client.Shared
 @using Microsoft.AspNetCore.Components.Forms;
 @using Hp_Web_App.Shared.Authentication;
 
@@ -25,7 +26,7 @@
                 <option value="" selected disabled>Select a Document.</option>
                 @foreach (var document in _documents)
                 {
-                    <option value="@document.Id">@document.Name</option>
+                    <option title="@document.Description" value="@document.Id">@document.Name</option>
                 })
             </select>
         </div>
@@ -41,6 +42,7 @@
             FieldMeta.Add("DocumentId", question.DocumentId);
             FieldMeta.Add("QuestionFieldId", question.Id);
             FieldMeta.Add("QuestionFieldLabel", question.Name);
+            FieldMeta.Add("QuestionFieldDescription", question.Description);
             FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
             <DynamicComponent Type=@_selectedType Parameters="FieldMeta" />
         }
@@ -81,6 +83,9 @@
     </div>
 </div>
 
+<div><DynamicTable TModel="DocumentsAttached" Items="_documentsAttached" /></div>
+<div><DynamicTable TModel="QuestionValue" Items="_previousQuestionValues" /></div>
+
 
 
 @code {
@@ -94,22 +99,22 @@
         switch (questionType)
         {
             case 1:
-                UpdateOrAddValue(_questionDateValues, (QuestionDateValue)value, x => x.DateValue = value.DateValue);
+                UpdateOrAddValue(_questionDateValues, (QuestionValues)value, x => x.DateValue = value.DateValue);
                 break;
             case 2:
-                UpdateOrAddValue(_questionBitValues, (QuestionBitValue)value, x => x.BoolValue = value.BoolValue);
+                UpdateOrAddValue(_questionBitValues, (QuestionValues)value, x => x.BoolValue = value.BoolValue);
                 break;
             case 3:
-                UpdateOrAddValue(_questionStringValues, (QuestionStringValue)value, x => x.StringValue = value.StringValue);
+                UpdateOrAddValue(_questionStringValues, (QuestionValues)value, x => x.StringValue = value.StringValue);
                 break;
             case 4:
-                UpdateOrAddValue(_questionIntValues, (QuestionIntValue)value, x => x.IntValue = value.IntValue);
+                UpdateOrAddValue(_questionIntValues, (QuestionValues)value, x => x.IntValue = value.IntValue);
                 break;
             case 5:
-                UpdateOrAddValue(_questionFloatValues, (QuestionFloatValue)value, x => x.FloatValue = value.FloatValue);
+                UpdateOrAddValue(_questionFloatValues, (QuestionValues)value, x => x.FloatValue = value.FloatValue);
                 break;
             case 6:
-                UpdateOrAddValue(_questionMemoValues, (QuestionMemoValue)value, x => x.MemoValue = value.MemoValue);
+                UpdateOrAddValue(_questionMemoValues, (QuestionValues)value, x => x.MemoValue = value.MemoValue);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(questionType), questionType, null);
@@ -155,18 +160,21 @@
     private List<CompanyDocument> _companyDocuments = new();
     private List<QuestionField> _questionField = new();
     private List<QuestionFieldType> _questionFieldType = new();
+    private List<DocumentsAttached> _documentsAttached = new();
 
     // Question Lists
     private List<QuestionValue> _questionValues = new();
-    private List<QuestionDateValue> _questionDateValues = new();
-    private List<QuestionBitValue> _questionBitValues = new();
-    private List<QuestionStringValue> _questionStringValues = new();
-    private List<QuestionIntValue> _questionIntValues = new();
-    private List<QuestionFloatValue> _questionFloatValues = new();
-    private List<QuestionMemoValue> _questionMemoValues = new();
+    private List<QuestionValues> _questionDateValues = new();
+    private List<QuestionValues> _questionBitValues = new();
+    private List<QuestionValues> _questionStringValues = new();
+    private List<QuestionValues> _questionIntValues = new();
+    private List<QuestionValues> _questionFloatValues = new();
+    private List<QuestionValues> _questionMemoValues = new();
+
+    private List<QuestionValues> _previousQuestionValues = new();
 
     // Related Objects
-    private DocumentsAttached _documentsAttached = new();
+    private DocumentsAttached _documentAttached = new();
     private User _user = new();
 
     // Identifiers
@@ -184,6 +192,8 @@
         await LoadUserSessionAsync();
         await LoadUniqueCompanyDocumentsAsync();
         await LoadQuestionFieldTypesWithComponentsAsync();
+        await LoadDocumentsAttached();
+        await LoadPreviousQuestionValues();
         StateHasChanged();
     }
     #endregion
@@ -268,6 +278,16 @@
         return nonEmptyLists;
     }
 
+    private async Task LoadDocumentsAttached()
+    {
+        // TODO: This is a temporary solution. Need to validate if the user can see all the documents or just their own.
+        _documentsAttached = await _documentService.GetDocumentsAttachedByUserForCompanyAsync(_user.CompanyId);
+    }
+
+    private async Task LoadPreviousQuestionValues()
+    {
+        _previousQuestionValues = await _questionService.GetAllQuestionValuesAsync();
+    }
     #endregion
 
     #region File Upload
@@ -311,7 +331,7 @@
             var company = await _companyService.GetCompanyAsync(_user.CompanyId);
 
             // Change the filename to "DocumentName_UsersName_CompanyName_Date" and append the extension.
-            var newFileName = $"{document.Name}_{_user.Name}_{company.Name.Replace(" ","")}_{DateTime.Now.ToString("yyyyMMddhhmmss")}{Path.GetExtension(_loadedFile.Name)}";
+            var newFileName = $"{document.Name}_{_user.Name}_{company.Name.Replace(" ", "")}_{DateTime.Now.ToString("yyyyMMddhhmmss")}{Path.GetExtension(_loadedFile.Name)}";
             string saveDirectory = Path.Combine(_config.GetValue<string>("FileShare")!, _user.Name!);
             Directory.CreateDirectory(saveDirectory);
             string filePath = Path.Combine(_config.GetValue<string>("FileShare")!, _user.Name!, newFileName);
@@ -321,16 +341,16 @@
             await _fileStream.CopyToAsync(fileStream);
 
 
-            _documentsAttached.UploadDate = DateTime.Now;
-            _documentsAttached.DocumentId = _documentsId;
-            _documentsAttached.UserId = _user.Id;
-            _documentsAttached.CompanyId = _user.CompanyId;
-            _documentsAttached.FileName = newFileName;
-            _documentsAttached.FileDescription = string.Empty;
-            _documentsAttached.FileUrl = filePath;
+            _documentAttached.UploadDate = DateTime.Now;
+            _documentAttached.DocumentId = _documentsId;
+            _documentAttached.UserId = _user.Id;
+            _documentAttached.CompanyId = _user.CompanyId;
+            _documentAttached.FileName = newFileName;
+            _documentAttached.FileDescription = string.Empty;
+            _documentAttached.FileUrl = filePath;
 
             // Retrieve the Id of the newly inserted document.
-            _documentsAttached = await _documentService.CreateDocumentsAttachedAsync(_documentsAttached);
+            _documentAttached = await _documentService.CreateDocumentsAttachedAsync(_documentAttached);
 
             // Check which lists have data. That would mean that they have answered questions.
             List<string> nonEmptyLists = GetNonEmptyQuestionValueListNames();
@@ -343,42 +363,42 @@
                     case nameof(_questionDateValues):
                         foreach (var date in _questionDateValues)
                         {
-                            date.DocumentsAttachedId = _documentsAttached.Id;
+                            date.DocumentsAttachedId = _documentAttached.Id;
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionDateValues);
                         break;
                     case nameof(_questionBitValues):
                         foreach (var date in _questionBitValues)
                         {
-                            date.DocumentsAttachedId = _documentsAttached.Id;
+                            date.DocumentsAttachedId = _documentAttached.Id;
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionBitValues);
                         break;
                     case nameof(_questionStringValues):
                         foreach (var date in _questionStringValues)
                         {
-                            date.DocumentsAttachedId = _documentsAttached.Id;
+                            date.DocumentsAttachedId = _documentAttached.Id;
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionStringValues);
                         break;
                     case nameof(_questionIntValues):
                         foreach (var date in _questionIntValues)
                         {
-                            date.DocumentsAttachedId = _documentsAttached.Id;
+                            date.DocumentsAttachedId = _documentAttached.Id;
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionIntValues);
                         break;
                     case nameof(_questionFloatValues):
                         foreach (var date in _questionFloatValues)
                         {
-                            date.DocumentsAttachedId = _documentsAttached.Id;
+                            date.DocumentsAttachedId = _documentAttached.Id;
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionFloatValues);
                         break;
                     case nameof(_questionMemoValues):
                         foreach (var date in _questionMemoValues)
                         {
-                            date.DocumentsAttachedId = _documentsAttached.Id;
+                            date.DocumentsAttachedId = _documentAttached.Id;
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionMemoValues);
                         break;
@@ -401,3 +421,6 @@
     }
     #endregion
 }
+
+
+
