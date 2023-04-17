@@ -26,6 +26,7 @@ public class DbWebAppContext : DbContext
     public DbSet<QuestionField> QuestionFields { get; set; }
     public DbSet<QuestionFieldType> QuestionFieldTypes { get; set; }
     public DbSet<QuestionValue> QuestionValues { get; set; }
+    public DbSet<ListValue> ListValues { get; set; }
     public DbSet<Company> Companies { get; set; }
     public DbSet<CompanyType> CompanyTypes { get; set; }
     public DbSet<CompanyDocument> CompanyDocuments { get; set; }
@@ -98,6 +99,11 @@ public class DbWebAppContext : DbContext
             .WithMany(d => d.QuestionFields) // Document has many QuestionFields
             .HasForeignKey(qf => qf.DocumentId); // DocumentId is the foreign key property for dependent entity
 
+        modelBuilder.Entity<ListValue>()
+            .HasOne(qf => qf.QuestionField) // ListValue has one QuestionField
+            .WithMany(d => d.ListValues) // QuestionField has many ListValues
+            .HasForeignKey(qf => qf.QuestionFieldId); // QuestionFieldId is the foreign key property for dependent entity
+
         // Seed data for QuestionFieldType table
         modelBuilder.Entity<QuestionFieldType>().HasData(
             new QuestionFieldType { Id = 1, SqlDataType = "DateTime", SystemType = "System.DateTime", DisplayName = "Date", ComponentName = "date" },
@@ -105,7 +111,8 @@ public class DbWebAppContext : DbContext
             new QuestionFieldType { Id = 3, SqlDataType = "Varchar(500)", SystemType = "System.String", DisplayName = "Text", ComponentName = "text" },
             new QuestionFieldType { Id = 4, SqlDataType = "Int", SystemType = "System.Int32", DisplayName = "Whole Number", ComponentName = "number" },
             new QuestionFieldType { Id = 5, SqlDataType = "Float", SystemType = "System.Double", DisplayName = "Decimal", ComponentName = "decimal" },
-            new QuestionFieldType { Id = 6, SqlDataType = "Varchar(max)", SystemType = "System.String", DisplayName = "Memo", ComponentName = "Memo" }
+            new QuestionFieldType { Id = 6, SqlDataType = "Varchar(max)", SystemType = "System.String", DisplayName = "Memo", ComponentName = "memo" },
+            new QuestionFieldType { Id = 7, SqlDataType = "Varchar(500)", SystemType = "System.String", DisplayName = "List", ComponentName = "select" }
         );
 
         // Seed data for CompanyType table
@@ -126,17 +133,17 @@ public class DbWebAppContext : DbContext
                         new Company { Id = 1, Name = "Hammond Pole", CompanyTypeId = 5 });
 
         modelBuilder.Entity<User>().HasData(
-                            new User 
-                            { 
-                                Id = -1, 
-                                Name = "Admin", 
-                                Email = "alanj@hpd.co.za", 
-                                CompanyId = 1, 
-                                UserRoleId = 1, 
-                                IsActive = true, 
-                                Password = "1234" 
+                            new User
+                            {
+                                Id = -1,
+                                Name = "Admin",
+                                Email = "alanj@hpd.co.za",
+                                CompanyId = 1,
+                                UserRoleId = 1,
+                                IsActive = true,
+                                Password = "1234"
                             });
-            
+
 
         base.OnModelCreating(modelBuilder);
     }

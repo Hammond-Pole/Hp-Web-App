@@ -38,7 +38,7 @@ else
                 {
                     <th>@_helperFunctions.ConvertPascalCaseToSpaced(@property.Name)</th>
                 }
-                @if (OnEdit.HasDelegate || OnDelete.HasDelegate)
+                @if (OnEdit.HasDelegate || OnDelete.HasDelegate || OnDownload.HasDelegate)
                 {
                     <th>Actions</th>
                 }
@@ -62,6 +62,18 @@ else
                         {
                             <button class="btn btn-danger btn-sm" @onclick="() => DeleteItem(item)">Delete</button>
                         }
+                        @if (OnDownload.HasDelegate)
+                        {
+                            @foreach (var property in GetProperties())
+                            {
+                                if (property.Name == "FileUrl")
+                                {
+                                    var prop = GetPropertyValue(item, property);
+
+                                    <a href="@prop" title="@prop" download="newfile.pdf" class="btn btn-primary btn-sm">Download</a>
+                                }
+                            }
+                        }
                     </td>
                 </tr>
             }
@@ -77,6 +89,7 @@ else
     [Parameter] public IEnumerable<TModel>? Items { get; set; }
     [Parameter] public EventCallback<TModel> OnEdit { get; set; }
     [Parameter] public EventCallback<TModel> OnDelete { get; set; }
+    [Parameter] public EventCallback<TModel> OnDownload { get; set; }
 
     #region Dynamic Table Data Retrieval
     private PropertyInfo[] GetProperties()
@@ -138,7 +151,7 @@ else
     }
     #endregion
 
-    #region Edit and Delete button events
+    #region Edit and Delete and Download button events
     private async Task ShowEditPopup(TModel item)
     {
         await OnEdit.InvokeAsync(item);
@@ -147,6 +160,11 @@ else
     private async Task DeleteItem(TModel item)
     {
         await OnDelete.InvokeAsync(item);
+    }
+
+    private async Task DownloadItem(TModel item)
+    {
+        await OnDownload.InvokeAsync(item);
     }
     #endregion
 }

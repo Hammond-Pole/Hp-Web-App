@@ -4,6 +4,7 @@ using Hp_Web_App.Shared.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hp_Web_App.Shared.Migrations
 {
     [DbContext(typeof(DbWebAppContext))]
-    partial class DbWebAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230417125927_AddSelectListRelationShip")]
+    partial class AddSelectListRelationShip
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

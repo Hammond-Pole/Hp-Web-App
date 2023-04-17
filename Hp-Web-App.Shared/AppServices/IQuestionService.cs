@@ -3,6 +3,7 @@
 namespace Hp_Web_App.Shared.AppServices;
 public interface IQuestionService
 {
+    Task<List<ListValue>> CreateListValuesAsync(List<ListValue> listValues);
     Task<QuestionField> CreateQuestionFieldAsync(QuestionField questionField);
     Task<List<QuestionValues>> CreateQuestionValuesAsync(List<QuestionValues> questionValues);
     Task DeleteQuestionByIdAsync(int id);

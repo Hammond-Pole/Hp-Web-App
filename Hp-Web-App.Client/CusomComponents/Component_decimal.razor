@@ -1,23 +1,38 @@
-﻿<div class="custom-component">
+﻿@using System.Globalization;
+@inject IJSRuntime js
+
+<div class="custom-component">
     <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <input title="@QuestionFieldDescription" type="number" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+    <input title="@QuestionFieldDescription" type="text" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
 </div>
 
 @code {
-
+    // These parameters are added to label the component and to pass the value to the parent component.
     [Parameter] public int DocumentId { get; set; }
     [Parameter] public int QuestionFieldId { get; set; }
-    [Parameter] public string QuestionFieldLabel { get; set; }
+    [Parameter] public string? QuestionFieldLabel { get; set; }
     [Parameter] public string QuestionFieldDescription { get; set; } = string.Empty;
-    [Parameter]
-    public double Value { get; set; }
-    [Parameter]
-    public EventCallback<dynamic> ValueChanged { get; set; }
+    [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
+
+    // This is the dynamic object we are passing back to the parent.
+    private QuestionValues _questionFloatValue = new();
 
     private async Task OnValueChanged(ChangeEventArgs e)
     {
-        string value = e.Value.ToString();
-        Console.WriteLine($"The new value is {value}");
-        await ValueChanged.InvokeAsync(e);
+        string inputValue = e.Value.ToString().Replace(',', '.');
+        if (double.TryParse(inputValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
+        {
+            _questionFloatValue.DocumentId = DocumentId;
+            _questionFloatValue.QuestionFieldID = QuestionFieldId;
+            _questionFloatValue.DateValueChanged = DateTime.Now;
+            _questionFloatValue.FloatValue = result;
+
+            // Invoke the callback sending back the Value Object.
+            await ValueChanged.InvokeAsync(_questionFloatValue);
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Invalid Format, please use a valid decimal number (e.g., '12.34' or '12,34')");
+        }
     }
 }

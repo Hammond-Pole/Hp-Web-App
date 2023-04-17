@@ -1,6 +1,15 @@
 ﻿<div class="custom-component">
     <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <select title="@QuestionFieldDescription" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+    <select title="@QuestionFieldDescription" id="@QuestionFieldLabel" @onchange="OnValueChanged">
+        <option value="" selected disabled>Select an option.</option>
+        @if (QuestionFieldListItems.Count >= 0)
+        {
+            foreach (var item in QuestionFieldListItems!)
+            {
+                <option value="@item.Id">@item.Value</option>
+            }
+        }
+    </select>
 </div>
 
 @code {
@@ -9,19 +18,20 @@
     [Parameter] public int QuestionFieldId { get; set; }
     [Parameter] public string QuestionFieldLabel { get; set; }
     [Parameter] public string QuestionFieldDescription { get; set; } = string.Empty;
+    [Parameter] public HashSet<ListValue>? QuestionFieldListItems { get; set; }
     [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
 
     // This is the dynamic object we are passing back to the parent.
-    private QuestionValues _questionBitValue = new();
+    private QuestionValues _questionintValue = new();
 
     private async Task OnValueChanged(ChangeEventArgs e)
     {
-        _questionBitValue.DocumentId = DocumentId;
-        _questionBitValue.QuestionFieldID = QuestionFieldId;
-        _questionBitValue.DateValueChanged = DateTime.Now;
-        _questionBitValue.BoolValue = Convert.ToBoolean(e.Value);
+        _questionintValue.DocumentId = DocumentId;
+        _questionintValue.QuestionFieldID = QuestionFieldId;
+        _questionintValue.DateValueChanged = DateTime.Now;
+        _questionintValue.ListValueId = Convert.ToInt32(e.Value);
 
         // Invoke the callback sending back the Value Object.
-        await ValueChanged.InvokeAsync(_questionBitValue);
+        await ValueChanged.InvokeAsync(_questionintValue);
     }
 }

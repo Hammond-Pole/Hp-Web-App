@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components.Forms
+﻿@using Microsoft.AspNetCore.Components.Forms;
+@using Hp_Web_App.Client.CusomComponents;
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
@@ -35,16 +36,25 @@
 
     <div class="form-group">
         <label for="ddlQuestionFieldType">Answer Format:</label>
-        <InputSelect id="ddlQuestionFieldType"
-                     class="form-select"
-                     @bind-Value="_questionField.QuestionFieldTypeId">
-            @foreach (var item in _questionFieldType!)
+        <div style="display: flex; align-items: baseline;">
+            <InputSelect id="ddlQuestionFieldType"
+                         class="form-select"
+                         @bind-Value="_questionField.QuestionFieldTypeId"
+                         style="margin-right: 8px; ">
+                @foreach (var item in _questionFieldType!)
+                {
+                    <option value="@item.Id">@item.DisplayName</option>
+                }
+            </InputSelect>
+            @if (_questionField.QuestionFieldTypeId == 7)
             {
-                <option value="@item.Id">@item.DisplayName</option>
+                <InputTextArea @bind-Value="_listAnswers" class="form-control" placeholder="Add 1 item per line for answers to this question" rows="5" style="width: 800px"></InputTextArea>
             }
-        </InputSelect>
+        </div>
         <ValidationMessage For="@(() => _questionField.QuestionFieldTypeId)" />
+        <div style="margin-top: 8px;"></div>
     </div>
+
 
     <div style="margin-top: 8px;"></div>
     <div class="form-group">
@@ -60,6 +70,9 @@
     </div>
 </EditForm>
 
+<text>@_listAnswers</text>
+
+
 
 @code {
     // Parameter used to insert the current page into as a Modal window.
@@ -73,6 +86,10 @@
     private QuestionField _questionField = new();
     private List<QuestionFieldType>? _questionFieldType = new();
     private string ErrorMessage = string.Empty;
+    private string _listAnswers = string.Empty;
+
+    // Document Answer Variables
+    private Type? _selectedType;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
@@ -92,7 +109,26 @@
     {
         try
         {
-            await _questionService.CreateQuestionFieldAsync(_questionField);
+            var result = await _questionService.CreateQuestionFieldAsync(_questionField);
+            if (_questionField.QuestionFieldTypeId == 7)
+            {
+                List<ListValue> _listValues = new List<ListValue>();
+
+                _listAnswers.Split(new[] { '\n' }, StringSplitOptions.TrimEntries)
+                .ToList()
+                .ForEach(x => 
+                    _listValues.Add(new ListValue 
+                        {
+                            Value = x, 
+                            QuestionFieldId = result.Id, 
+                            QuestionField = _questionField
+                        }
+                    )
+                );
+
+                await _questionService.CreateListValuesAsync(_listValues);
+            }
+
             await Close();
         }
         catch (Exception ex)

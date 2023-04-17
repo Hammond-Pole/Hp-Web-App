@@ -53,6 +53,8 @@ public class QuestionValues : QuestionValue
 
     public string? MemoValue { get; set; }
 
+    public int? ListValueId { get; set; }
+
     [NotMapped]
     public object? ActualValue
     {
