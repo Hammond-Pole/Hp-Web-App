@@ -1,0 +1,8 @@
+﻿@using Microsoft.AspNetCore.Components
+
+<button @onclick="OnClick">@ButtonText</button>
+
+@code {
+    [Parameter] public string ButtonText { get; set; } = "Add Component";
+    [Parameter] public EventCallback OnClick { get; set; }
+}

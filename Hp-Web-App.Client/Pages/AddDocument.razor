@@ -43,6 +43,10 @@
             FieldMeta.Add("QuestionFieldId", question.Id);
             FieldMeta.Add("QuestionFieldLabel", question.Name);
             FieldMeta.Add("QuestionFieldDescription", question.Description);
+            if (question.QuestionFieldTypeId == 7)
+            {
+                FieldMeta.Add("QuestionFieldListItems", question.ListValues);
+            }
             FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
             <DynamicComponent Type=@_selectedType Parameters="FieldMeta" />
         }
@@ -83,7 +87,7 @@
     </div>
 </div>
 
-<div><DynamicTable TModel="DocumentsAttached" Items="_documentsAttached" /></div>
+<div><DynamicTable TModel="DocumentsAttached" Items="_documentsAttached" OnDownload="Download" /></div>
 <div><DynamicTable TModel="QuestionValue" Items="_previousQuestionValues" /></div>
 
 
@@ -115,6 +119,9 @@
                 break;
             case 6:
                 UpdateOrAddValue(_questionMemoValues, (QuestionValues)value, x => x.MemoValue = value.MemoValue);
+                break;
+            case 7:
+                UpdateOrAddValue(_questionSelectValues, (QuestionValues)value, x => x.ListValueId = value.ListValueId);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(questionType), questionType, null);
@@ -170,6 +177,7 @@
     private List<QuestionValues> _questionIntValues = new();
     private List<QuestionValues> _questionFloatValues = new();
     private List<QuestionValues> _questionMemoValues = new();
+    private List<QuestionValues> _questionSelectValues = new();
 
     private List<QuestionValues> _previousQuestionValues = new();
 
@@ -207,8 +215,7 @@
         _documentsId = Convert.ToInt32(e.Value);
         _showFileUpload = true;
 
-        // Clear all lists when the document selection changes.
-        ClearQuestionValueLists();
+
         StateHasChanged();
     }
     #endregion
@@ -262,6 +269,7 @@
         _questionIntValues.Clear();
         _questionFloatValues.Clear();
         _questionMemoValues.Clear();
+        _questionSelectValues.Clear();
     }
 
     private List<string> GetNonEmptyQuestionValueListNames()
@@ -274,6 +282,7 @@
         if (_questionIntValues.Any()) nonEmptyLists.Add(nameof(_questionIntValues));
         if (_questionFloatValues.Any()) nonEmptyLists.Add(nameof(_questionFloatValues));
         if (_questionMemoValues.Any()) nonEmptyLists.Add(nameof(_questionMemoValues));
+        if (_questionSelectValues.Any()) nonEmptyLists.Add(nameof(_questionSelectValues));
 
         return nonEmptyLists;
     }
@@ -282,6 +291,16 @@
     {
         // TODO: This is a temporary solution. Need to validate if the user can see all the documents or just their own.
         _documentsAttached = await _documentService.GetDocumentsAttachedByUserForCompanyAsync(_user.CompanyId);
+
+        foreach (var documentAttached in _documentsAttached)
+        {
+            string DocumentLink = Path.Combine(_config.GetValue<string>("FileShare")!, documentAttached.FileUrl.Replace("/PortalFiles", ""));
+        }
+
+    //    foreach (var item in _documentsAttached)
+    //    {
+    //        item.DocumentLink = $"/documents/{item.DocumentId}";
+    //    }
     }
 
     private async Task LoadPreviousQuestionValues()
@@ -402,6 +421,13 @@
                         }
                         await _questionService.CreateQuestionValuesAsync(_questionMemoValues);
                         break;
+                    case nameof(_questionSelectValues):
+                        foreach (var date in _questionSelectValues)
+                        {
+                            date.DocumentsAttachedId = _documentAttached.Id;
+                        }
+                        await _questionService.CreateQuestionValuesAsync(_questionSelectValues);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(item), item, null);
                 }
@@ -420,6 +446,11 @@
         StateHasChanged();
     }
     #endregion
+
+    async Task Download(DocumentsAttached documentsAttached)
+    {
+        await JSRuntime.InvokeVoidAsync("downloadFile", documentsAttached.FileUrl, documentsAttached.FileName);
+    }
 }
 
 

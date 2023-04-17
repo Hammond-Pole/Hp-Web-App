@@ -21,6 +21,7 @@ public class QuestionService : IQuestionService
         var questionField = await _context.Set<QuestionField>()
             .Include(qf => qf.QuestionFieldType)
             .Include(d => d.Document)
+            .Include(lv => lv.ListValues)
             .Where(qf => qf.Id == id)
             .Where(qf => qf.IsVisible == true)
             .FirstOrDefaultAsync();
@@ -31,6 +32,7 @@ public class QuestionService : IQuestionService
         var questionFields = await _context.Set<QuestionField>()
             .Include(qf => qf.QuestionFieldType)
             .Include(d => d.Document)
+            .Include(lv => lv.ListValues)
             .Where(qf => qf.IsVisible == true)
             .ToListAsync();
         return questionFields ?? new List<QuestionField>();
@@ -40,6 +42,7 @@ public class QuestionService : IQuestionService
         var questionFields = await _context.Set<QuestionField>()
             .Include(qf => qf.QuestionFieldType)
             .Include(d => d.Document)
+            .Include(lv => lv.ListValues)
             .Where(qf => qf.DocumentId == id)
             .Where(qf => qf.IsVisible == true)
             .ToListAsync();
@@ -62,7 +65,7 @@ public class QuestionService : IQuestionService
         questionField.QuestionFieldType = existingQuestionFieldType;
         _context.QuestionFields.Add(questionField);
         await _context.SaveChangesAsync();
-        return questionField;
+        return questionField ?? new QuestionField();
     }
     public async Task UpdateQuestionFieldAsync(QuestionField questionField)
     {
@@ -94,6 +97,18 @@ public class QuestionService : IQuestionService
                 .ExecuteUpdateAsync(qf => qf.SetProperty(x => x.IsVisible, false));
         }
     }
+    public async Task<List<ListValue>> CreateListValuesAsync(List<ListValue> listValues)
+    {
+        if (listValues == null)
+        {
+            throw new ArgumentNullException(nameof(listValues));
+        }
+        
+        await _context.ListValues.AddRangeAsync(listValues);
+        await _context.SaveChangesAsync();
+        return listValues ?? new List<ListValue>();
+    }
+    
     #endregion
 
     #region QuestionFieldTypes

@@ -1,23 +1,28 @@
 ﻿<div class="custom-component">
     <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <input title="@QuestionFieldDescription" type="text" id="@QuestionFieldLabel" @onchange="OnValueChanged" />
+    <textarea title="@QuestionFieldDescription" type="text" id="@QuestionFieldLabel" @onchange="OnValueChanged"></textarea>
 </div>
 
-@code {
 
+@code {
+    // These parameters are added to label the component and to pass the value to the parent component.
     [Parameter] public int DocumentId { get; set; }
     [Parameter] public int QuestionFieldId { get; set; }
-    [Parameter] public string QuestionFieldLabel { get; set; }
+    [Parameter] public string? QuestionFieldLabel { get; set; }
     [Parameter] public string QuestionFieldDescription { get; set; } = string.Empty;
-    [Parameter]
-    public string? Value { get; set; }
-    [Parameter]
-    public EventCallback<dynamic> ValueChanged { get; set; }
+    [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
+
+    // This is the dynamic object we are passing back to the parent.
+    private QuestionValues _questionStringValue = new();
 
     private async Task OnValueChanged(ChangeEventArgs e)
     {
-        string value = e.Value.ToString();
-        Console.WriteLine($"The new value is {value}");
-        await ValueChanged.InvokeAsync(e);
+        _questionStringValue.DocumentId = DocumentId;
+        _questionStringValue.QuestionFieldID = QuestionFieldId;
+        _questionStringValue.DateValueChanged = DateTime.Now;
+        _questionStringValue.StringValue = e.Value.ToString();
+
+        // Invoke the callback sending back the Value Object.
+        await ValueChanged.InvokeAsync(_questionStringValue);
     }
 }

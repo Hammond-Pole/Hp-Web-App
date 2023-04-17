@@ -5,7 +5,7 @@
 namespace Hp_Web_App.Shared.Migrations;
 
 /// <inheritdoc />
-public partial class UpdateQuestionValuesForNull : Migration
+public partial class AddSelectListRelationShip : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)

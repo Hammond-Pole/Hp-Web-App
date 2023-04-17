@@ -72,6 +72,14 @@ public class DocumentService : IDocumentService
     #endregion
 
     #region Documents Attached
+    public async Task<DocumentsAttached> GetDocumentsAttachedByIdAsync(int id)
+    {
+        var documentsAttached = await _context.DocumentsAttached
+                                    .Where(d => d.Id == id)
+                                    .FirstOrDefaultAsync();
+        return documentsAttached ?? new DocumentsAttached();
+    }
+
     public async Task<List<DocumentsAttached>> GetDocumentsAttachedByUserAsync(int userId)
     {
         var documentsAttached = await _context.DocumentsAttached
@@ -81,7 +89,7 @@ public class DocumentService : IDocumentService
     }
 
     public async Task<List<DocumentsAttached>> GetDocumentsAttachedByUserForCompanyAsync(int companyId)
-    { 
+    {
         var documentsAttached = await _context.DocumentsAttached
                                     .Where(d => d.CompanyId == companyId)
                                     .ToListAsync();
@@ -128,6 +136,9 @@ public class DocumentService : IDocumentService
     public async Task<List<QuestionField>> GetQuestionFieldsByDocumentAsync(int Id)
     {
         var questionFields = await _context.Set<QuestionField>()
+            .Include(qf => qf.QuestionFieldType)
+            .Include(d => d.Document)
+            .Include(lv => lv.ListValues)
                                 .Where(q => q.DocumentId == Id)
                                 .Where(q => q.IsVisible == true)
                                 .ToListAsync();

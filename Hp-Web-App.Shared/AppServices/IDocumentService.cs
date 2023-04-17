@@ -12,6 +12,7 @@ public interface IDocumentService
     Task<List<CompanyDocument>> GetCompanyDocumentsByDocumentAsync(int documentId);
     Task<Document> GetDocumentAsync(int id);
     Task<List<Document>> GetDocumentsAsync();
+    Task<DocumentsAttached> GetDocumentsAttachedByIdAsync(int id);
     Task<List<DocumentsAttached>> GetDocumentsAttachedByUserAsync(int userId);
     Task<List<DocumentsAttached>> GetDocumentsAttachedByUserForCompanyAsync(int userId);
     Task<List<QuestionField>> GetQuestionFieldsByDocumentAsync(int Id);

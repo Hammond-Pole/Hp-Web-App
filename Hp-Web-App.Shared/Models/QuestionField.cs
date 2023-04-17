@@ -39,5 +39,8 @@ public class QuestionField
 
     [ExcludeFromTable]
     public ICollection<DocumentsAttached>? DocumentsAttached { get; set; }
+
+    [ExcludeFromTable]
+    public ICollection<ListValue>? ListValues { get; set; }
     #endregion
 }
