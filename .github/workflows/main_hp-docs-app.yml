@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.5.0
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: xt0rted/setup-dotnet@v1.5.0
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
@@ -28,11 +28,23 @@ jobs:
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
+      - name: entiy framework install
+        run: dotnet tool install -g dotnet-ef
+
+      - name: entiy framework create migration
+        run: dotnet ef migrations script --idempotent --startup-project Hp-Web-App.Client/Hp-Web-App.Client.csproj --output ${{env.DOTNET_ROOT}}/myapp/migrate.sql
+        
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Apply EF migration script
+        uses: Azure/sql-action@v2.1
+        with:
+          connection-string: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}
+          path: ${{env.DOTNET_ROOT}}/myapp/migrate.sql          
 
   deploy:
     runs-on: ubuntu-latest
