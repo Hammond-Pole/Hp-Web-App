@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Hp_Web_App.Shared.Models;
+﻿namespace Hp_Web_App.Shared.Models;
 
 public class User
 {
@@ -35,8 +33,8 @@ public class User
     #endregion
 
     #region Navigation Properties
-    public Company Company { get; set; }
-    public UserRole UserRole { get; set; }
+    public Company? Company { get; set; }
+    public UserRole? UserRole { get; set; }
 
     [ExcludeFromTable]
     public ICollection<DocumentsAttached>? DocumentsAttached { get; set; }
