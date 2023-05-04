@@ -1,9 +1,4 @@
 ﻿@typeparam TModel
-@using System.Reflection
-@using System.ComponentModel.DataAnnotations;
-@using System.ComponentModel.DataAnnotations.Schema;
-@using Hp_Web_App.Client.Pages.Users;
-@using Hp_Web_App.Shared.Functions;
 
 @inject IHelperFunctions _helperFunctions
 
@@ -100,7 +95,10 @@ else
 
         if (typeof(QuestionValues).IsAssignableFrom(typeof(TModel)))
         {
-            properties.Add(typeof(QuestionValues).GetProperty("ActualValue"));
+            if (typeof(QuestionValues).GetProperty("ActualValue") is not null)
+            {
+                properties.Add(typeof(QuestionValues).GetProperty("ActualValue")!);
+            }
         }
 
         return properties.ToArray();
