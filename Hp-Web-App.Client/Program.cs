@@ -1,42 +1,21 @@
-using Hp_Web_App.Shared.Functions;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-
+// Create an instance of the web application builder.
+using WebApplication = Microsoft.AspNetCore.Builder.WebApplication;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-builder.Services.AddBlazoredModal();
-builder.Services.AddScoped<ProtectedSessionStorage>();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IQuestionService, QuestionService>();
-builder.Services.AddScoped<IDocumentService, DocumentService>();
-builder.Services.AddScoped<ICompanyService, CompanyService>();
-builder.Services.AddScoped<IHelperFunctions, HelperFunctions>();
-builder.Services.AddSingleton<WeatherForecastService>();
 
-builder.Services.AddDbContext<DbWebAppContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")));
 
+
+// Call the extension method, instantiate the service installers and configure services with dependency injection.
+builder.Services
+    .InstallServices(
+        builder.Configuration,
+typeof(IServiceInstaller).Assembly);
+
+// Create an instance of the app.
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+// Add configuration.
+app.ConfigureMiddleware();
 
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
-
+// Start the App.
 app.Run();

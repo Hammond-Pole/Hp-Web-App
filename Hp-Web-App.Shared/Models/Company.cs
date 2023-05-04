@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Hp_Web_App.Shared.Models;
+﻿namespace Hp_Web_App.Shared.Models;
 
 public class Company
 {
@@ -22,7 +20,7 @@ public class Company
     #endregion
 
     #region Navigation Properties
-    public CompanyType CompanyType { get; set; }  // navigation property
+    public CompanyType? CompanyType { get; set; }  // navigation property
 
     [ExcludeFromTable]
     public ICollection<CompanyDocument>? CompanyDocuments { get; set; } // navigation property

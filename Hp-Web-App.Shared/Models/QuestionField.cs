@@ -31,8 +31,8 @@ public class QuestionField
    #endregion
 
     #region Navigation Properties
-    public QuestionFieldType QuestionFieldType { get; set; }
-    public Document Document { get; set; }
+    public QuestionFieldType? QuestionFieldType { get; set; }
+    public Document? Document { get; set; }
 
     [ExcludeFromTable]
     public ICollection<QuestionValue>? Values { get; set; }

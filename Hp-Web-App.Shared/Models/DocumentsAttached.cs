@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Hp_Web_App.Shared.Models;
+﻿namespace Hp_Web_App.Shared.Models;
 
 public class DocumentsAttached
 {
@@ -12,14 +9,14 @@ public class DocumentsAttached
     #endregion
 
     #region User Properties
-    public DateTime UploadDate { get; set; }
+    public DateTime? UploadDate { get; set; } = DateTime.Now;
     
     [ExcludeFromTable]
-    public string FileName { get; set; }
+    public string FileName { get; set; } = string.Empty;
 
-    public string FileDescription { get; set; }
+    public string FileDescription { get; set; } = string.Empty;
 
-    public string FileUrl { get; set; }
+    public string FileUrl { get; set; } = string.Empty;
     #endregion
 
     #region Foreign Keys
@@ -37,12 +34,11 @@ public class DocumentsAttached
     #endregion
 
     #region Navigation Properties
-    public User User { get; set; }
-    public Company Company { get; set; }
-    public Document Document { get; set; }
+    public User? User { get; set; }
+    public Company? Company { get; set; }
+    public Document? Document { get; set; }
     
     [ExcludeFromTable]
     public ICollection<QuestionValue>? QuestionValues { get; set; }
     #endregion
-
 }
