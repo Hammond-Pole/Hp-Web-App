@@ -1,14 +1,13 @@
-﻿namespace Hp_Web_App.Shared.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Hp_Web_App.Shared.Models;
 
 public class QuestionFieldType
 {
-    #region Primary Key
-    [Required]
+
     [ExcludeFromTable]
     public int Id { get; set; }
-    #endregion
 
-    #region User Properties
     [ExcludeFromTable]
     public string SqlDataType { get; set; } = string.Empty;
 
@@ -19,16 +18,11 @@ public class QuestionFieldType
 
     [ExcludeFromTable]
     public string ComponentName { get; set; } = string.Empty;
-    #endregion
 
-    #region Internal Properties
     [ExcludeFromTable]
     [NotMapped]
     public Type ComponentType { get; set; } = typeof(QuestionFieldType);
-    #endregion
 
-    #region Navigation Properties
     [ExcludeFromTable]
     public ICollection<QuestionField>? QuestionFields { get; set; } // navigation property
-    #endregion
 }

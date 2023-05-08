@@ -1,4 +1,7 @@
-﻿namespace Hp_Web_App.Shared.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Hp_Web_App.Shared.Models;
 
 public abstract class QuestionValue
 {
@@ -27,11 +30,9 @@ public abstract class QuestionValue
     #endregion
 
     #region Navigation Properties
-    public DocumentsAttached? DocumentsAttached { get; set; }
-    
-    public QuestionField? QuestionField { get; set; }
-    
-    public Document? Document { get; set; }
+    public DocumentsAttached DocumentsAttached { get; set; }
+    public QuestionField QuestionField { get; set; }
+    public Document Document { get; set; }
 
     public ICollection<QuestionValues>? QuestionValues { get; set; }
     #endregion

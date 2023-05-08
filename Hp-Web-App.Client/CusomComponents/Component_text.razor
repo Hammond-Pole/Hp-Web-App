@@ -19,7 +19,7 @@
         _questionStringValue.DocumentId = DocumentId;
         _questionStringValue.QuestionFieldID = QuestionFieldId;
         _questionStringValue.DateValueChanged = DateTime.Now;
-        _questionStringValue.StringValue = e.Value!.ToString();
+        _questionStringValue.StringValue = e.Value.ToString();
 
         // Invoke the callback sending back the Value Object.
         await ValueChanged.InvokeAsync(_questionStringValue);

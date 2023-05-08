@@ -88,6 +88,9 @@
     private string ErrorMessage = string.Empty;
     private string _listAnswers = string.Empty;
 
+    // Document Answer Variables
+    private Type? _selectedType;
+
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
     {

@@ -1,30 +1,35 @@
-﻿namespace Hp_Web_App.Shared.AppServices;
+﻿using Hp_Web_App.Shared.DbContexts;
+using Hp_Web_App.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
+namespace Hp_Web_App.Shared.AppServices;
 public class DocumentService : IDocumentService
 {
     private readonly DbWebAppContext _context;
+    private readonly ICompanyService _companyService;
 
-    public DocumentService(DbWebAppContext context)
+    public DocumentService(DbWebAppContext context, ICompanyService companyService)
     {
         _context = context;
+        _companyService = companyService;
     }
 
     #region Document
     public async Task<Document> GetDocumentAsync(int id)
     {
         var document = await _context.Set<Document>()
-                                     .Include(x => x.QuestionFields)
-                                     .ThenInclude(c => c.QuestionFieldType)
-                                     .Where(x => x.Id == id)
-                                     .FirstOrDefaultAsync();
+            .Include(x => x.QuestionFields)
+            .ThenInclude(c => c.QuestionFieldType)
+            .Where(x => x.Id == id)
+            .FirstOrDefaultAsync();
         return document ?? new Document();
     }
     public async Task<List<Document>> GetDocumentsAsync()
     {
         var documents = await _context.Set<Document>()
-                                      .Include(x => x.QuestionFields)
-                                      .ThenInclude(c => c.QuestionFieldType)
-                                      .ToListAsync();
+            .Include(x => x.QuestionFields)
+            .ThenInclude(c => c.QuestionFieldType)
+            .ToListAsync();
         return documents ?? new List<Document>();
     }
     public async Task<Document> CreateDocumentAsync(Document document)

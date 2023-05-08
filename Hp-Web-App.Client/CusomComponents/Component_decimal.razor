@@ -19,23 +19,20 @@
 
     private async Task OnValueChanged(ChangeEventArgs e)
     {
-        if (e.Value is not null)
+        string inputValue = e.Value.ToString().Replace(',', '.');
+        if (double.TryParse(inputValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
         {
-            string inputValue = e.Value.ToString()!.Replace(',', '.');
-            if (double.TryParse(inputValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
-            {
-                _questionFloatValue.DocumentId = DocumentId;
-                _questionFloatValue.QuestionFieldID = QuestionFieldId;
-                _questionFloatValue.DateValueChanged = DateTime.Now;
-                _questionFloatValue.FloatValue = result;
+            _questionFloatValue.DocumentId = DocumentId;
+            _questionFloatValue.QuestionFieldID = QuestionFieldId;
+            _questionFloatValue.DateValueChanged = DateTime.Now;
+            _questionFloatValue.FloatValue = result;
 
-                // Invoke the callback sending back the Value Object.
-                await ValueChanged.InvokeAsync(_questionFloatValue);
-            }
-            else
-            {
-                await js.InvokeVoidAsync("alert", "Invalid Format, please use a valid decimal number (e.g., '12.34' or '12,34')");
-            }
+            // Invoke the callback sending back the Value Object.
+            await ValueChanged.InvokeAsync(_questionFloatValue);
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Invalid Format, please use a valid decimal number (e.g., '12.34' or '12,34')");
         }
     }
 }
