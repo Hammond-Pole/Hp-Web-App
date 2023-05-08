@@ -1,12 +1,16 @@
 ﻿@page "/uploaddocument"
+@using Hp_Web_App.Client.CusomComponents;
+@using Hp_Web_App.Client.Pages.Documents.Questions;
 @using Hp_Web_App.Client.Shared
-@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Forms;
+@using Hp_Web_App.Shared.Authentication;
 
 @inject IJSRuntime JSRuntime
 @inject IDocumentService _documentService
 @inject IQuestionService _questionService
 @inject IUserService _userService
 @inject ICompanyService _companyService
+
 @inject ProtectedSessionStorage _sessionStorage
 @inject IConfiguration _config
 
@@ -31,7 +35,7 @@
     <div class="card-body">
         @foreach (var question in _questionField)
         {
-            _selectedType = question.QuestionFieldType!.ComponentType;
+            _selectedType = question.QuestionFieldType.ComponentType;
 
             // Setup the dictionary of Parameters for each question.
             var FieldMeta = new Dictionary<string, dynamic>();
@@ -41,7 +45,7 @@
             FieldMeta.Add("QuestionFieldDescription", question.Description);
             if (question.QuestionFieldTypeId == 7)
             {
-                FieldMeta.Add("QuestionFieldListItems", question.ListValues!);
+                FieldMeta.Add("QuestionFieldListItems", question.ListValues);
             }
             FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
             <DynamicComponent Type=@_selectedType Parameters="FieldMeta" />
@@ -179,7 +183,7 @@
 
     // Related Objects
     private DocumentsAttached _documentAttached = new();
-    private Hp_Web_App.Shared.Models.User _user = new();
+    private User _user = new();
 
     // Identifiers
     private int _documentsId;
@@ -206,7 +210,7 @@
     public async void OnChange(ChangeEventArgs e)
     {
         _status = _defaultStatus;
-        _loadedFile = null!;
+        _loadedFile = null;
         _questionField = await _documentService.GetQuestionFieldsByDocumentAsync(Convert.ToInt32(e.Value));
         _documentsId = Convert.ToInt32(e.Value);
         _showFileUpload = true;
@@ -220,7 +224,7 @@
     private async Task LoadUserSessionAsync()
     {
         var userSessionResult = await _sessionStorage.GetAsync<UserSession>("UserSession");
-        UserSession = userSessionResult.Value!.UserName!;
+        UserSession = userSessionResult.Value.UserName!;
 
         _user = await _userService.GetUserByEmailAsync(UserSession);
         UserSession = _user.Name;
@@ -246,10 +250,7 @@
 
         foreach (var fieldType in questionFieldTypes)
         {
-            if (fieldType.ComponentName is not null)
-            {
-                fieldType.ComponentType = Type.GetType($"Hp_Web_App.Client.CusomComponents.Component_{fieldType.ComponentName}")!;
-            }
+            fieldType.ComponentType = Type.GetType($"Hp_Web_App.Client.CusomComponents.Component_{fieldType.ComponentName}");
         }
     }
 
@@ -312,7 +313,7 @@
     async Task ViewFile(InputFileChangeEventArgs e)
     {
         _errorMessage = string.Empty;
-        _loadedFile = null!;
+        _loadedFile = null;
         // Save the instance of the file into an IBrowserFile object.
         _loadedFile = e.File;
         _status = e.File.Name;

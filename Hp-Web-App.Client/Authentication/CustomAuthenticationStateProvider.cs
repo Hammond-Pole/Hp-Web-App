@@ -1,66 +1,74 @@
-﻿namespace Hp_Web_App.Client.Authentication;
+﻿using Hp_Web_App.Shared.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using System.Security.Claims;
 
-public class CustomAuthenticationStateProvider : AuthenticationStateProvider
+namespace Hp_Web_App.Client.Authentication
 {
-    private readonly ProtectedSessionStorage _sessionStorage;
-    private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
-
-    public CustomAuthenticationStateProvider(ProtectedSessionStorage sessionStorage)
+    public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        _sessionStorage = sessionStorage;
-    }
+        private readonly ProtectedSessionStorage _sessionStorage;
+        private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
 
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        try
+        public CustomAuthenticationStateProvider(ProtectedSessionStorage sessionStorage)
         {
-            var userSessionStorageResult = await _sessionStorage.GetAsync<UserSession>("UserSession");
-            var userSession = userSessionStorageResult.Success ? userSessionStorageResult.Value : null;
+            _sessionStorage = sessionStorage;
+        }
 
-            if (userSession == null)
-                return await Task.FromResult(new AuthenticationState(_anonymous));
-
-            var claimsPrinciple = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, userSession.UserName),
-                    new Claim(ClaimTypes.Role, userSession.Role),
-                    new Claim("SessionId", userSession.SessionId.ToString())
-                }, "CustomAuth"));
-
-            // Add session validation here
-            var storedSessionIdResult = await _sessionStorage.GetAsync<string>("SessionId");
-            if (storedSessionIdResult.Success && storedSessionIdResult.Value != userSession.SessionId.ToString())
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            try
             {
-                // Session ID mismatch, set the user as unauthenticated
+                var userSessionStorageResult = await _sessionStorage.GetAsync<UserSession>("UserSession");
+                var userSession = userSessionStorageResult.Success ? userSessionStorageResult.Value : null;
+
+                if (userSession == null)
+                    return await Task.FromResult(new AuthenticationState(_anonymous));
+
+                var claimsPrinciple = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, userSession.UserName),
+                        new Claim(ClaimTypes.Role, userSession.Role),
+                        new Claim("SessionId", userSession.SessionId.ToString())
+                    }, "CustomAuth"));
+
+                // Add session validation here
+                var storedSessionIdResult = await _sessionStorage.GetAsync<string>("SessionId");
+                if (storedSessionIdResult.Success && storedSessionIdResult.Value != userSession.SessionId.ToString())
+                {
+                    // Session ID mismatch, set the user as unauthenticated
+                    return await Task.FromResult(new AuthenticationState(_anonymous));
+                }
+
+                return await Task.FromResult(new AuthenticationState(claimsPrinciple));
+            }
+            catch
+            {
                 return await Task.FromResult(new AuthenticationState(_anonymous));
             }
-
-            return await Task.FromResult(new AuthenticationState(claimsPrinciple));
         }
-        catch
+        public async Task UpdateAuthenticationState(UserSession userSession)
         {
-            return await Task.FromResult(new AuthenticationState(_anonymous));
-        }
-    }
-    public async Task UpdateAuthenticationState(UserSession userSession)
-    {
-        ClaimsPrincipal claimsPrincipal;
+            ClaimsPrincipal claimsPrincipal;
 
-        if (userSession != null)
-        {
-            await _sessionStorage.SetAsync("UserSession", userSession);
-            claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+            if (userSession != null)
             {
-                new Claim(ClaimTypes.Name, userSession.UserName),
-                new Claim(ClaimTypes.Role, userSession.Role)
-            }));
-        }
-        else
-        {
-            await _sessionStorage.DeleteAsync("UserSession");
-            claimsPrincipal = _anonymous;
-        }
+                await _sessionStorage.SetAsync("UserSession", userSession);
+                claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, userSession.UserName),
+                    new Claim(ClaimTypes.Role, userSession.Role)
+                }));
+            }
+            else
+            {
+                await _sessionStorage.DeleteAsync("UserSession");
+                claimsPrincipal = _anonymous;
+            }
 
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+        }
     }
 }
+
+

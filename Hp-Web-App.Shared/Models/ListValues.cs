@@ -1,5 +1,6 @@
-﻿namespace Hp_Web_App.Shared.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace Hp_Web_App.Shared.Models;
 public class ListValue
 {
     #region Primary Key
@@ -9,7 +10,7 @@ public class ListValue
     #endregion
 
     #region User Properties
-    public string Value { get; set; } = string.Empty;
+    public string Value { get; set; }
     #endregion
 
     #region Foreign Keys
@@ -19,6 +20,6 @@ public class ListValue
     #endregion
 
     #region Navigation Properties
-    public QuestionField? QuestionField { get; set; } 
+    public QuestionField QuestionField { get; set; }
     #endregion
 }

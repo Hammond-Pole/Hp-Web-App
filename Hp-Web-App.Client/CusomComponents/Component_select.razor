@@ -2,7 +2,7 @@
     <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
     <select title="@QuestionFieldDescription" id="@QuestionFieldLabel" @onchange="OnValueChanged">
         <option value="" selected disabled>Select an option.</option>
-        @if (QuestionFieldListItems!.Count >= 0)
+        @if (QuestionFieldListItems.Count >= 0)
         {
             foreach (var item in QuestionFieldListItems!)
             {
@@ -16,9 +16,9 @@
     // These parameters are added to label the component and to pass the value to the parent component.
     [Parameter] public int DocumentId { get; set; }
     [Parameter] public int QuestionFieldId { get; set; }
-    [Parameter] public string QuestionFieldLabel { get; set; } = string.Empty;
+    [Parameter] public string QuestionFieldLabel { get; set; }
     [Parameter] public string QuestionFieldDescription { get; set; } = string.Empty;
-    [Parameter] public HashSet<ListValue>? QuestionFieldListItems { get; set; } = new();
+    [Parameter] public HashSet<ListValue>? QuestionFieldListItems { get; set; }
     [Parameter] public EventCallback<dynamic> ValueChanged { get; set; }
 
     // This is the dynamic object we are passing back to the parent.
