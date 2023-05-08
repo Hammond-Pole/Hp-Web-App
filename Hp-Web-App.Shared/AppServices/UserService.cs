@@ -37,7 +37,7 @@ public class UserService : IUserService
             var session = new UserSession
             {
                 UserName = user.Email,
-                Role = user.UserRole!.Name,
+                Role = user.UserRole.Name,
                 CompanyId = user.CompanyId,
                 SessionId = Guid.NewGuid()
             };
@@ -99,8 +99,18 @@ public class UserService : IUserService
             throw new ArgumentNullException(nameof(user), "User cannot be null.");
         }
 
-        var existingRole = await GetUserRoleAsync(user.UserRoleId) ?? throw new ArgumentException("User role cannot be null.");
-        var existingCompany = await _companyService.GetCompanyAsync(user.CompanyId) ?? throw new ArgumentException("Company cannot be null.");
+        var existingRole = await GetUserRoleAsync(user.UserRoleId);
+        if (existingRole == null)
+        {
+            throw new ArgumentException("User role cannot be null.");
+        }
+
+        var existingCompany = await _companyService.GetCompanyAsync(user.CompanyId);
+        if (existingCompany == null)
+        {
+            throw new ArgumentException("Company cannot be null.");
+        }
+
         if (string.IsNullOrEmpty(existingRole.Name) || string.IsNullOrEmpty(existingCompany.Name))
         {
             throw new Exception("User role or company name cannot be empty.");

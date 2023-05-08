@@ -1,5 +1,8 @@
-﻿namespace Hp_Web_App.Shared.AppServices;
+﻿using Hp_Web_App.Shared.DbContexts;
+using Hp_Web_App.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
+namespace Hp_Web_App.Shared.AppServices;
 public class CompanyService : ICompanyService
 {
     private readonly DbWebAppContext _context;
@@ -23,13 +26,13 @@ public class CompanyService : ICompanyService
         }
         
         await _context.Entry(company)
-            .Collection(c => c.Users ?? Enumerable.Empty<User>())
+            .Collection(c => c.Users)
             .Query()
             .Include(u => u.UserRole)
             .LoadAsync();
 
         await _context.Entry(company)
-            .Collection(d => d.CompanyDocuments ?? Enumerable.Empty<CompanyDocument>())
+            .Collection(d => d.CompanyDocuments)
             .Query()
             .Include(d => d.Document)
             .Include(c => c.Company)
@@ -51,13 +54,13 @@ public class CompanyService : ICompanyService
         foreach (var company in companies)
         {
             await _context.Entry(company)
-                .Collection(c => c.Users ?? Enumerable.Empty<User>())
+                .Collection(c => c.Users)
                 .Query()
                 .Include(u => u.UserRole)
                 .LoadAsync();
 
             await _context.Entry(company)
-                .Collection(d => d.CompanyDocuments ?? Enumerable.Empty<CompanyDocument>())
+                .Collection(d => d.CompanyDocuments)
                 .Query()
                 .Include(d => d.Document)
                 .Include(c => c.Company)
