@@ -1,0 +1,122 @@
+﻿@page "/Register";
+
+@using Microsoft.AspNetCore.Components.Forms;
+<!-- Dependency Injection. -->
+@inject IUserService _userService;
+@inject ICompanyService _companyService;
+
+
+
+
+<!-- Display the error at the top of the form so that we know why something failed. -->
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+
+<!--Add a form for me that is based on the User Class with a submit button that executes CreateUser-->
+<EditForm Model="@_user" OnValidSubmit="@CreateUser" class="card-body">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label for="name">Full Name:</label>
+        <InputText id="name" class="form-control" @bind-Value="_user.Name" />
+        <ValidationMessage For="@(() => _user.Name)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" class="form-control" @bind-Value="_user.Email" />
+        <ValidationMessage For="@(() => _user.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <InputText id="password" class="form-control" @bind-Value="_user.Password" />
+        <ValidationMessage For="@(() => _user.Password)" />
+    </div>
+
+    <div class="form-group">
+        <label for="ddlUserRole">Role:</label>
+        <InputSelect id="ddlUserRole"
+                     class="form-select"
+                     TValue="int"
+                     @bind-Value="_userRoleId">
+            @foreach (var role in _userRoles)
+            {
+                <option value="@role.Id">@role.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => _user.UserRoleId)" />
+    </div>
+
+    <div class="form-group">
+        <label for="ddlUserCompany">Company:</label>
+        <InputSelect id="ddlUserCompany"
+                     class="form-select"
+                     TValue="int"
+                     @bind-Value="_companyId">
+            @foreach (var company in _companies!)
+            {
+
+                <option value="@company.Id">@company.Name</option>
+
+
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => _user.CompanyId)" />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
+    </div>
+</EditForm>
+
+
+@code {
+
+
+    // Parameter used to insert the current page into as a Modal window.
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    // Private properties used only in this page.
+    private User _user = new User();
+    private List<Company> _companies = new();
+    private List<UserRole> _userRoles = new();
+    private string ErrorMessage = string.Empty;
+    private int _userRoleId = 1;
+    private int _companyId = 1;
+
+    // Load all required data when launching the page.
+    protected async override Task OnInitializedAsync()
+    {
+        _companies = await _companyService.GetCompaniesAsync();
+        _userRoles = await _userService.GetUserRolesAsync();
+    }
+
+    #region CRUD Operations
+    async Task CreateUser()
+    {
+        try
+        {
+            _user.UserRoleId = _userRoleId;
+            _user.CompanyId = _companyId;
+            await _userService.CreateUserAsync(_user);
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+    #endregion
+
+    #region Modal Operations
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+}
