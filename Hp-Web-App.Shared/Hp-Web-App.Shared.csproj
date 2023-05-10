@@ -31,6 +31,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Graph" Version="5.9.0" />
+    <PackageReference Include="Microsoft.Graph.Core" Version="3.0.6" />
   </ItemGroup>
 
 </Project>
