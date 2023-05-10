@@ -65,7 +65,7 @@
                      @bind-Value="_companyId">
             @foreach (var company in _companies!)
             {
-                if(company.Id==5)
+                if(company.CompanyTypeId==5)
                 {
                     <option value="@company.Id">@company.Name</option>
                 }
