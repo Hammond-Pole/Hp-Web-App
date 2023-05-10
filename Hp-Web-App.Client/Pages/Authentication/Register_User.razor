@@ -47,7 +47,11 @@
                      @bind-Value="_userRoleId">
             @foreach (var role in _userRoles)
             {
-                <option value="@role.Id">@role.Name</option>
+                if(role.Id==2)
+                {
+                    <option value="@role.Id">@role.Name</option>
+                }
+               
             }
         </InputSelect>
         <ValidationMessage For="@(() => _user.UserRoleId)" />
@@ -61,10 +65,11 @@
                      @bind-Value="_companyId">
             @foreach (var company in _companies!)
             {
-
-                <option value="@company.Id">@company.Name</option>
-
-
+                if(company.Id==5)
+                {
+                    <option value="@company.Id">@company.Name</option>
+                }
+               
             }
         </InputSelect>
         <ValidationMessage For="@(() => _user.CompanyId)" />
