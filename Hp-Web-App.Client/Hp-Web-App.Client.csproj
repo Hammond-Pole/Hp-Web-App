@@ -5,13 +5,24 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>Hp_Web_App.Client</RootNamespace>
+		<UserSecretsId>22615620-8191-4dd3-8990-01f32e98fe48</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\Templates\Registration.html" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.8.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.Graph" Version="5.9.0" />
+		<PackageReference Include="Microsoft.Graph.Core" Version="3.0.6" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="2.10.0" />
+		<PackageReference Include="Microsoft.Identity.Web.UI" Version="2.10.0" />
+		<PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.1.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
@@ -21,14 +32,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Update="appsettings.Development.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 		<Content Update="wwwroot\roundBack.jpg">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Authentication\" />
 		<Folder Include="wwwroot\css\js\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="wwwroot\Templates\Registration.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
 	</ItemGroup>
 
 </Project>

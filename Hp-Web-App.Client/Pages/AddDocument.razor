@@ -1,15 +1,22 @@
 ﻿@page "/uploaddocument"
+
+
+@using Azure.Identity;
 @using Hp_Web_App.Client.CusomComponents;
 @using Hp_Web_App.Client.Pages.Documents.Questions;
 @using Hp_Web_App.Client.Shared
+@using Hp_Web_App.Shared.AppServices.Graph;
 @using Microsoft.AspNetCore.Components.Forms;
 @using Hp_Web_App.Shared.Authentication;
+
+
 
 @inject IJSRuntime JSRuntime
 @inject IDocumentService _documentService
 @inject IQuestionService _questionService
 @inject IUserService _userService
 @inject ICompanyService _companyService
+@inject IGraphService _graphService
 
 @inject ProtectedSessionStorage _sessionStorage
 @inject IConfiguration _config
@@ -91,7 +98,9 @@
 <div><DynamicTable TModel="QuestionValue" Items="_previousQuestionValues" /></div>
 
 
-
+<br />
+<br />
+<button @onclick="GraphTest" class="btn btn-primary"> <i class="oi oi-plus"></i>GraphTest</button>
 @code {
 
     #region Update Question Values
@@ -116,8 +125,7 @@
                 break;
             case 5:
                 UpdateOrAddValue(_questionFloatValues, (QuestionValues)value, x => x.FloatValue = value.FloatValue);
-                break;
-            case 6:
+                break;case 6:
                 UpdateOrAddValue(_questionMemoValues, (QuestionValues)value, x => x.MemoValue = value.MemoValue);
                 break;
             case 7:
@@ -183,7 +191,7 @@
 
     // Related Objects
     private DocumentsAttached _documentAttached = new();
-    private User _user = new();
+    private Hp_Web_App.Shared.Models.User _user = new();
 
     // Identifiers
     private int _documentsId;
@@ -297,10 +305,10 @@
             string DocumentLink = Path.Combine(_config.GetValue<string>("FileShare")!, documentAttached.FileUrl.Replace("/PortalFiles", ""));
         }
 
-    //    foreach (var item in _documentsAttached)
-    //    {
-    //        item.DocumentLink = $"/documents/{item.DocumentId}";
-    //    }
+        //    foreach (var item in _documentsAttached)
+        //    {
+        //        item.DocumentLink = $"/documents/{item.DocumentId}";
+        //    }
     }
 
     private async Task LoadPreviousQuestionValues()
@@ -450,6 +458,18 @@
     async Task Download(DocumentsAttached documentsAttached)
     {
         await JSRuntime.InvokeVoidAsync("downloadFile", documentsAttached.FileUrl, documentsAttached.FileName);
+    }
+
+    async Task GraphTest()
+    {         
+        try
+        {
+            _graphService.SendRegistrationEmail("alanj@hammondpole.co.za", "Alan Jordaan");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
+        }
     }
 }
 
