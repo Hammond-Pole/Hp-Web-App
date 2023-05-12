@@ -7,17 +7,12 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 
 //var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 //IConfiguration config = new ConfigurationBuilder()
 //            .SetBasePath(Directory.GetCurrentDirectory())
 //            .AddJsonFile($"appsettings.json", true, true)
 //.Build();
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING");
@@ -46,10 +41,8 @@ var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ') ??
 
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(azureConfig);
-//.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-//        .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-//.AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
-//            .AddInMemoryTokenCaches();
+
+
 
 builder.Services.AddControllersWithViews()
 .AddMicrosoftIdentityUI();
@@ -59,10 +52,6 @@ builder.Services.AddAuthorization(options =>
     // By default, all incoming requests will be authorized according to the default policy
     options.FallbackPolicy = options.DefaultPolicy;
 });
-
-builder.Services.AddRazorPages()
-                .AddMvcOptions(options => { })
-                .AddMicrosoftIdentityUI();
 
 var app = builder.Build();
 
