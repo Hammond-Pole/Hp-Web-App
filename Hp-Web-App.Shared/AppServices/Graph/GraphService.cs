@@ -12,6 +12,8 @@ public class GraphService : IGraphService
     private readonly string _clientId;
     private readonly string _clientSecret;
     private readonly string _tenantId;
+    private readonly string _scopes;
+
 
     public GraphService(IConfiguration config, IGraphClientFactory graphClient)
     {
@@ -21,6 +23,7 @@ public class GraphService : IGraphService
         _clientId = _config.GetSection("AzureAd:ClientId").Value!;
         _clientSecret = _config.GetSection("AzureAd:ClientSecret").Value!;
         _tenantId = _config.GetSection("AzureAd:TenantId").Value!;
+        _scopes = _config.GetSection("AzureAd:Scopes").Value!;
     }
 
     public async Task SendRegistrationEmail(string email, string name)
