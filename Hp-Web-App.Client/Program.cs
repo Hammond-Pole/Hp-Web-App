@@ -40,6 +40,10 @@ var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ') ??
 
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(azureConfig);
+//.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+//        .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
+//.AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
+//            .AddInMemoryTokenCaches();
 
 builder.Services.AddControllersWithViews()
 .AddMicrosoftIdentityUI();
