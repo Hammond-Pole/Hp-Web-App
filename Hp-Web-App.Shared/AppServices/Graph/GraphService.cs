@@ -1,13 +1,7 @@
-﻿using Azure;
-using Hp_Web_App.Shared.ClientFactories;
+﻿using Hp_Web_App.Shared.ClientFactories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users.Item.SendMail;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hp_Web_App.Shared.AppServices.Graph;
 public class GraphService : IGraphService

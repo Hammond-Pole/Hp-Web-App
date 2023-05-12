@@ -40,26 +40,13 @@
                     <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }" disabled="@_isBusy">Login</button>
 
             </div>
-
-               
-         
-           
-           
-
         </EditForm>
          <div class="mb-3 text-center">
-                <DynamicTable TModel="User" Items="_users" OnEdit="ShowEditPopup" OnDelete="OnDeleteItem" />
                       <br />
                 <i class="text-danger">Don't have an account?</i>
                    <button @onclick="ShowAddPopup"  class=" btn btn-link"> Register</button>
-               
             </div>
-
-         
-       
     </div>
-
-   
 </div>
 
 
