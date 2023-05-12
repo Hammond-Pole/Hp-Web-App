@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 //var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 //IConfiguration config = new ConfigurationBuilder()
@@ -22,7 +25,8 @@ var azureConfig = builder.Configuration.GetSection("AzureAd");
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddServerSideBlazor()
+    .AddMicrosoftIdentityConsentHandler();
 builder.Services.AddBlazoredModal();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
@@ -38,8 +42,17 @@ builder.Services.AddTransient<IGraphClientFactory, GraphClientFactory>();
 builder.Services.AddDbContext<DbWebAppContext>(options =>
         options.UseSqlServer(connectionString));
 
+var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ') ?? builder.Configuration["MicrosoftGraph:Scopes"]?.Split(' ');
+
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(azureConfig);
+//.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+//        .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
+//.AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
+//            .AddInMemoryTokenCaches();
+
+builder.Services.AddControllersWithViews()
+.AddMicrosoftIdentityUI();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -73,6 +86,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

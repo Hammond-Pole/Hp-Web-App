@@ -1,4 +1,4 @@
-﻿@using Authentication
+@using Authentication
 @inherits LayoutComponentBase
 
 @inject IJSRuntime JSRuntime
@@ -13,7 +13,8 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
+        <div class="top-row px-4 auth">
+            <LoginDisplay />
             <AuthorizeView>
                 <Authorized>
                     <a @onclick="LogoutAndClearSession">Logout</a>

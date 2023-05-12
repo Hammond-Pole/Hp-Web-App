@@ -14,10 +14,8 @@ public class GraphClientFactory : IGraphClientFactory
     public GraphServiceClient CreateClient(string clientId, string clientSecret, string tenantId)
     {
         // Setup the connection to Azure.
-        var managedIdentityCredential = new ManagedIdentityCredential();
-        var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
 
-        var credential = new ChainedTokenCredential(managedIdentityCredential, clientSecretCredential);
+        var credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
 
         // Get a token.
         var token = new GraphAccessTokenProvider(credential);
