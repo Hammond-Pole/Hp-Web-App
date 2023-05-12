@@ -67,7 +67,7 @@
     protected override async Task OnInitializedAsync()
     {
         _users = await _userService.GetUsersAsync();
-        ClientId = _config.GetSection("AzureAd:ClientId").Value!;
+        ClientId = Environment.GetEnvironmentVariable("ClientId");
     }
 
     private class Model
