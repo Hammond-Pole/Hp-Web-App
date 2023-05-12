@@ -11,6 +11,8 @@
 @inject NavigationManager uriHelper
 @inject NavigationManager NavigationManager
 
+@inject IConfiguration _config
+
 @inject IUserService _userService
 @inject IJSRuntime js
 
@@ -49,7 +51,7 @@
     </div>
 </div>
 
-
+@ClientId
 
 @code {
 
@@ -60,10 +62,12 @@
     private List<User> _users { get; set; }
     private string ErrorMessage = string.Empty;
 
+    private string ClientId = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         _users = await _userService.GetUsersAsync();
+        ClientId = _config.GetSection("AzureAd:ClientId").Value!;
     }
 
     private class Model
