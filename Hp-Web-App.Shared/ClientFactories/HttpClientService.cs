@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -17,6 +16,7 @@ public class HttpClientService : IHttpClientService
 {
     private readonly IConfidentialClientApplication _app;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly string _mountPath;
 
     public HttpClientService(IHttpClientFactory clientFactory, IConfiguration config)
     {
@@ -29,6 +29,7 @@ public class HttpClientService : IHttpClientService
                 .WithAuthority(new Uri(authority))
                 .Build();
         _clientFactory = clientFactory;
+        _mountPath = config.GetSection("FileShare").Value!;
 
     }
 
@@ -47,7 +48,9 @@ public class HttpClientService : IHttpClientService
         var authenticationResult = await GetAccessTokenAsync();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.ToString());
 
-        string htmlTemplate = System.IO.File.ReadAllText($"{System.IO.Directory.GetCurrentDirectory()}{@"\wwwroot\Templates\Registration.html"}");
+        var templatePath = _mountPath + @"\Templates\Registration.html";
+
+        string htmlTemplate = File.ReadAllText(templatePath);
 
         htmlTemplate = htmlTemplate.Replace("{{name}}", name);
         htmlTemplate = htmlTemplate.Replace("{{email}}", email);
