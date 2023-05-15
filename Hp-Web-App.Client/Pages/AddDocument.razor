@@ -6,6 +6,7 @@
 @using Hp_Web_App.Client.Pages.Documents.Questions;
 @using Hp_Web_App.Client.Shared
 @using Hp_Web_App.Shared.AppServices.Graph;
+@using Hp_Web_App.Shared.ClientFactories;
 @using Microsoft.AspNetCore.Components.Forms;
 @using Hp_Web_App.Shared.Authentication;
 
@@ -16,7 +17,7 @@
 @inject IQuestionService _questionService
 @inject IUserService _userService
 @inject ICompanyService _companyService
-@inject IGraphService _graphService
+@inject IHttpClientService _graphService
 
 @inject ProtectedSessionStorage _sessionStorage
 @inject IConfiguration _config
@@ -464,7 +465,7 @@
     {         
         try
         {
-            _graphService.SendRegistrationEmail("alanj@hammondpole.co.za", "Alan Jordaan");
+            await _graphService.SendRegistrationEmailAsync("alanj@hammondpole.co.za", "Alan Jordaan");
         }
         catch (Exception ex)
         {

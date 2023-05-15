@@ -1,11 +1,8 @@
 using Hp_Web_App.Shared.AppServices.Graph;
 using Hp_Web_App.Shared.ClientFactories;
 using Hp_Web_App.Shared.Functions;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
 
 //var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -15,13 +12,16 @@ using Microsoft.IdentityModel.Logging;
 //.Build();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add environment variables to the ConfigurationBuilder
+builder.Configuration.AddEnvironmentVariables();
+
 var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING");
-var azureConfig = builder.Configuration.GetSection("AzureAd");
+
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor()
-    .AddMicrosoftIdentityConsentHandler();
+builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredModal();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
@@ -38,21 +38,22 @@ builder.Services.AddDbContext<DbWebAppContext>(options =>
 
 var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ') ?? builder.Configuration["MicrosoftGraph:Scopes"]?.Split(' ');
 
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(azureConfig);
-//.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-//        .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
-//.AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
-//            .AddInMemoryTokenCaches();
-
-builder.Services.AddControllersWithViews()
-.AddMicrosoftIdentityUI();
-
-builder.Services.AddAuthorization(options =>
+builder.Services.AddTransient<IHttpClientService, HttpClientService>();
+builder.Services.AddHttpClient("graph", client =>
 {
-    // By default, all incoming requests will be authorized according to the default policy
-    options.FallbackPolicy = options.DefaultPolicy;
+    client.BaseAddress = new Uri("https://graph.microsoft.com/v1.0/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("User-Agent", "hp-document-portal");
 });
+
+
+
+//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme);
+//builder.Services.AddAuthorization(options =>
+//{
+//    // By default, all incoming requests will be authorized according to the default policy
+//    options.FallbackPolicy = options.DefaultPolicy;
+//});
 
 var app = builder.Build();
 
@@ -74,8 +75,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+
 
 app.MapControllers();
 
