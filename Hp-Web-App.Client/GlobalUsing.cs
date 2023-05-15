@@ -1,7 +1,6 @@
 ﻿global using Blazored.Modal;
 global using Blazored.Modal.Services;
 global using Hp_Web_App.Client.Authentication;
-global using Hp_Web_App.Client.Data;
 global using Hp_Web_App.Shared.AppServices;
 global using Hp_Web_App.Shared.DbContexts;
 global using Hp_Web_App.Shared.Models;

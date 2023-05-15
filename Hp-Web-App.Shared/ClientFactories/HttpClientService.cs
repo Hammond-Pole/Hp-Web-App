@@ -29,8 +29,7 @@ public class HttpClientService : IHttpClientService
                 .WithAuthority(new Uri(authority))
                 .Build();
         _clientFactory = clientFactory;
-        _mountPath = config.GetSection("FileShare").Value!;
-
+        _mountPath = config["FileShare"]!;
     }
 
     public async Task<string> GetAccessTokenAsync()
@@ -48,7 +47,7 @@ public class HttpClientService : IHttpClientService
         var authenticationResult = await GetAccessTokenAsync();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.ToString());
 
-        var templatePath = _mountPath + @"\Templates\Registration.html";
+        var templatePath = _mountPath + @"/Templates/Registration.html";
 
         string htmlTemplate = File.ReadAllText(templatePath);
 
