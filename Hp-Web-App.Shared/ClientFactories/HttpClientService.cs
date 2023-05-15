@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
