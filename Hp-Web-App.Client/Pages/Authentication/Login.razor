@@ -1,136 +1,141 @@
-﻿@page "/Authentication/Login";
+﻿@* This Razor file defines a login form for Hp-Web-App. *@
+@page "/login";
+@page "/login/{token}"
 
+@* Import directives *@
 @using Hp_Web_App.Client.Authentication;
 @using System.ComponentModel.DataAnnotations;
 @using Hp_Web_App.Shared.Authentication;
 @using Microsoft.AspNetCore.Components.Forms
 
-@inject IUserService _userService
-@inject IJSRuntime js
-@inject AuthenticationStateProvider authStateProvider
-@inject NavigationManager uriHelper
-@inject NavigationManager NavigationManager
+@* Dependency Injection *@
+@inject IUserService UserService
+@inject IJSRuntime JsRuntime
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager UriHelper
+@inject IConfiguration Config
 
-@inject IConfiguration _config
-
-@inject IUserService _userService
-@inject IJSRuntime js
-
-
-
+@* HTML section of the component *@
 <div class="row">
     <div class="col-lg-3 offset-lg-4 pt-4 pb-4 border">
         <div class="mb-3 text-center">
             <h3>LOGIN</h3>
         </div>
-        <EditForm Model="_model" Ch>
+        <EditForm Model=_model>
             <DataAnnotationsValidator />
             <div class="form-group-sm">
                 <label for="email" style="width:100%">Email</label>
-                <InputText style="width:100%" id="email" @bind-Value="_model.Email" placeholder="Email" />
-                <ValidationMessage For="@(() => _model.Email)" />
+                <InputText style="width:100%" id="email" @bind-Value=_model.Email placeholder="Email" />
+                <ValidationMessage For=@(() => _model.Email) />
             </div>
             <div style="height:10px; width:100%"></div>
             <div class="form-group-sm">
                 <label for="password" style="width:100%">Password</label>
-                <InputText style="width:100%" id="password" @bind-Value="_model.Password" type="password" placeholder="Password" />
-                <ValidationMessage For="@(() => _model.Password)" />
+                <InputText style="width:100%" id="password" @bind-Value=_model.Password type="password" placeholder="Password" />
+                <ValidationMessage For=@(() => _model.Password) />
             </div>
             <div style="height:10px; width:100%"></div>
             <div class="mb-3 text-center">
-                    
-                    <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }" disabled="@_isBusy">Login</button>
+
+                <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }" disabled=_isBusy>Login</button>
 
             </div>
         </EditForm>
-         <div class="mb-3 text-center">
-                      <br />
-                <i class="text-danger">Don't have an account?</i>
-                   <button @onclick="ShowAddPopup"  class=" btn btn-link"> Register</button>
-            </div>
+        <div class="mb-3 text-center">
+            <br />
+            <i class="text-danger">Don't have an account?</i>
+            <button @onclick="async () => await ShowRegisterPopup()" class=" btn btn-link"> Register</button>
+        </div>
     </div>
 </div>
 
-@ClientId
-
+@* The @code section defines several properties and methods, including the Model class, Authenticate method, and ShowRegisterPopup method. *@
 @code {
 
     // Parameter used to enable the popup/modal window.
     [CascadingParameter] public IModalService Modal { get; set; }
 
+    // Add optional parameters to log in the user the first time.
+    [Parameter] public string token { get; set; } = string.Empty;
+
     // Private properties used only in this page.
-    private List<User> _users { get; set; }
-    private string ErrorMessage = string.Empty;
+    private bool _isBusy;
 
-    private string ClientId = string.Empty;
+    // Create a Model instance for binding the user's credentials in the Razor input fields.
+    private Model _model = new()
+        {
+            Email = string.Empty,
+            Password = string.Empty
+        };
 
-    protected override async Task OnInitializedAsync()
-    {
-        _users = await _userService.GetUsersAsync();
-        ClientId = Environment.GetEnvironmentVariable("ClientId");
-    }
-
+    /**
+     * The Model class defines the input fields that a user must fill in to login. The Email field has validation constraints applied to it.
+     */
     private class Model
     {
-        [Required]
+        [Required(ErrorMessage = "Email is required")]
         [StringLength(50, ErrorMessage = "Email is too long.")]
-        [EmailAddress(ErrorMessage = "Not a valid email")]
-        public string Email { get; set; } = string.Empty;
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        public string Email { get; set; }
 
-        [Required]
-        public string Password { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; }
     }
 
-    private Model _model = new Model();
-    private bool _isBusy = false;
+    /**
+     * When the component is initialized, check if the token in the URL is not empty. If so, get the user corresponding to that token and populate the input fields for email and password. Then call Authenticate method.
+     */
+    protected override async Task OnInitializedAsync()
+    {
+        if (token != "new")
+        {
+            var user = await UserService.GetUserbyTokenAsync(token);
+            _model.Email = user.Email;
+            _model.Password = user.Password;
 
+            await Authenticate();
+        }
+    }
+
+    /**
+     * The Authenticate method verifies the user's email and password against the user database using the UserService.
+     * If successful, update the AuthenticationStateProvider and redirect to the protected page: /uploaddocument.
+     * If failed, show an alert with invalid email or password. With both successful or failed, set _isBusy back to false.
+     */
     private async Task Authenticate()
     {
         try
         {
-            (UserSession userSession, LoginError loginError) = await _userService.Login(_model.Email, _model.Password);
+            // Call the UserService to verify the user
+            (UserSession userSession, LoginError loginError) = await UserService.Login(_model.Email, _model.Password);
 
             if (!loginError.Equals(LoginError.None))
             {
-                await js.InvokeVoidAsync("alert", "Invalid email or password");
+                // If login fails, show an alert with an error message
+                await JsRuntime.InvokeVoidAsync("alert", "Invalid email or password");
                 return;
             }
 
-            var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
-            await customAuthStateProvider.UpdateAuthenticationState(new UserSession
-                {
-                    UserName = userSession.UserName,
-                    Role = userSession.Role,
-                    SessionId = userSession.SessionId,
-                    CompanyId = userSession.CompanyId
-                });
-            uriHelper.NavigateTo("/uploaddocument", true);
+            // Update the Auth State Provider with the user's information, and navigate to /uploaddocument
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(userSession);
+            UriHelper.NavigateTo("/uploaddocument", true);
         }
         finally
         {
+            // Once the user has logged in or the authentication has failed, set isBusy to false
             _isBusy = false;
         }
     }
 
-
-    
-
-
-    async void ShowAddPopup()
+    /**
+     * The ShowRegisterPopup method displays a modal window for the user to register.
+     */
+    private async Task ShowRegisterPopup()
     {
-        var options = new ModalOptions()
-            {
-                DisableBackgroundCancel = true
-            };
+        var options = new ModalOptions { DisableBackgroundCancel = true };
 
-        // Call the add form and wait to see if there is an Ok or Cancel.
         var createForm = Modal.Show<Register_User>("Register", options);
         var result = await createForm.Result;
-
-        if (!result.Cancelled)
-        {
-            _users = await _userService.GetUsersAsync();
-            StateHasChanged();
-        }
     }
 }

@@ -22,6 +22,13 @@ public class User
     public string Password { get; set; } = string.Empty;
 
     public bool IsActive { get; set; }
+
+    [ExcludeFromTable]
+    public string? RegistrationKey { get; set; }
+
+    [ExcludeFromTable]
+    public DateTime RegistrationKeyExpires { get; set; }  = DateTime.Now.AddHours(24);
+
     #endregion
 
     #region Foreign Keys

@@ -34,7 +34,7 @@
                 <option value="" selected disabled>Select a Document.</option>
                 @foreach (var document in _documents)
                 {
-                    <option title="@document.Description" value="@document.Id">@document.Name</option>
+                        <option title="@document.Description" value="@document.Id">@document.Name</option>
                 })
             </select>
         </div>
@@ -56,52 +56,48 @@
                 FieldMeta.Add("QuestionFieldListItems", question.ListValues);
             }
             FieldMeta.Add("ValueChanged", EventCallback.Factory.Create<dynamic>(this, OnValueChanged));
-            <DynamicComponent Type=@_selectedType Parameters="FieldMeta" />
+                <DynamicComponent Type=@_selectedType Parameters="FieldMeta" />
         }
 
         <!-- Only show these components when the user selects a document. -->
         @if (_showFileUpload)
         {
-            <div class="drag-drop-zone">
-                <InputFile OnChange="ViewFile" />
+                <div class="drag-drop-zone">
+                    <InputFile OnChange="ViewFile" />
                 @_status
-            </div>
+                </div>
 
-            <!-- Display the Success Message on the form so that we know what happend. -->
+                <!-- Display the Success Message on the form so that we know what happend. -->
             @if (!string.IsNullOrEmpty(_errorMessage))
             {
-                <div class="alert alert-danger card-body" role="alert">
+                        <div class="alert alert-danger card-body" role="alert">
                     @_errorMessage
-                </div>
+                        </div>
             }
-            <!-- Display the Success Message on the form so that we know what happend. -->
+                <!-- Display the Success Message on the form so that we know what happend. -->
             @if (!string.IsNullOrEmpty(_successMessage))
             {
-                <div class="alert alert-success card-body" role="alert">
+                        <div class="alert alert-success card-body" role="alert">
                     @_successMessage
                     @_loadedFile.Name
-                </div>
+                        </div>
             }
-            <div class="card-body" style="padding:0 0 0 0">
-                <button @onclick="Save" class="btn btn-primary">Save</button>
-            </div>
+                <div class="card-body" style="padding:0 0 0 0">
+                    <button @onclick="Save" class="btn btn-primary">Save</button>
+                </div>
         }
         else
         {
-            <div class="alert alert-info" role="alert">
-                <text>Select a document from the list to begin!</text>
-            </div>
+                <div class="alert alert-info" role="alert">
+                    <text>Select a document from the list to begin!</text>
+                </div>
         }
     </div>
 </div>
 
 <div><DynamicTable TModel="DocumentsAttached" Items="_documentsAttached" OnDownload="Download" /></div>
-<div><DynamicTable TModel="QuestionValue" Items="_previousQuestionValues" /></div>
+<div><DynamicTable TModel="QuestionValue" Items="_previousQuestionValues"/></div>
 
-
-<br />
-<br />
-<button @onclick="GraphTest" class="btn btn-primary"> <i class="oi oi-plus"></i>GraphTest</button>
 @code {
 
     #region Update Question Values
@@ -126,7 +122,8 @@
                 break;
             case 5:
                 UpdateOrAddValue(_questionFloatValues, (QuestionValues)value, x => x.FloatValue = value.FloatValue);
-                break;case 6:
+                break;
+            case 6:
                 UpdateOrAddValue(_questionMemoValues, (QuestionValues)value, x => x.MemoValue = value.MemoValue);
                 break;
             case 7:
@@ -460,19 +457,6 @@
     {
         await JSRuntime.InvokeVoidAsync("downloadFile", documentsAttached.FileUrl, documentsAttached.FileName);
     }
-
-    async Task GraphTest()
-    {         
-        try
-        {
-            await _graphService.SendRegistrationEmailAsync("alanj@hammondpole.co.za", "Alan Jordaan");
-        }
-        catch (Exception ex)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", ex.Message);
-        }
-    }
 }
-
 
 

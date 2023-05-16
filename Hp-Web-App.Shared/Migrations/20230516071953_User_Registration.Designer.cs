@@ -4,6 +4,7 @@ using Hp_Web_App.Shared.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hp_Web_App.Shared.Migrations
 {
     [DbContext(typeof(DbWebAppContext))]
-    partial class DbWebAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230516071953_User_Registration")]
+    partial class User_Registration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -404,8 +407,8 @@ namespace Hp_Web_App.Shared.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RegistrationKey")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("RegistrationKey")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("RegistrationKeyExpires")
                         .HasColumnType("datetime2");
@@ -430,7 +433,8 @@ namespace Hp_Web_App.Shared.Migrations
                             IsActive = true,
                             Name = "Admin",
                             Password = "1234",
-                            RegistrationKeyExpires = new DateTime(2023, 5, 17, 14, 0, 44, 684, DateTimeKind.Local).AddTicks(6527),
+                            RegistrationKey = new Guid("00000000-0000-0000-0000-000000000000"),
+                            RegistrationKeyExpires = new DateTime(2023, 5, 17, 9, 19, 52, 864, DateTimeKind.Local).AddTicks(1524),
                             UserRoleId = 1
                         });
                 });
