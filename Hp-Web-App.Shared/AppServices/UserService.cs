@@ -52,9 +52,37 @@ public class UserService : IUserService
         if (typedPassword == storedPassword) return true;
         return false;
     }
+    public async Task<bool> VerifyToken(string token)
+    {
+        // Get the token from the Database.
+        var user = await GetUserbyTokenAsync(token);
+
+        // Check if user is null or not.
+        if (user is null)
+        {
+            return false;
+        }
+        if (user is not null && user.RegistrationKey == token && user.RegistrationKeyExpires >= DateTime.Now)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     #endregion
 
     #region User
+    public async Task<User> GetUserbyTokenAsync(string RegistrationKey)
+    {
+        // find user by id and include the UserRole.
+        var user = await _context.Set<User>()
+            .Where(u => u.RegistrationKey == RegistrationKey)
+            .FirstOrDefaultAsync();
+
+        return user ?? new User();
+    }
     public async Task<User> GetUserAsync(int id)
     {
         // find user by id and include the UserRole.

@@ -9,9 +9,11 @@ public interface IUserService
     Task<User> GetUserAsync(int id);
     Task<List<User>> GetUserByCompanyAsync(int companyId);
     Task<User> GetUserByEmailAsync(string email);
+    Task<User> GetUserbyTokenAsync(string RegistrationKey);
     Task<UserRole> GetUserRoleAsync(int Id);
     Task<List<UserRole>> GetUserRolesAsync();
     Task<List<User>> GetUsersAsync();
     Task<(UserSession, LoginError)> Login(string email, string password);
     Task UpdateUserAsync(User user);
+    Task<bool> VerifyToken(string token);
 }
