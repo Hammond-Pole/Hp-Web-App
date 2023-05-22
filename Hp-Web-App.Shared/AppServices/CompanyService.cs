@@ -18,28 +18,43 @@ public class CompanyService : ICompanyService
         var company = await _context.Set<Company>()
             .Include(c => c.CompanyType)
             .Where(c => c.Id == id)
-            .FirstOrDefaultAsync();            
-        
+            .FirstOrDefaultAsync();
+
         if (company == null)
         {
             return new Company();
         }
-        
-        await _context.Entry(company)
-            .Collection(c => c.Users)
-            .Query()
-            .Include(u => u.UserRole)
-            .LoadAsync();
 
-        await _context.Entry(company)
+        if (company.Users is null)
+        {
+            return new Company();
+        }
+        else
+        {
+            await _context.Entry(company)
+                .Collection(c => c.Users)
+                .Query()
+                .Include(u => u.UserRole)
+                .LoadAsync();
+        }
+
+
+        if (company.CompanyDocuments is null)
+        {
+            return new Company();
+        }
+        else
+        {
+            await _context.Entry(company)
             .Collection(d => d.CompanyDocuments)
             .Query()
             .Include(d => d.Document)
             .Include(c => c.Company)
             .LoadAsync();
-
+        }
         return company ?? new Company();
     }
+
     public async Task<List<Company>> GetCompaniesAsync()
     {
         var companies = await _context.Set<Company>()

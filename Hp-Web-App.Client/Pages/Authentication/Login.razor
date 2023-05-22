@@ -53,13 +53,10 @@
 @code {
 
     // Parameter used to enable the popup/modal window.
-    [CascadingParameter] public IModalService Modal { get; set; }
+    [CascadingParameter] public IModalService? Modal { get; set; }
 
     // Add optional parameters to log in the user the first time.
     [Parameter] public string token { get; set; } = string.Empty;
-
-    // Private properties used only in this page.
-    private bool _isBusy = false;
 
     // Create a Model instance for binding the user's credentials in the Razor input fields.
     private Model _model = new()
@@ -76,10 +73,10 @@
         [Required(ErrorMessage = "Email is required")]
         [StringLength(50, ErrorMessage = "Email is too long.")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
     }
 
     /**
@@ -106,8 +103,14 @@
     {
         try
         {
+            if (string.IsNullOrEmpty(_model.Email) || string.IsNullOrEmpty(_model.Password))
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Invalid email or password");
+                return;
+            }
+
             // Call the UserService to verify the user
-            (UserSession userSession, LoginError loginError) = await UserService.Login(_model.Email, _model.Password);
+            (UserSession userSession, LoginError loginError) = await UserService.Login(_model.Email!, _model.Password!);
 
             if (!loginError.Equals(LoginError.None))
             {
@@ -121,10 +124,10 @@
             await customAuthStateProvider.UpdateAuthenticationState(userSession);
             UriHelper.NavigateTo("/uploaddocument", true);
         }
-        finally
+        catch (Exception ex)
         {
-            // Once the user has logged in or the authentication has failed, set isBusy to false
-            _isBusy = false;
+            // If an exception occurs, show an alert with the exception message
+            await JsRuntime.InvokeVoidAsync("alert", ex.Message);
         }
     }
 
