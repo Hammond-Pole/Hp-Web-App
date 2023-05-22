@@ -32,7 +32,7 @@ public class UserService : IUserService
 
         var user = await GetUserByEmailAsync(email);
 
-        if (VerifyPassword(password, user.Password))
+        if (VerifyPassword(password, user.Password, user.Id))
         {
             var session = new UserSession
             {
@@ -47,10 +47,13 @@ public class UserService : IUserService
         return (new UserSession(), LoginError.InvalidCredentials);
     }
 
-    private static bool VerifyPassword(string typedPassword, string storedPassword)
+    private static bool VerifyPassword(string typedPassword, string storedPassword, int userId)
     {
-        if (typedPassword == storedPassword) return true;
-        return false;
+        if (userId == -1)
+        {
+            return typedPassword == storedPassword;
+        }
+        return BCrypt.Net.BCrypt.Verify(typedPassword, storedPassword);
     }
     public async Task<bool> VerifyToken(string token)
     {
@@ -147,10 +150,17 @@ public class UserService : IUserService
         user.IsActive = true;
         user.UserRole = existingRole;
         user.Company = existingCompany;
+
+        if (user.Id != -1)
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+        }
+
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return user;
     }
+
     public async Task UpdateUserAsync(User user)
     {
         if (user == null)
@@ -158,7 +168,12 @@ public class UserService : IUserService
             throw new ArgumentNullException(nameof(user));
         }
 
-        _context.Update(user);
+        if (user.Id != -1)
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+        }
+
+        _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
     public async Task DeleteUserAsync(int id)
