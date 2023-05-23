@@ -37,7 +37,7 @@
             <div style="height:10px; width:100%"></div>
             <div class="mb-3 text-center">
 
-                <button id="login" class="btn btn-primary" @onclick="async () => { _isBusy = true; await Authenticate(); _isBusy = false; }" disabled=_isBusy>Login</button>
+                <button id="login" class="btn btn-primary" @onclick="Authenticate">Login</button>
 
             </div>
         </EditForm>
@@ -57,9 +57,6 @@
 
     // Add optional parameters to log in the user the first time.
     [Parameter] public string token { get; set; } = string.Empty;
-
-    // Private properties used only in this page.
-    private bool _isBusy;
 
     // Create a Model instance for binding the user's credentials in the Razor input fields.
     private Model _model = new()
@@ -121,12 +118,16 @@
             await customAuthStateProvider.UpdateAuthenticationState(userSession);
             UriHelper.NavigateTo("/uploaddocument", true);
         }
-        finally
+        catch (Exception ex)
         {
-            // Once the user has logged in or the authentication has failed, set isBusy to false
-            _isBusy = false;
+            int errorCode = 404;
+            string fullErrorMessage = string.Format("Error {0}: {1}", errorCode, ex.Message);
+            string errorMessage = $"An error occurred: {ex.Message}";
+            await JsRuntime.InvokeVoidAsync("alert", fullErrorMessage);
+            return;
         }
     }
+    
 
     /**
      * The ShowRegisterPopup method displays a modal window for the user to register.
