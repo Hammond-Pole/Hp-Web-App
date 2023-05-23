@@ -72,5 +72,5 @@ jobs:
         with:
           app-name: 'hp-docs-portal'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_317C72AEDB7B477FA5D79BCABE439EE5 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F73DD4F339C744EC937730B6956BEA19 }}
           package: .
