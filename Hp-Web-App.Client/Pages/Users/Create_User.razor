@@ -33,8 +33,28 @@
 
     <div class="form-group">
         <label for="password">Password:</label>
-        <InputText id="password" class="form-control" @bind-Value="_user.Password" />
+        <InputText type="password" id="password" class="form-control" @bind-Value="_user.Password" />
         <ValidationMessage For="@(() => _user.Password)" />
+    </div>
+    <div class="form-group">
+        <label for="password_confirm">Confirm Password:</label>
+        <InputText type="password" id="password_confirm" class="form-control" @bind-Value="_confirmPassword" @oninput="ValidateConfirmPassword" />
+        <ValidationMessage For="@(() => _errorMessage)" />
+
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ErrorMessage
+                @_errorMessage
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @_errorMessage
+            </div>
+        }
+
     </div>
 
     <div class="form-group">
@@ -42,7 +62,7 @@
         <InputSelect id="ddlUserRole"
                      class="form-select"
                      TValue="int"
-                     @bind-Value="_userRoleId">
+        @bind-Value="_userRoleId">
             @foreach (var role in _userRoles)
             {
                 <option value="@role.Id">@role.Name</option>
@@ -56,7 +76,7 @@
         <InputSelect id="ddlUserCompany"
                      class="form-select"
                      TValue="int"
-                     @bind-Value="_companyId">
+        @bind-Value="_companyId">
             @foreach (var company in _companies!)
             {
                 <option value="@company.Id">@company.Name</option>
@@ -64,9 +84,9 @@
         </InputSelect>
         <ValidationMessage For="@(() => _user.CompanyId)" />
     </div>
-
+ <br />
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))">Submit</button>
         <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
     </div>
 </EditForm>
@@ -94,12 +114,25 @@
     #region CRUD Operations
     async Task CreateUser()
     {
+
+        // Check if the email address is already in use.
+        var _userExists = await _userService.GetUserByEmailAsync(_user.Email);
+
+        if (_userExists != null)
+        {
+            ErrorMessage = "Email address already in use";
+            return;
+        }
+
         try
         {
-            _user.UserRoleId = _userRoleId;
-            _user.CompanyId = _companyId;
-            await _userService.CreateUserAsync(_user);
-            await Close();
+            if (string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                _user.UserRoleId = _userRoleId;
+                _user.CompanyId = _companyId;
+                await _userService.CreateUserAsync(_user);
+                await Close();
+            }
         }
         catch (Exception ex)
         {
@@ -113,5 +146,15 @@
     async Task Close() => await BlazoredModal.CloseAsync();
     #endregion
 
+    #region Password Validation
+    private string _confirmPassword = string.Empty;
+    private string _errorMessage = string.Empty;
 
+    private void ValidateConfirmPassword(ChangeEventArgs args)
+    {
+        _errorMessage = _user.Password == args.Value.ToString() ? string.Empty : "Passwords do not match";
+    }
+
+
+    #endregion
 }
