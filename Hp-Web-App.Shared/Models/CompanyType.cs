@@ -1,11 +1,25 @@
-﻿namespace Hp_Web_App.Shared.Models
-{
-    public class CompanyType
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+﻿using System.ComponentModel.DataAnnotations;
 
-        public ICollection<Company>? Companies { get; set; } // navigation property
-    }
+namespace Hp_Web_App.Shared.Models;
+
+public class CompanyType
+{
+    #region Primary Key
+    [Required]
+    [ExcludeFromTable]
+    public int Id { get; set; }
+    #endregion
+
+    #region User Properties
+    [StringLength(25, ErrorMessage = "Name is too long.")]
+    public string Name { get; set; } = string.Empty;
+
+    [StringLength(255, ErrorMessage = "Description is too long.")]
+    public string Description { get; set; } = string.Empty;
+    #endregion
+
+    #region Navigation Properties
+    [ExcludeFromTable]
+    public ICollection<Company>? Companies { get; set; } // navigation property
+    #endregion
 }

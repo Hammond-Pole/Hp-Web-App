@@ -40,6 +40,7 @@ public abstract class QuestionValue
 
 public class QuestionValues : QuestionValue
 {
+    #region User Properties
     public DateTime? DateValue { get; set; }
 
     [StringLength(255)]
@@ -69,4 +70,5 @@ public class QuestionValues : QuestionValue
             return null;
         }
     }
+    #endregion
 }

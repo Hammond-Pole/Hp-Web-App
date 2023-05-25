@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Hp_Web_App.Shared.Models;
 
@@ -44,5 +43,4 @@ public class DocumentsAttached
     [ExcludeFromTable]
     public ICollection<QuestionValue>? QuestionValues { get; set; }
     #endregion
-
 }

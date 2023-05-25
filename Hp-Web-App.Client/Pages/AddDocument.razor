@@ -455,7 +455,8 @@
 
     async Task Download(DocumentsAttached documentsAttached)
     {
-        await JSRuntime.InvokeVoidAsync("downloadFile", documentsAttached.FileUrl, documentsAttached.FileName);
+        var fileBytes = await System.IO.File.ReadAllBytesAsync(documentsAttached.FileName);
+        await JSRuntime.InvokeVoidAsync("saveAsFile", documentsAttached.FileName, Convert.ToBase64String(fileBytes));
     }
 }
 
