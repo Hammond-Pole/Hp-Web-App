@@ -2,6 +2,7 @@
 
 @using Hp_Web_App.Shared.ClientFactories;
 @using Microsoft.AspNetCore.Components.Forms;
+@using Microsoft.Data.SqlClient;
 <!-- Dependency Injection. -->
 @inject IUserService _userService;
 @inject ICompanyService _companyService;
@@ -37,7 +38,7 @@
 
     <div class="form-group">
         <label for="password">Password:</label>
-        <InputText id="password" class="form-control" @bind-Value="_user.Password" />
+        <InputText type="password" id="password" class="form-control" @bind-Value="_user.Password" />
         <ValidationMessage For="@(() => _user.Password)" />
     </div>
     <div class="form-group">
@@ -108,45 +109,36 @@
     #region CRUD Operations
     async Task CreateUser()
     {
+        var ErrorMessage = string.Empty;
         var _guid = Guid.NewGuid();
         var _regkey = _guid.ToString();
+
+
+        _user.UserRoleId = _userRoleId;
+        _user.CompanyId = _companyId;
+        _user.RegistrationKey = _regkey;
+        _user.IsActive = false;
+
         try
-        {
-
-            _user.UserRoleId = _userRoleId;
-            _user.CompanyId = _companyId;
-            _user.RegistrationKey = _regkey;
-            _user.IsActive = false;
-
-            // Check if the email address is already in use.
-            var _userExists = await _userService.GetUserByEmailAsync(_user.Email);
-
-            if (_userExists != null)
+        {       
+            // Verify that the email address isn't already in use.
+            var _userEmailExists = await _userService.EmailExistsAsync(_user.Email);
+            if (_userEmailExists)
             {
-                ErrorMessage = "Email address already in use";
-                return;
+                throw new Exception("Email address already exists, try another email.");
             }
 
             await _userService.CreateUserAsync(_user);
 
-            try
-            {
-                await _httpClientService.SendRegistrationEmailAsync(_user.Email, _user.Name, _user.RegistrationKey);
-                await js.InvokeVoidAsync("alert", $"A confirmation email has been sent to {_user.Email}, follow the link to verify your account!");
-                await Close();
-                return;
-            }
-            catch (Exception)
-            {
-                await js.InvokeVoidAsync("alert", "An error occured trying to confirm your account, please contact Hammond Pole for support!");
-                throw;
-            }
 
-
+            await _httpClientService.SendRegistrationEmailAsync(_user.Email, _user.Name, _user.RegistrationKey);
+            await js.InvokeVoidAsync("alert", $"A confirmation email has been sent to {_user.Email}, follow the link to verify your account!");
+            await Close();
         }
         catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
+        {            
+                await js.InvokeVoidAsync("alert", $"{ex.Message}");
+                return;
         }
     }
     #endregion

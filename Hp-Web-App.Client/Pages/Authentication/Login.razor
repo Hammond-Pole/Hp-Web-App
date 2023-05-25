@@ -36,22 +36,17 @@
             </div>
             <div style="height:10px; width:100%"></div>
             <div class="mb-3 text-center">
-
                 <button id="login" class="btn btn-primary" @onclick="Authenticate">Login</button>
-
+            </div>
+            <div class="mb-3 text-center">
+                <i class="text-danger">Don't have an account?</i>
+                <button @onclick="async () => await ShowRegisterPopup()" class=" btn btn-link"> Register</button>
             </div>
         </EditForm>
-        <div class="mb-3 text-center">
-            <br />
-            <i class="text-danger">Don't have an account?</i>
-            <button @onclick="async () => await ShowRegisterPopup()" class=" btn btn-link"> Register</button>
-        </div>
     </div>
 </div>
 
-@* The @code section defines several properties and methods, including the Model class, Authenticate method, and ShowRegisterPopup method. *@
 @code {
-
     // Parameter used to enable the popup/modal window.
     [CascadingParameter] public IModalService Modal { get; set; }
 
@@ -65,9 +60,9 @@
             Password = string.Empty
         };
 
-    /**
-     * The Model class defines the input fields that a user must fill in to login. The Email field has validation constraints applied to it.
-     */
+    /*
+    The Model class defines the input fields that a user must fill in to login. The Email field has validation constraints applied to it.
+    */
     private class Model
     {
         [Required(ErrorMessage = "Email is required")]
@@ -79,12 +74,12 @@
         public string Password { get; set; }
     }
 
-    /**
-     * When the component is initialized, check if the token in the URL is not empty. If so, get the user corresponding to that token and populate the input fields for email and password. Then call Authenticate method.
-     */
+    /*
+    When the component is initialized, check if the token in the URL is not empty. If so, get the user corresponding to that token and populate the input fields for email and password. Then call Authenticate method.
+    */
     protected override async Task OnInitializedAsync()
     {
-        if (token != "new")
+        if (token != "new" && token is not null)
         {
             var user = await UserService.GetUserbyTokenAsync(token);
             _model.Email = user.Email;
@@ -94,11 +89,11 @@
         }
     }
 
-    /**
-     * The Authenticate method verifies the user's email and password against the user database using the UserService.
-     * If successful, update the AuthenticationStateProvider and redirect to the protected page: /uploaddocument.
-     * If failed, show an alert with invalid email or password. With both successful or failed, set _isBusy back to false.
-     */
+    /*
+    The Authenticate method verifies the user's email and password against the user database using the UserService.
+    If successful, update the AuthenticationStateProvider and redirect to the protected page: /uploaddocument.
+    If failed, show an alert with invalid email or password. With both successful or failed, set _isBusy back to false.
+    */
     private async Task Authenticate()
     {
         try
@@ -129,9 +124,9 @@
     }
     
 
-    /**
-     * The ShowRegisterPopup method displays a modal window for the user to register.
-     */
+    /*
+     The ShowRegisterPopup method displays a modal window for the user to register.
+    */
     private async Task ShowRegisterPopup()
     {
         var options = new ModalOptions { DisableBackgroundCancel = true };

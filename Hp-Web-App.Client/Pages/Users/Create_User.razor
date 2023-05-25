@@ -6,6 +6,7 @@
 <!-- Dependency Injection. -->
 @inject IUserService _userService
 @inject ICompanyService _companyService
+@inject IJSRuntime js
 
 <!-- Display the error at the top of the form so that we know why something failed. -->
 @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -84,7 +85,7 @@
         </InputSelect>
         <ValidationMessage For="@(() => _user.CompanyId)" />
     </div>
- <br />
+    <br />
     <div class="form-group">
         <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))">Submit</button>
         <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
@@ -114,23 +115,23 @@
     #region CRUD Operations
     async Task CreateUser()
     {
-
-        // Check if the email address is already in use.
-        var _userExists = await _userService.GetUserByEmailAsync(_user.Email);
-
-        if (_userExists != null)
-        {
-            ErrorMessage = "Email address already in use";
-            return;
-        }
-
         try
         {
             if (string.IsNullOrWhiteSpace(_errorMessage))
             {
                 _user.UserRoleId = _userRoleId;
                 _user.CompanyId = _companyId;
+
+                // Verify that the email address isn't already in use.
+                var _userEmailExists = await _userService.EmailExistsAsync(_user.Email);
+                if (_userEmailExists)
+                {
+                    throw new Exception("Email address already exists, try another email.");
+                }
+
                 await _userService.CreateUserAsync(_user);
+
+                await js.InvokeVoidAsync("alert", $"A confirmation email has been sent to {_user.Email}, follow the link to verify your account!");
                 await Close();
             }
         }
