@@ -1,4 +1,5 @@
 ﻿namespace Hp_Web_App.Shared.Models;
+
 public class MSGraphUser
 {
     public string displayName { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Hp_Web_App.Shared.Models;
+
 public class ListValue
 {
     #region Primary Key

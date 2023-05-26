@@ -74,6 +74,24 @@ public class UserService : IUserService
     #endregion
 
     #region User
+    public async Task<bool> EmailExistsAsync(string email)
+    {
+        var user = await _context.Set<User>()
+            .Include(u => u.UserRole)
+            .Include(u => u.Company)
+            .Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (user is not null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public async Task<User> GetUserbyTokenAsync(string RegistrationKey)
     {
         // find user by id and include the UserRole.

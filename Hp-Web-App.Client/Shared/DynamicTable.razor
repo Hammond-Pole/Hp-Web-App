@@ -70,7 +70,7 @@ else
                                 {
                                     var prop = GetPropertyValue(item, property);
 
-                                    <a href="@prop" title="@prop" download="newfile.pdf" class="btn btn-primary btn-sm">Download</a>
+                                    <a href="@prop" title="@prop" @onclick="() => DownloadItem(item)" class="btn btn-primary btn-sm">Download</a>
                                 }
                             }
                         }

@@ -2,6 +2,7 @@
 
 @using Hp_Web_App.Shared.ClientFactories;
 @using Microsoft.AspNetCore.Components.Forms;
+@using Microsoft.Data.SqlClient;
 <!-- Dependency Injection. -->
 @inject IUserService _userService;
 @inject ICompanyService _companyService;
@@ -37,38 +38,56 @@
 
     <div class="form-group">
         <label for="password">Password:</label>
-        <InputText id="password" class="form-control" @bind-Value="_user.Password" />
+        <InputText type="password" id="password" class="form-control" @bind-Value="_user.Password" />
         <ValidationMessage For="@(() => _user.Password)" />
     </div>
+    <div class="form-group">
+        <label for="password_confirm">Confirm Password:</label>
+        <InputText type="password" id="password_confirm" class="form-control" @bind-Value="_confirmPassword" @oninput="ValidateConfirmPassword" />
+        <ValidationMessage For="@(() => _errorMessage)" />
 
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @ErrorMessage
+                @_errorMessage
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @_errorMessage
+            </div>
+        }
+
+    </div>
     <div class="form-group">
         <label for="ddlUserCompany">Company:</label>
         <InputSelect id="ddlUserCompany"
                      class="form-select"
                      TValue="int"
-                     @bind-Value="_companyId">
+        @bind-Value="_companyId">
             @foreach (var company in _companies!)
             {
-                if(company.CompanyTypeId==5)
+                if (company.CompanyTypeId != 5)
                 {
                     <option value="@company.Id">@company.Name</option>
                 }
-               
+
             }
         </InputSelect>
         <ValidationMessage For="@(() => _user.CompanyId)" />
     </div>
 
+    <br />
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))">Submit</button>
         <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
     </div>
 </EditForm>
 
 
 @code {
-
-
     // Parameter used to insert the current page into as a Modal window.
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
@@ -90,35 +109,36 @@
     #region CRUD Operations
     async Task CreateUser()
     {
+        var ErrorMessage = string.Empty;
         var _guid = Guid.NewGuid();
         var _regkey = _guid.ToString();
+
+
+        _user.UserRoleId = _userRoleId;
+        _user.CompanyId = _companyId;
+        _user.RegistrationKey = _regkey;
+        _user.IsActive = false;
+
         try
-        {
-            _user.UserRoleId = _userRoleId;
-            _user.CompanyId = _companyId;
-            _user.RegistrationKey = _regkey;
-            _user.IsActive = false;
+        {       
+            // Verify that the email address isn't already in use.
+            var _userEmailExists = await _userService.EmailExistsAsync(_user.Email);
+            if (_userEmailExists)
+            {
+                throw new Exception("Email address already exists, try another email.");
+            }
 
             await _userService.CreateUserAsync(_user);
 
-            try
-            {
-                await _httpClientService.SendRegistrationEmailAsync(_user.Email, _user.Name, _user.RegistrationKey);
-                var email = _user.Email;
-                await js.InvokeVoidAsync("alert", "A confirmation email has been sent to {email}, follow the link to verify your account!");
-                return;
-            }
-            catch (Exception)
-            {
-                await js.InvokeVoidAsync("alert", "An error occured trying to confirm your account, please contact Hammond Pole for support!");
-                throw;
-            }
 
-
+            await _httpClientService.SendRegistrationEmailAsync(_user.Email, _user.Name, _user.RegistrationKey);
+            await js.InvokeVoidAsync("alert", $"A confirmation email has been sent to {_user.Email}, follow the link to verify your account!");
+            await Close();
         }
         catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
+        {            
+                await js.InvokeVoidAsync("alert", $"{ex.Message}");
+                return;
         }
     }
     #endregion
@@ -126,5 +146,17 @@
     #region Modal Operations
     async Task Cancel() => await BlazoredModal.CancelAsync();
     async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+
+    #region Password Validation
+    private string _confirmPassword = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    private void ValidateConfirmPassword(ChangeEventArgs args)
+    {
+        _errorMessage = _user.Password == args.Value.ToString() ? string.Empty : "Passwords do not match";
+    }
+
+
     #endregion
 }

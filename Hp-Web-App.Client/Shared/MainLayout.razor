@@ -17,10 +17,10 @@
             <LoginDisplay />
             <AuthorizeView>
                 <Authorized>
-                    <a @onclick="LogoutAndClearSession">Logout</a>
+                    <a @onclick="LogoutAndClearSession" style="cursor: pointer;">Logout</a>
                 </Authorized>
                 <NotAuthorized>
-                    <a href="authentication/login">Login</a>
+                    <a href="/login">Login</a>
                 </NotAuthorized>
             </AuthorizeView>
         </div>
@@ -37,7 +37,7 @@
     {
         await JSRuntime.InvokeVoidAsync("blazorHelpers.clearSession");
         await JSRuntime.InvokeVoidAsync("blazorHelpers.refresh");
-        NavigationManager.NavigateTo("/", true);
+        NavigationManager.NavigateTo("/login", true);
     }
 
 }

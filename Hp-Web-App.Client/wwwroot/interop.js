@@ -22,3 +22,11 @@ window.downloadFile = (fileUrl, fileName) => {
     document.body.removeChild(link);
 };
 
+function saveAsFile(fileName, base64String) {
+    var link = document.createElement('a');
+    link.download = fileName;
+    link.href = 'data:application/octet-stream;base64,' + base64String;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
