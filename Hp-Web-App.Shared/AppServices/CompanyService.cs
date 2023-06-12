@@ -7,7 +7,7 @@ public class CompanyService : ICompanyService
 {
     private readonly DbWebAppContext _context;
 
-    public CompanyService(DbWebAppContext context)
+    public CompanyService(DbWebAppContext context, object value)
     {
         _context = context;
     }
@@ -76,7 +76,7 @@ public class CompanyService : ICompanyService
             return new Company();
         }
 
-        _context.Add(company);
+        _context.Companies.Add(company);
         await _context.SaveChangesAsync();
         return company;
     }

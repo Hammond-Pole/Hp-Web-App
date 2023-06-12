@@ -40,4 +40,9 @@
     <None Include="D:\repo\Hp-Web-App\Hp_Web_App.Tests\.editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DbContext\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>
