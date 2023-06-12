@@ -88,3 +88,10 @@ a {
 .dynamic-table-toggle:visited {
     background-color: #333d65  
 }
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 4px;
+}
