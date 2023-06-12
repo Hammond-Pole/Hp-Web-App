@@ -11,7 +11,7 @@ public class QuestionField
     #endregion
 
     #region User Properties
-    [StringLength(25, ErrorMessage = "Name is too long.")]
+    [StringLength(17, ErrorMessage = "Name is too long.")]
     public string Name { get; set; } = string.Empty;
 
     [StringLength(250, ErrorMessage = "Description is too long.")]

@@ -1,6 +1,6 @@
 ﻿<div class="custom-component">
     <label title="@QuestionFieldDescription" for="@QuestionFieldLabel" class="bold-label">@QuestionFieldLabel:</label>
-    <select title="@QuestionFieldDescription" id="@QuestionFieldLabel" @onchange="OnValueChanged">
+    <select title="@QuestionFieldDescription" id="@QuestionFieldLabel" class="ques-inputs" @onchange="OnValueChanged">
         <option value="" selected disabled>Select an option.</option>
         @if (QuestionFieldListItems.Count >= 0)
         {

@@ -96,9 +96,25 @@
 </div>
 
 <div><DynamicTable TModel="DocumentsAttached" Items="_documentsAttached" OnDownload="Download" /></div>
-<div><DynamicTable TModel="QuestionValue" Items="_previousQuestionValues"/></div>
+<div class="dynamic-table-wrapper">
+    <button class="dynamic-table-toggle btn btn-primary" @onclick="ToggleDynamicTable">Questions and Answers to Uploaded Documents</button>
+    <div>
+    @if (showDynamicTable)
+    {
+        <DynamicTable TModel="QuestionValue" Items="_previousQuestionValues" />
+    }
+    </div>
+</div>
+
 
 @code {
+
+    bool showDynamicTable = false;
+
+    private void ToggleDynamicTable()
+    {
+        showDynamicTable = !showDynamicTable;
+    }
 
     #region Update Question Values
     private void OnValueChanged(dynamic value)
@@ -134,7 +150,6 @@
         }
         StateHasChanged();
     }
-
     private void UpdateOrAddValue<T>(List<T> list, QuestionValue value, Action<T> updateAction) where T : QuestionValue
     {
         var existingValue = list.FirstOrDefault(x => x.DocumentId == value.DocumentId && x.QuestionFieldID == value.QuestionFieldID);
@@ -459,5 +474,6 @@
         await JSRuntime.InvokeVoidAsync("saveAsFile", documentsAttached.FileName, Convert.ToBase64String(fileBytes));
     }
 }
+
 
 
