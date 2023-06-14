@@ -6,6 +6,7 @@
 
 main {
     flex: 1;
+    
 }
 
 .sidebar {
@@ -19,8 +20,24 @@ main {
     height: 3.5rem;
     display: flex;
     align-items: center;
+    background-color: #434969;
 }
-
+a.nav-link:hover {
+    color: #7e8386;
+}
+a {
+    color: #f7f7f7;
+    font-family: serif;
+    font-weight: bold;
+}
+    a:visited {
+        color: #f7f7f7;
+    }
+.btn-primary {
+    color: #fff;
+    background-color: #333d65;
+    border: none;
+}
     .top-row ::deep a, .top-row .btn-link {
         white-space: nowrap;
         margin-left: 1.5rem;
@@ -67,4 +84,14 @@ main {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }
+}
+.dynamic-table-toggle:visited {
+    background-color: #333d65  
+}
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 4px;
 }

@@ -1,4 +1,6 @@
+@using System.Text.Json;
 @using Authentication
+@using Hp_Web_App.Client.Shared
 @inherits LayoutComponentBase
 
 @inject IJSRuntime JSRuntime
@@ -7,17 +9,23 @@
 
 <PageTitle>Document Manager</PageTitle>
 
-<div class="page">
+@*<div class="page">
     <div class="sidebar">
         <NavMenu />
-    </div>
+    </div>*@
 
     <main>
         <div class="top-row px-4 auth">
             <LoginDisplay />
             <AuthorizeView>
                 <Authorized>
-                    <a @onclick="LogoutAndClearSession" style="cursor: pointer;">Logout</a>
+                <a class="nav-link" href="/uploaddocument" Match="NavLinkMatch.All">
+                    <span class="oi oi-file" aria-hidden="true"></span> Upload A Document
+                    </a>
+                    <a class="nav-link" data-toggle="collapse" href="#settingsCollapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
+                        <span class="oi oi-cog" aria-hidden="true"></span> Admin
+                    </a>
+                <a class="nav-link" @onclick="LogoutAndClearSession" style="cursor: pointer;">Logout</a>
                 </Authorized>
                 <NotAuthorized>
                     <a href="/login">Login</a>
@@ -29,7 +37,7 @@
             @Body
         </article>
     </main>
-</div>
+@*</div>*@
 
 @code {
 
@@ -39,5 +47,4 @@
         await JSRuntime.InvokeVoidAsync("blazorHelpers.refresh");
         NavigationManager.NavigateTo("/login", true);
     }
-
 }
