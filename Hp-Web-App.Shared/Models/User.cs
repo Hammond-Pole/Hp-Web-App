@@ -28,6 +28,8 @@ public class User
 
     [ExcludeFromTable]
     public DateTime RegistrationKeyExpires { get; set; }  = DateTime.Now.AddHours(24);
+    public string Surname { get; set; } =string.Empty;
+    public DateTime Dob { get; set; }
 
     #endregion
 
