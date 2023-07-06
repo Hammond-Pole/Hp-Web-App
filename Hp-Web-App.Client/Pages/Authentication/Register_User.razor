@@ -36,13 +36,20 @@
         <ValidationMessage For="@(() => _user.Surname)" />
     </div>
 
-    <!---
+    
       <div class="form-group">
         <label for="Dob">Date of Birth:</label>
         <InputDate id="sdob" class="form-control" @bind-Value="_user.Dob" />
         <ValidationMessage For="@(() => _user.Dob)" />
     </div>  
-    --->
+    
+   
+    <div class="form-group">
+        <label for="Phone_Num">Phone No:</label>
+        <InputText id="uphonenum" class="form-control" @bind-Value="_user.Phone_Num" />
+        <ValidationMessage For="@(() => _user.Phone_Num)" />
+    </div>
+    
 
     <div class="form-group">
         <label for="email">Email:</label>
@@ -114,6 +121,7 @@
     private int _companyId = 1;
     private string _surname = string.Empty;
     private DateTime _Dob = DateTime.Now;
+    private string _PhoneNum = string.Empty;
 
 
     // Load all required data when launching the page.
@@ -136,7 +144,8 @@
         _user.RegistrationKey = _regkey;
         _user.IsActive = false;
         _user.Surname = _surname;
-        //_user.Dob = _Dob;
+        _user.Dob = _Dob;
+        _user.Phone_Num = _PhoneNum;
 
         try
         {       

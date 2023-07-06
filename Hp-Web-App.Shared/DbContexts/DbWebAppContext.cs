@@ -143,7 +143,9 @@ public class DbWebAppContext : DbContext
                                 IsActive = true,
                                 Password = "1234",
                                 Surname = "Jordan",
-                                Dob = DateTime.Now
+                                Dob = DateTime.Now,
+                                Phone_Num="073 345 8900"
+
 
                             });
 
