@@ -31,8 +31,8 @@ public class User
     [Required(ErrorMessage ="Sunamr is required")]
     public string Surname { get; set; } =string.Empty;
     public DateTime Dob { get; set; }
-    [Required(ErrorMessage ="Phone number is required")]
-    public string Phone_Num { get; set; }=string.Empty; 
+    [Required(ErrorMessage = "Phone number is required")]
+    public string? Phone_Num { get; set; } = string.Empty;
 
     #endregion
 

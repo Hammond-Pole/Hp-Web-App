@@ -119,9 +119,7 @@
     private string ErrorMessage = string.Empty;
     private int _userRoleId = 1;
     private int _companyId = 1;
-    private string _surname = string.Empty;
-    private DateTime _Dob = DateTime.Now;
-    private string _PhoneNum = string.Empty;
+    
 
 
     // Load all required data when launching the page.
@@ -143,9 +141,7 @@
         _user.CompanyId = _companyId;
         _user.RegistrationKey = _regkey;
         _user.IsActive = false;
-        _user.Surname = _surname;
-        _user.Dob = _Dob;
-        _user.Phone_Num = _PhoneNum;
+        
 
         try
         {       
