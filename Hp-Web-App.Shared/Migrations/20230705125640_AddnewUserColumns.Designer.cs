@@ -4,6 +4,7 @@ using Hp_Web_App.Shared.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hp_Web_App.Shared.Migrations
 {
     [DbContext(typeof(DbWebAppContext))]
-    partial class DbWebAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230705125640_AddnewUserColumns")]
+    partial class AddnewUserColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -409,10 +412,6 @@ namespace Hp_Web_App.Shared.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone_Num")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RegistrationKey")
                         .HasColumnType("nvarchar(max)");
 
@@ -439,13 +438,12 @@ namespace Hp_Web_App.Shared.Migrations
                         {
                             Id = -1,
                             CompanyId = 1,
-                            Dob = new DateTime(2023, 7, 5, 16, 23, 56, 11, DateTimeKind.Local).AddTicks(2115),
+                            Dob = new DateTime(2023, 7, 5, 0, 0, 0, 0, DateTimeKind.Local),
                             Email = "alanj@hpd.co.za",
                             IsActive = true,
                             Name = "Admin",
                             Password = "1234",
-                            Phone_Num = "073 345 8900",
-                            RegistrationKeyExpires = new DateTime(2023, 7, 6, 16, 23, 56, 11, DateTimeKind.Local).AddTicks(2095),
+                            RegistrationKeyExpires = new DateTime(2023, 7, 6, 14, 56, 40, 713, DateTimeKind.Local).AddTicks(5640),
                             Surname = "Jordan",
                             UserRoleId = 1
                         });

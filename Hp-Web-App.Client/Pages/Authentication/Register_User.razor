@@ -31,6 +31,27 @@
     </div>
 
     <div class="form-group">
+        <label for="Surname">Surname:</label>
+        <InputText id="sname" class="form-control" @bind-Value="_user.Surname" />
+        <ValidationMessage For="@(() => _user.Surname)" />
+    </div>
+
+    
+      <div class="form-group">
+        <label for="Dob">Date of Birth:</label>
+        <InputDate id="sdob" class="form-control" @bind-Value="_user.Dob" />
+        <ValidationMessage For="@(() => _user.Dob)" />
+    </div>  
+    
+   <!-------------------------------phone number----------------------------------------->
+    <div class="form-group">
+        <label for="Phone_Num">Phone No:</label>
+        <InputText id="uphonenum" class="form-control" @bind-Value="_user.Phone_Num" />
+        <ValidationMessage For="@(() => _user.Phone_Num)" />
+    </div>
+    
+
+    <div class="form-group">
         <label for="email">Email:</label>
         <InputText id="email" class="form-control" @bind-Value="_user.Email" />
         <ValidationMessage For="@(() => _user.Email)" />
@@ -98,6 +119,8 @@
     private string ErrorMessage = string.Empty;
     private int _userRoleId = 1;
     private int _companyId = 1;
+    
+
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
@@ -118,6 +141,7 @@
         _user.CompanyId = _companyId;
         _user.RegistrationKey = _regkey;
         _user.IsActive = false;
+        
 
         try
         {       

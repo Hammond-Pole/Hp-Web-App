@@ -132,7 +132,7 @@ public class DbWebAppContext : DbContext
         modelBuilder.Entity<Company>().HasData(
                         new Company { Id = 1, Name = "Hammond Pole", CompanyTypeId = 5 });
 
-        modelBuilder.Entity<User>().HasData(
+        _ = modelBuilder.Entity<User>().HasData(
                             new User
                             {
                                 Id = -1,
@@ -141,7 +141,12 @@ public class DbWebAppContext : DbContext
                                 CompanyId = 1,
                                 UserRoleId = 1,
                                 IsActive = true,
-                                Password = "1234"
+                                Password = "1234",
+                                Surname = "Jordan",
+                                Dob = DateTime.Now,
+                                Phone_Num="073 345 8900"
+
+
                             });
 
 
