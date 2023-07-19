@@ -42,7 +42,7 @@
 <h3>Allocated Questions</h3>
 
 <!-- Show a table below with the current document types. Allow the user to add more document types. -->
-<DynamicTable TModel="QuestionField" Items="_questionFields" OnDelete="OnDeleteItem" />
+<DynamicTable TModel="QuestionField" Items="_questionFields" OnEdit="ShowEditQuestion" OnDelete="OnDeleteItem" />
 <br />
 <button @onclick="ShowAddQuestionPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Question</button>
 
@@ -117,6 +117,12 @@
             _questionFields = await _questionService.GetQuestionFieldsByDocumentAsync(documentId);
             StateHasChanged();
         }
+    }
+
+    async void ShowEditQuestion(QuestionField Qfield)
+    {
+        int Qid = Qfield.Id;
+        uriHelper.NavigateTo("Document/Edit/Edit_Question/" + Qid);
     }
     #endregion
 }
