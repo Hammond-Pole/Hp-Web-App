@@ -113,7 +113,7 @@
             ErrorMessage = ex.Message;
         }
         RedirectToEdit();
-        // RedirectToEdit(_document);
+       
     }
     #endregion
 
@@ -122,21 +122,13 @@
     // async Task Close() => await BlazoredModal.CloseAsync();
     #endregion
 
-    /*async void RedirectToEdit(Document document)
-    {
-        int Id = document.Id; // Assuming the item has an Id property
-
-        //Navigate to the Edit_Document page.
-        //uriHelper.NavigateTo("Document/Edit/" + Id);
-        uriHelper.NavigateTo("Document");
-    }*/
+    
 
     async void RedirectToEdit()
     {
         
 
-        //Navigate to the Edit_Document page.
-        //uriHelper.NavigateTo("Document/Edit/" + Id);
+    
         uriHelper.NavigateTo("Document");
     }
 
