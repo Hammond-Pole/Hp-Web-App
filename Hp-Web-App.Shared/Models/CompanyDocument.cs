@@ -15,10 +15,10 @@ public class CompanyDocument
     #endregion
 
     #region Navigation Properties
-    [ExcludeFromTable]
+    //[ExcludeFromTable]
     public Document? Document { get; set; } // navigation property
 
-    [ExcludeFromTable]
+  //  [ExcludeFromTable]
     public Company? Company { get; set; } // navigation property
     #endregion
 }
