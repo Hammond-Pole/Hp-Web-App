@@ -42,7 +42,7 @@
 <h3>Allocated Questions</h3>
 
 <!-- Show a table below with the current document types. Allow the user to add more document types. -->
-<DynamicTable TModel="QuestionField" Items="_questionFields" OnEdit="ShowEditQuestion" OnDelete="OnDeleteItem" />
+<DynamicTable TModel="QuestionField" Items="_questionFields" OnEdit=" ShowEditQuestionPopup" OnDelete="OnDeleteItem" />
 <br />
 <button @onclick="ShowAddQuestionPopup" class="btn btn-primary"> <i class="oi oi-plus"></i> Add a Question</button>
 
@@ -119,10 +119,37 @@
         }
     }
 
-    async void ShowEditQuestion(QuestionField Qfield)
+    /*async void ShowEditQuestion(QuestionField Qfield)
     {
         int Qid = Qfield.Id;
         uriHelper.NavigateTo("Document/Edit/Edit_Question/" + Qid);
+    }*/
+
+
+  
+    async void ShowEditQuestionPopup(QuestionField Qfield)
+    {
+        int Quesid = Qfield.Id;
+
+       
+        var parameters = new ModalParameters
+        {
+            { nameof(Edit_Question.qsId), Quesid }
+        };
+        var options = new ModalOptions()
+            {
+                DisableBackgroundCancel = true
+            };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var createForm = Modal.Show<Edit_Question>("Edit question", parameters, options);
+        var result = await createForm.Result;
+
+        if (!result.Cancelled)
+        {
+            _questionFields = await _questionService.GetQuestionFieldsAsync();
+            StateHasChanged();
+        }
     }
     #endregion
 }
