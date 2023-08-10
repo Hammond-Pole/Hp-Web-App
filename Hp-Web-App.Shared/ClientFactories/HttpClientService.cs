@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Hp_Web_App.Shared.Migrations;
+using Hp_Web_App.Shared.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -10,6 +12,7 @@ public interface IHttpClientService
 {
     Task<string> GetAccessTokenAsync();
     Task<HttpResponseMessage> SendRegistrationEmailAsync(string email, string name, string token);
+    Task<HttpResponseMessage> SendRegistrationEmailAsync(TrainingRequestModel training);
 }
 
 public class HttpClientService : IHttpClientService
@@ -98,4 +101,61 @@ public class HttpClientService : IHttpClientService
 
         return response;
     }
+
+
+    public async Task<HttpResponseMessage> SendRegistrationEmailAsync(TrainingRequestModel training)
+    {
+        var baseUrl = "users/property@hammondpole.co.za/sendmail";
+        var client = _clientFactory.CreateClient("graph");
+        var authenticationResult = await GetAccessTokenAsync();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.ToString());
+
+        var templatePath = _mountPath + @"/Templates/OrderTraining.html";
+
+
+        string htmlTemplate = File.ReadAllText(templatePath);
+
+        htmlTemplate = htmlTemplate.Replace("{{name}}", training.Name);
+        htmlTemplate = htmlTemplate.Replace("{{email}}", training.Email);
+        htmlTemplate = htmlTemplate.Replace("{{surname}}", training.Surname);
+        htmlTemplate = htmlTemplate.Replace("{{company}}", training.CompanyName);
+        htmlTemplate = htmlTemplate.Replace("{{role}}", training.Role);
+        htmlTemplate = htmlTemplate.Replace("{{telephone}}", training.TelephoneNumber);
+        htmlTemplate = htmlTemplate.Replace("{{address}}", training.OfficeAddress);
+        htmlTemplate = htmlTemplate.Replace("{{topic}}", training.Topic);
+
+
+        var message = new
+        {
+            Message = new
+            {
+                Subject = $"REAL ETSATE TRAINING REQUEST: {training.CompanyName}",
+                Body = new
+                {
+                    ContentType = "Html",
+                    Content = htmlTemplate
+                },
+                ToRecipients = new[]
+                {
+                    new
+                    {
+                        EmailAddress = new
+                        {
+                            Address = "alanj@hammondpole.co.za"
+                        }
+                    }
+                }
+            },
+            SaveToSentItems = false
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
+        var fullUrl = new UriBuilder(client.BaseAddress + baseUrl).ToString();
+        var response = await client.PostAsync(fullUrl, content);
+
+        response.EnsureSuccessStatusCode();
+
+        return response;
+    }
+
 }

@@ -1,0 +1,137 @@
+﻿@page "/trainingrequests"
+
+<!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
+@using Hp_Web_App.Shared.ClientFactories;
+@using Microsoft.AspNetCore.Components.Forms
+
+
+<!-- Dependency Injection. -->
+@inject ITrainingRequestService _trainingRequestService
+@inject IHttpClientService _httpClientService
+@inject IJSRuntime js
+
+<div style="background-color: #272E3E; display: flex; justify-content: center; align-items: center; height: 100px; position: absolute; top: 0; width: 100%; padding: 0;">
+    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/06/HammondPoleLogo-01-300x93.png" alt="Logo" style="padding-top: 10px; height: 93px; width: 300px;" />
+</div>
+
+
+<div style="background-color: #272E3E; display:flex; justify-content: center; align-items: center; position: absolute; top: 100px; width: 100%; padding: 0px;">
+    <div style="background-color: white; max-width: 50%; margin: 0 auto; padding:0">
+        <div class="custom-form">
+
+            <h2 class="text-center fun-font" style="padding-top: 100px">Our attorneys and our expertise at YOUR fingertips</h2>
+
+            <div class="attorney-pics" style="padding-top: 18px">
+                <div class="row justify-content-center">
+                    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/06/Brendan-Michie-150x150.png" alt="Brendan Michie" class="rounded-circle" style="width: 100%; height: auto; max-width: 100px;">
+                    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/07/katlego-mthembu-2-150x150.png" alt="Katlego Mthembu" class="rounded-circle" style="width: 100%; height: auto; max-width: 100px;">
+                    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/06/Michelle-Orsmon-150x150.png" alt="Michelle Orsmond" class="rounded-circle" style="width: 100%; height: auto; max-width: 100px;">
+                    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/06/Neil-Mc-Kinon-150x150.png" alt="Neil Mc Kinon" class="rounded-circle" style="width: 100%; height: auto; max-width: 100px;">
+                    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/06/Andrew-Gerhard-150x150.png" alt="Andrew Gerhard" class="rounded-circle" style="width: 100%; height: auto; max-width: 100px;">
+                    <img src="https://www.hammondpole.co.za/wp-content/uploads/2021/08/adrene2-150x150.png" alt="Ardene Nel" class="rounded-circle" style="width: 100%; height: auto; max-width: 100px;">
+                </div>
+            </div>
+
+            <div style="background-color: white; padding: 1rem;">
+                <p class="edgy-paragraph">
+                    If you, your office or some of your agents require any specific real estate training please fill out this form, tell us what you need and we will contact you to arrange your own custom training sessions, free of charge. Obviously, the training will be arranged with you at a time that is suitable to you and our attorneys.
+                </p>
+            </div>
+
+            <div class="mb-3">
+                <hr class="form-section-divider">
+            </div>
+
+            <EditForm Model="@_trainingRequest" OnValidSubmit="@CreateRequest" class="card-body">
+                <DataAnnotationsValidator />
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="name">First Name:</label>
+                    <InputText id="name" class="form-control" @bind-Value="_trainingRequest.Name" />
+                    <ValidationMessage For="@(() => _trainingRequest.Name)" />
+                </div>
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="surname">Surname:</label>
+                    <InputText id="surname" class="form-control" @bind-Value="_trainingRequest.Surname" />
+                    <ValidationMessage For="@(() => _trainingRequest.Surname)" />
+                </div>
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="company">Company Name:</label>
+                    <InputText id="company" class="form-control" @bind-Value="_trainingRequest.CompanyName" />
+                    <ValidationMessage For="@(() => _trainingRequest.CompanyName)" />
+                </div>
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="role">Job Role:</label>
+                    <InputText id="role" class="form-control" @bind-Value="_trainingRequest.Role" />
+                    <ValidationMessage For="@(() => _trainingRequest.Role)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <InputText id="email" class="form-control" @bind-Value="_trainingRequest.Email" />
+                    <ValidationMessage For="@(() => _trainingRequest.Email)" />
+                </div>
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="phone">Phone:</label>
+                    <InputText id="phone" class="form-control" @bind-Value="_trainingRequest.TelephoneNumber" />
+                    <ValidationMessage For="@(() => _trainingRequest.TelephoneNumber)" />
+                </div>
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="address">Office Address:</label>
+                    <InputTextArea id="address" class="form-control" @bind-Value="_trainingRequest.OfficeAddress" />
+                    <ValidationMessage For="@(() => _trainingRequest.OfficeAddress)" />
+                </div>
+
+                <div class="form-group" style="padding-top: 10px">
+                    <label for="topic">Topic:</label>
+                    <InputTextArea id="topic" class="form-control" @bind-Value="_trainingRequest.Topic" />
+                    <ValidationMessage For="@(() => _trainingRequest.Topic)" />
+                </div>
+
+                <div />
+                <div />
+                <div class="form-group" style="padding-top: 10px">
+                    <button type="submit" class="btn btn-primary">Order your Training</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    // Private properties used only in this page.
+    private TrainingRequestModel _trainingRequest = new();
+    private string ErrorMessage = string.Empty;
+
+    protected async override Task OnInitializedAsync()
+    {
+
+    }
+
+    #region CRUD Operations
+    async Task CreateRequest()
+    {
+        try
+        {
+            var submission = await _trainingRequestService.CreateRequestAsync(_trainingRequest);
+
+            await _httpClientService.SendRegistrationEmailAsync(_trainingRequest);
+
+
+            await js.InvokeVoidAsync("alert", $"Thank you for requesting training, we will be in touch.");
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+    #endregion
+}
