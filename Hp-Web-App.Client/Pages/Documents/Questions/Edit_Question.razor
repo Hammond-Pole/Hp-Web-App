@@ -44,32 +44,18 @@
         </InputSelect>
         <div style="display: flex; align-items: baseline;">
             
-
+            <br />
             @if (_questionField.QuestionFieldTypeId == 7)
             {
                 
                 
                 <ul>
-
-                    <li>
-                        <InputSelect id="ddlQuestionFieldType"
-                                     class="form-select"
-                        @bind-Value="_questionField.QuestionFieldTypeId"
-                                     style="margin-right: 8px; ">
-                            @foreach (var item in _questionFieldType!)
-                            {
-                                <option value="@item.Id">@item.DisplayName</option>
-                            }
-                        </InputSelect>
-                    </li>
-
-                <li>
                         @foreach (var item in _questionField.ListValues!)
                         {
                             <InputText id="name" class="form-control" @bind-Value="@item.Value" style="width:420px" />
+                           
                         }
-                </li>
-                  
+                          
                 </ul>
             }
         </div>

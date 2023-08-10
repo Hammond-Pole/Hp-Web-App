@@ -135,8 +135,7 @@ public class QuestionService : IQuestionService
         }
 
         foreach (var questionValue in questionValues)
-        {
-            var existingDocument = await _context.Documents.FindAsync(questionValue.DocumentId);
+        {var existingDocument = await _context.Documents.FindAsync(questionValue.DocumentId);
             if (existingDocument == null)
             {
                 throw new Exception($"DocumentsAttached with ID {questionValue.DocumentsAttachedId} not found.");
