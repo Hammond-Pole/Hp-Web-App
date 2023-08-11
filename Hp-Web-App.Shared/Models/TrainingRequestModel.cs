@@ -9,7 +9,6 @@ public class TrainingRequestModel
     #endregion
 
     #region User Properties
-
     [StringLength(25, ErrorMessage = "Name is too long.")]
     public string Name { get; set; } = string.Empty;
 

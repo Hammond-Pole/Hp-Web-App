@@ -122,16 +122,23 @@
         {
             var submission = await _trainingRequestService.CreateRequestAsync(_trainingRequest);
 
-            await _httpClientService.SendRegistrationEmailAsync(_trainingRequest);
-
-
-            await js.InvokeVoidAsync("alert", $"Thank you for requesting training, we will be in touch.");
+            var mailResult = await _httpClientService.SendRegistrationEmailAsync(_trainingRequest);
+            if (!mailResult.IsSuccessStatusCode)
+            {
+                await js.InvokeVoidAsync("alert", "An error occurred sending your confirmation, but don't worry, we will be in touch.");
+            }
+            else
+            {
+                await js.InvokeVoidAsync("alert", $"Thank you for requesting training, we will be in touch.");
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
-            throw;
+            await js.InvokeVoidAsync("alert", "An error occurred: " + ex.Message);
         }
+    
+        _trainingRequest = new(); 
+        StateHasChanged();
     }
     #endregion
 }
