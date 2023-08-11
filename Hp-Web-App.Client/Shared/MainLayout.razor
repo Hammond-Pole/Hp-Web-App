@@ -10,12 +10,12 @@
 <PageTitle>Document Manager</PageTitle>
 
 <main style="padding:0">
-    @if (NavigationManager.Uri.Contains("trainingrequest"))
-    {
-        <article class="content">
-            @Body
-        </article>
-    }
+@if (NavigationManager.Uri.Contains("trainingrequest", StringComparison.OrdinalIgnoreCase))
+{
+    <article class="content">
+        @Body
+    </article>
+}
     else
     {
         <div class="top-row px-4 auth">
