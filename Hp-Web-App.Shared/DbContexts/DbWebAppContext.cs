@@ -32,6 +32,10 @@ public class DbWebAppContext : DbContext
     public DbSet<CompanyDocument> CompanyDocuments { get; set; }
     public DbSet<DocumentsAttached> DocumentsAttached { get; set; }
 
+
+    // Single Page Table
+    public DbSet<TrainingRequestModel> TrainingRequests { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
@@ -149,6 +153,9 @@ public class DbWebAppContext : DbContext
 
                             });
 
+
+        modelBuilder.Entity<TrainingRequestModel>()
+            .HasKey(k => k.Id);
 
         base.OnModelCreating(modelBuilder);
     }

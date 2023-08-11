@@ -9,35 +9,38 @@
 
 <PageTitle>Document Manager</PageTitle>
 
-@*<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>*@
-
-    <main>
+<main style="padding:0">
+@if (NavigationManager.Uri.Contains("trainingrequest", StringComparison.OrdinalIgnoreCase))
+{
+    <article class="content">
+        @Body
+    </article>
+}
+    else
+    {
         <div class="top-row px-4 auth">
             <LoginDisplay />
             <AuthorizeView>
                 <Authorized>
-                <a class="nav-link" href="/uploaddocument" Match="NavLinkMatch.All">
-                    <span class="oi oi-file" aria-hidden="true"></span> Upload A Document
+                    <a class="nav-link" href="/uploaddocument" Match="NavLinkMatch.All">
+                        <span class="oi oi-file" aria-hidden="true"></span> Upload A Document
                     </a>
                     <a class="nav-link" data-toggle="collapse" href="#settingsCollapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
                         <span class="oi oi-cog" aria-hidden="true"></span> Admin
                     </a>
-                <a class="nav-link" @onclick="LogoutAndClearSession" style="cursor: pointer;">Logout</a>
+                    <a class="nav-link" @onclick="LogoutAndClearSession" style="cursor: pointer;">Logout</a>
                 </Authorized>
                 <NotAuthorized>
                     <a href="/login">Login</a>
                 </NotAuthorized>
             </AuthorizeView>
         </div>
+    <article class="content px-4">
+        @Body
+    </article>
+    }
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-@*</div>*@
+</main>
 
 @code {
 
