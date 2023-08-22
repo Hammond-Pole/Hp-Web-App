@@ -41,6 +41,7 @@
             <div class="mb-3 text-center">
                 <i class="text-danger">Don't have an account?</i>
                 <button @onclick="async () => await ShowRegisterPopup()" class=" btn btn-link"> Register</button>
+                <button @onclick="async () => await ResetPassword()" class=" btn btn-link"> Forgot Password</button>
             </div>
         </EditForm>
     </div>
@@ -132,6 +133,16 @@
         var options = new ModalOptions { DisableBackgroundCancel = true };
 
         var createForm = Modal.Show<Register_User>("Register", options);
+        var result = await createForm.Result;
+    }
+
+    private async Task ResetPassword()
+    {
+        /// UriHelper.NavigateTo("/ResetPassword", true);
+
+        var options = new ModalOptions { DisableBackgroundCancel = true };
+
+        var createForm = Modal.Show<ForgotPassword>("Enter your email address", options);
         var result = await createForm.Result;
     }
 }
