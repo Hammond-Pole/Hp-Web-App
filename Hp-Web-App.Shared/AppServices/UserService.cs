@@ -162,7 +162,7 @@ public class UserService : IUserService
             throw new Exception("User role or company name cannot be empty.");
         }
 
-        user.IsActive = true;
+        user.IsActive = false;
         user.UserRole = existingRole;
         user.Company = existingCompany;
         _context.Users.Add(user);
