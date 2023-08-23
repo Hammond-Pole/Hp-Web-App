@@ -162,7 +162,7 @@ public class UserService : IUserService
             throw new Exception("User role or company name cannot be empty.");
         }
 
-        user.IsActive = true;
+        user.IsActive = false;
         user.UserRole = existingRole;
         user.Company = existingCompany;
         _context.Users.Add(user);
@@ -213,5 +213,9 @@ public class UserService : IUserService
         var userRole = await _context.UserRoles.FindAsync(Id);
         return userRole ?? new UserRole();
     }
+
+    
+
+
     #endregion
 }

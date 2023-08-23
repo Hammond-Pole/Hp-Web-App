@@ -17,4 +17,7 @@ public interface IUserService
     Task<(UserSession, LoginError)> Login(string email, string password);
     Task UpdateUserAsync(User user);
     Task<bool> VerifyToken(string token);
+
+   
+   
 }

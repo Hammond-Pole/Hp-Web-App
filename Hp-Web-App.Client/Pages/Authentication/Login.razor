@@ -25,13 +25,13 @@
             <DataAnnotationsValidator />
             <div class="form-group-sm">
                 <label for="email" style="width:100%">Email</label>
-                <InputText style="width:100%" id="email" @bind-Value=_model.Email placeholder="Email" />
+                <InputText class="form-control" style="width:100%" id="email" @bind-Value=_model.Email placeholder="Email" />
                 <ValidationMessage For=@(() => _model.Email) />
             </div>
             <div style="height:10px; width:100%"></div>
             <div class="form-group-sm">
                 <label for="password" style="width:100%">Password</label>
-                <InputText style="width:100%" id="password" @bind-Value=_model.Password type="password" placeholder="Password" />
+                <InputText class="form-control" style="width:100%" id="password" @bind-Value=_model.Password type="password" placeholder="Password" />
                 <ValidationMessage For=@(() => _model.Password) />
             </div>
             <div style="height:10px; width:100%"></div>
@@ -39,9 +39,12 @@
                 <button id="login" class="btn btn-primary" @onclick="Authenticate">Login</button>
             </div>
             <div class="mb-3 text-center">
-                <i class="text-danger">Don't have an account?</i>
-                <button @onclick="async () => await ShowRegisterPopup()" class=" btn btn-link"> Register</button>
+                <i class="text-secondary">Don't have an account?</i>
+                <button @onclick="async () => await ShowRegisterPopup()" class=" btn btn-outline-danger"> Register</button>
+                <button @onclick="async () => await ResetPassword()" class=" btn btn-outline-primary"> Forgot Password</button>
             </div>
+
+
         </EditForm>
     </div>
 </div>
@@ -53,6 +56,9 @@
     // Add optional parameters to log in the user the first time.
     [Parameter] public string token { get; set; } = string.Empty;
 
+
+    public bool _iSActive = false;
+    User _user = new User();
     // Create a Model instance for binding the user's credentials in the Razor input fields.
     private Model _model = new()
         {
@@ -72,6 +78,8 @@
 
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
+
+      
     }
 
     /*
@@ -122,10 +130,10 @@
             return;
         }
     }
-    
+
 
     /*
-     The ShowRegisterPopup method displays a modal window for the user to register.
+    The ShowRegisterPopup method displays a modal window for the user to register.
     */
     private async Task ShowRegisterPopup()
     {
@@ -134,4 +142,15 @@
         var createForm = Modal.Show<Register_User>("Register", options);
         var result = await createForm.Result;
     }
+
+    private async Task ResetPassword()
+    {
+        /// UriHelper.NavigateTo("/ResetPassword", true);
+
+        var options = new ModalOptions { DisableBackgroundCancel = true };
+
+        var createForm = Modal.Show<ForgotPassword>("Enter your email address", options);
+        var result = await createForm.Result;
+    }
+
 }
