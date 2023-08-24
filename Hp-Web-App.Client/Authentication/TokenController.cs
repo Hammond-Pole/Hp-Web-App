@@ -20,7 +20,7 @@ public class TokenController : Controller
         {
             var user = await _userService.GetUserbyTokenAsync(token);
             user.IsActive = true;
-            return Redirect("/login/" + token.ToString());
+            return Redirect("/Confirme/" + token.ToString());
         }
         else
         {

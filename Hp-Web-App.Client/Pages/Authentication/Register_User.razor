@@ -127,6 +127,7 @@
     {
         _companies = await _companyService.GetCompaniesAsync();
         _userRoles = await _userService.GetUserRolesAsync();
+        _user.IsActive = false;
     }
 
     #region CRUD Operations
@@ -140,7 +141,7 @@
         _user.UserRoleId = _userRoleId;
         _user.CompanyId = _companyId;
         _user.RegistrationKey = _regkey;
-        _user.IsActive = false;
+       
       
 
         try

@@ -15,4 +15,6 @@ public interface IQuestionService
     Task<List<QuestionFieldType>> GetQuestionFieldTypesAsync();
     Task<List<QuestionValues>> GetQuestionValuesByQuestionFieldIdAsync(int id);
     Task UpdateQuestionFieldAsync(QuestionField questionField);
+   // Task <listLGetQuestionValueByQuestionFieldIdAsync(int qfiId);
+   Task<List<ListValue>> GetQuestionValueByQuestionFieldIdAsync(int QUEST_FIELD_ID);
 }
