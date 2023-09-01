@@ -10,6 +10,7 @@ public class UserService : IUserService
     private readonly DbWebAppContext _context;
     private readonly IDocumentService _documentService;
     private readonly ICompanyService _companyService;
+    
 
     public UserService(DbWebAppContext context, IDocumentService documentService, ICompanyService companyService)
     {
@@ -19,7 +20,7 @@ public class UserService : IUserService
     }
 
     #region Authentication
-    public async Task<(UserSession, LoginError)> Login(string email, string password)
+    public async Task<(UserSession, LoginError)> Login(string email, string password )
     {
         if (string.IsNullOrEmpty(email))
         {
@@ -30,7 +31,9 @@ public class UserService : IUserService
             throw new ArgumentException($"'{nameof(password)}' cannot be null or empty.", nameof(password));
         }
 
-        var user = await GetUserByEmailAsync(email);
+       
+
+        var user = await GetActiveUserByEmailAsync(email);
 
         if (VerifyPassword(password, user.Password))
         {
@@ -118,6 +121,17 @@ public class UserService : IUserService
             .Include(u => u.UserRole)
             .Include(u => u.Company)
             .Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
+        return user ?? new User();
+    }
+
+    public async Task<User> GetActiveUserByEmailAsync(string email)
+    {
+        var user = await _context.Set<User>()
+            .Include(u => u.UserRole)
+            .Include(u => u.Company)
+            .Where(u => u.Email == email)
+            .Where (u => u.IsActive == true)
             .FirstOrDefaultAsync();
         return user ?? new User();
     }

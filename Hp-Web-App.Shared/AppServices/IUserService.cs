@@ -7,6 +7,7 @@ public interface IUserService
     Task<User> CreateUserAsync(User user);
     Task DeleteUserAsync(int Id);
     Task<bool> EmailExistsAsync(string email);
+    Task<User> GetActiveUserByEmailAsync(string email);
     Task<User> GetUserAsync(int id);
     Task<List<User>> GetUserByCompanyAsync(int companyId);
     Task<User> GetUserByEmailAsync(string email);

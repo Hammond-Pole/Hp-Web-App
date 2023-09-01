@@ -55,7 +55,7 @@
 
     // Add optional parameters to log in the user the first time.
     [Parameter] public string token { get; set; } = string.Empty;
-
+    private string email = string.Empty;
 
     public bool _iSUserActivated;
     User _user = new User();
@@ -105,7 +105,7 @@
             }
         }
 
-       
+
     }
 
     /*
@@ -115,7 +115,7 @@
     */
     private async Task Authenticate()
     {
-       
+
 
         try
         {
@@ -125,9 +125,13 @@
             if (!loginError.Equals(LoginError.None))
             {
                 // If login fails, show an alert with an error message
-                await JsRuntime.InvokeVoidAsync("alert", "Invalid email or password");
+                await JsRuntime.InvokeVoidAsync("alert", "Please activate your account if you haven't yet..\nThen enter valid Email Address and Password and try gain. \nThank you!!!!");
                 return;
             }
+
+            
+             // await  ActivateUser();
+            
 
             // Update the Auth State Provider with the user's information, and navigate to /uploaddocument
             var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
@@ -165,5 +169,13 @@
         var createForm = Modal.Show<ForgotPassword>("Enter your email address", options);
         var result = await createForm.Result;
     }
+
+    async Task ActivateUser()
+    {
+        email = _user.Email;
+        _user = await UserService.GetActiveUserByEmailAsync(email);
+ 
+    }
+
 
 }
