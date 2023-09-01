@@ -180,6 +180,12 @@ public class QuestionService : IQuestionService
         return oldQuestionValues ?? new List<QuestionValues>();
     }
 
+    public async Task<List<ListValue>> GetQuestionValueByQuestionFieldIdAsync(int QUEST_FIELD_ID)
+    {
+        return await _context.ListValues
+             .Where(qf=>qf.QuestionFieldId == QUEST_FIELD_ID)
+             .ToListAsync() ;
+    }
 
     #endregion
 }

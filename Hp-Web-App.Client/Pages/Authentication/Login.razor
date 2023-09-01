@@ -55,9 +55,9 @@
 
     // Add optional parameters to log in the user the first time.
     [Parameter] public string token { get; set; } = string.Empty;
+    private string email = string.Empty;
 
-
-    public bool _iSActive = false;
+    public bool _iSUserActivated;
     User _user = new User();
     // Create a Model instance for binding the user's credentials in the Razor input fields.
     private Model _model = new()
@@ -79,7 +79,7 @@
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
 
-      
+
     }
 
     /*
@@ -87,14 +87,25 @@
     */
     protected override async Task OnInitializedAsync()
     {
-        if (token != "new" && token is not null)
+        _iSUserActivated = _user.IsActive;
+        if(_iSUserActivated=false)
         {
-            var user = await UserService.GetUserbyTokenAsync(token);
-            _model.Email = user.Email;
-            _model.Password = user.Password;
-
-            await Authenticate();
+            await JsRuntime.InvokeVoidAsync("alert", "User account is Not active please click the link sent your email addres  and follow the instructions to activate your account ");
+            return;
         }
+        else
+        {
+            if (token != "new" && token is not null)
+            {
+                var user = await UserService.GetUserbyTokenAsync(token);
+                _model.Email = user.Email;
+                _model.Password = user.Password;
+
+                await Authenticate();
+            }
+        }
+
+
     }
 
     /*
@@ -104,6 +115,8 @@
     */
     private async Task Authenticate()
     {
+
+
         try
         {
             // Call the UserService to verify the user
@@ -112,9 +125,13 @@
             if (!loginError.Equals(LoginError.None))
             {
                 // If login fails, show an alert with an error message
-                await JsRuntime.InvokeVoidAsync("alert", "Invalid email or password");
+                await JsRuntime.InvokeVoidAsync("alert", "Please activate your account if you haven't yet..\nThen enter valid Email Address and Password and try gain. \nThank you!!!!");
                 return;
             }
+
+            
+             // await  ActivateUser();
+            
 
             // Update the Auth State Provider with the user's information, and navigate to /uploaddocument
             var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
@@ -152,5 +169,13 @@
         var createForm = Modal.Show<ForgotPassword>("Enter your email address", options);
         var result = await createForm.Result;
     }
+
+    async Task ActivateUser()
+    {
+        email = _user.Email;
+        _user = await UserService.GetActiveUserByEmailAsync(email);
+ 
+    }
+
 
 }

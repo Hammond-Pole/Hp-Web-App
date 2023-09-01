@@ -57,11 +57,20 @@
                         }
                           
                 </ul>
+                <!-------------------------------------
+                <div>
+                                   <InputTextArea @bind-Value="_listAnswers" class="form-control" placeholder="Add 1 item per line for answers to this question" rows="5" style="width: 420px"></InputTextArea>
+                               </div>
+
+                ------------------------------------------->
+               
             }
         </div>
         <ValidationMessage For="@(() => _questionField.QuestionFieldTypeId)" />
         <div style="margin-top: 8px;"></div>
     </div>
+
+   
 
     <div style="margin-top: 8px;"></div>
     <div class="form-group">
@@ -73,7 +82,8 @@
 
 
     <div class="form-group">
-        <button @onclick="UpdateQuestion" class="btn btn-primary">Submit</button>
+        <button @onclick="UpdateQuestion" class="btn btn-primary">Update</button>
+        <button @onclick="AddQuestion" class="btn btn-primary">Add to list</button>
         <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
     </div>
 </EditForm>
@@ -139,6 +149,39 @@
 
     
         uriHelper.NavigateTo("Document");
+    }
+
+
+    async Task AddQuestion()
+    {
+        try
+        {
+            var result = await _questionService.CreateQuestionFieldAsync(_questionField);
+            if (_questionField.QuestionFieldTypeId == 7)
+            {
+                List<ListValue> _listValues = new List<ListValue>();
+
+                _listAnswers.Split(new[] { '\n' }, StringSplitOptions.TrimEntries)
+                .ToList()
+                .ForEach(x =>
+                    _listValues.Add(new ListValue
+                        {
+                            Value = x,
+                            QuestionFieldId = result.Id,
+                            QuestionField = _questionField
+                        }
+                    )
+                );
+
+                await _questionService.CreateListValuesAsync(_listValues);
+            }
+
+            //await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
 }

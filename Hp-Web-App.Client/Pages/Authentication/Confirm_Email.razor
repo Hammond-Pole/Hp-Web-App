@@ -1,0 +1,105 @@
+﻿@page "/Confirme/{token}"
+
+@using Hp_Web_App.Shared.ClientFactories;
+@using Microsoft.AspNetCore.Components.Forms;
+@using Microsoft.Data.SqlClient;
+@using Microsoft.AspNetCore.Identity;
+
+<!-- Dependency Injection. -->
+@inject IUserService _userService;
+@inject ICompanyService _companyService;
+@inject IHttpClientService _httpClientService;
+@inject IJSRuntime js
+@inject NavigationManager navmanager;
+
+<h5 class="text-danger">Click below tikbox to activate your account</h5>
+
+<EditForm Model="@_user" class="card-body" OnValidSubmit="@UpdateUser">
+
+    <div class="form-group" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <label for="isactive" style="margin-right: 30px; width: 180px;">Activate your account:</label>
+        <InputCheckbox class="form-control-sm" id="isactive" @bind-Value="_user.IsActive" />
+    </div>
+    <br />
+
+    <div class="form-group">
+
+        <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))">Activate</button>
+    </div>
+
+</EditForm>
+
+
+
+
+@code {
+    // Parameter used to insert the current page into as a Modal window.
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    // Add optional parameters to log in the user the first time.
+    [Parameter] public string token { get; set; } = string.Empty;
+    private string ErrorMessage = string.Empty;
+    private User _user = new User();
+    bool isTokenValid = false;
+    
+
+    protected async override Task OnInitializedAsync()
+    {
+       
+        try
+        {
+            _user = await _userService.GetUserbyTokenAsync(token);
+            //_user.Password = string.Empty;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        // Get the user as soon as we have the Token.
+
+        if (_user.Name is null)
+        {
+            _errorMessage = "User not found or token expired";
+        }
+    }
+
+
+    #region token Validation
+   // private string _confirmPassword = string.Empty;
+    private string _errorMessage = string.Empty;
+    #endregion
+
+
+    async Task UpdateUser()
+    {
+        var ErrorMessage = string.Empty;
+
+
+        try
+        {
+            await _userService.UpdateUserAsync(_user);
+            // await Close();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+
+        RedirectToLogin();
+    }
+
+
+    async Task RedirectToLogin()
+    {
+        await js.InvokeVoidAsync("alert", $" awesome, you have successfully activated your account, click Ok button to go to login page");
+        navmanager.NavigateTo("Login");
+
+
+    }
+
+    #region Modal Operations
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+    // async Task Close() => await BlazoredModal.CloseAsync();
+    #endregion
+}
