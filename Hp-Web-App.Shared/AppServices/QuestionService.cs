@@ -55,7 +55,7 @@ public class QuestionService : IQuestionService
         {
             return new QuestionField();
         }
-        
+
         var existingQuestionFieldType = await GetQuestionFieldTypeAsync(questionField.QuestionFieldTypeId);
         if (existingQuestionFieldType == null)
         {
@@ -103,12 +103,12 @@ public class QuestionService : IQuestionService
         {
             throw new ArgumentNullException(nameof(listValues));
         }
-        
+
         await _context.ListValues.AddRangeAsync(listValues);
         await _context.SaveChangesAsync();
         return listValues ?? new List<ListValue>();
     }
-    
+
     #endregion
 
     #region QuestionFieldTypes
@@ -127,7 +127,7 @@ public class QuestionService : IQuestionService
     #endregion
 
     #region QuestionValue
-    public async Task<List<QuestionValues>> CreateQuestionValuesAsync(List<QuestionValues> questionValues) 
+    public async Task<List<QuestionValues>> CreateQuestionValuesAsync(List<QuestionValues> questionValues)
     {
         if (questionValues == null)
         {
@@ -135,7 +135,8 @@ public class QuestionService : IQuestionService
         }
 
         foreach (var questionValue in questionValues)
-        {var existingDocument = await _context.Documents.FindAsync(questionValue.DocumentId);
+        {
+            var existingDocument = await _context.Documents.FindAsync(questionValue.DocumentId);
             if (existingDocument == null)
             {
                 throw new Exception($"DocumentsAttached with ID {questionValue.DocumentsAttachedId} not found.");
@@ -150,12 +151,12 @@ public class QuestionService : IQuestionService
             questionValue.QuestionField = existingQuestionField;
 
             var existingDocumentAttached = await _context.DocumentsAttached.FindAsync(questionValue.DocumentsAttachedId);
-            if ( existingDocumentAttached == null)
+            if (existingDocumentAttached == null)
             {
                 throw new Exception($"DocumentAttached with ID {questionValue.DocumentsAttachedId} not found.");
             }
             questionValue.DocumentsAttached = existingDocumentAttached;
-            
+
         }
 
         _context.AddRange(questionValues);
@@ -167,6 +168,7 @@ public class QuestionService : IQuestionService
     public async Task<List<QuestionValues>> GetQuestionValuesByQuestionFieldIdAsync(int id)
     {
         var questionValues = await _context.Set<QuestionValues>()
+
             .Where(qv => qv.QuestionFieldID == id)
             .ToListAsync();
 
@@ -176,16 +178,38 @@ public class QuestionService : IQuestionService
     public async Task<List<QuestionValues>> GetAllQuestionValuesAsync()
     {
         var oldQuestionValues = await _context.Set<QuestionValues>()
-            .ToListAsync() ;
+            .ToListAsync();
         return oldQuestionValues ?? new List<QuestionValues>();
     }
 
-    public async Task<List<ListValue>> GetQuestionValueByQuestionFieldIdAsync(int QUEST_FIELD_ID)
+
+
+   
+
+
+
+
+    public async Task<ListValue> AddToListValueAsync(ListValue ValLst)
     {
-        return await _context.ListValues
-             .Where(qf=>qf.QuestionFieldId == QUEST_FIELD_ID)
-             .ToListAsync() ;
+        if (ValLst == null)
+        {
+            throw new ArgumentNullException(nameof(ValLst));
+        }
+
+        await _context.ListValues.AddRangeAsync(ValLst);
+        await _context.SaveChangesAsync();
+        return ValLst ?? new ListValue();
     }
 
-    #endregion
+    public async Task<List<ListValue>> GetListValueByQuestionFieldIdAsync(int ID)
+    {
+        return await _context.ListValues
+           .Include(c => c.QuestionField)
+           .Where(qf => qf.QuestionFieldId == ID)
+           .ToListAsync();
+    }
 }
+
+
+    
+    #endregion

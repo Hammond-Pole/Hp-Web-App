@@ -19,6 +19,4 @@ public interface IUserService
     Task UpdateUserAsync(User user);
     Task<bool> VerifyToken(string token);
 
-   
-   
 }

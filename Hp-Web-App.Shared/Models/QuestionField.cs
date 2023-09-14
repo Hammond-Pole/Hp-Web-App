@@ -38,7 +38,7 @@ public class QuestionField
     public ICollection<QuestionValue>? Values { get; set; }
 
     [ExcludeFromTable]
-    public ICollection<DocumentsAttached>? DocumentsAttached { get; set; }
+    public ICollection<DocumentsAttached>? DocumentsAttached { get; set; } 
 
     [ExcludeFromTable]
     public ICollection<ListValue>? ListValues { get; set; }
