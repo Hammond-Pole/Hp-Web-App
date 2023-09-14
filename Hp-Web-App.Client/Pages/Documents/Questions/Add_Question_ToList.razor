@@ -10,14 +10,12 @@
 @inject IJSRuntime js
 
 
-
 <h3>Add Question to List</h3>
 <div style="margin-top: 8px;"></div>
 
 <EditForm Model="_lstValue" OnValidSubmit="showspecificQuestion">
     <DataAnnotationsValidator />
 
- 
     <div class="form-group">
         <InputNumber id="Qfield" class="form-control" @bind-Value="_lstValue.QuestionFieldId" hidden="true"/>
     </div>
@@ -67,12 +65,18 @@
 
         await js.InvokeVoidAsync("alert", $" Question successfully added to the list");
         ClearInput();
+        RedirectTo_EditQuestion();
     }
 
     async Task ClearInput()
     {
         // Set inputValue to an empty string or null to clear the input box
         _lstValue.Value = string.Empty;
+    }
+
+    async Task RedirectTo_EditQuestion()
+    {
+        uriHelper.NavigateTo("/Document/Edit/Edit_Question/" + quessId,true);
     }
 
 }
