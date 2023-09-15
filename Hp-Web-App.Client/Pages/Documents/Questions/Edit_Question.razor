@@ -1,8 +1,11 @@
 ﻿@page "/Document/Edit/Edit_Question/{qsId:int}"
+
+
 <!-- Page Specific Using Satements. If there are general ones then add them to _Imports.razor. -->
 @using Hp_Web_App.Client.Pages.Documents.Questions;
 @using Hp_Web_App.Client.Shared
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Web;
 
 <!-- Only Administrators are allowed to browse to this page. -->
 @attribute [Authorize(Roles = "Administrator")]
@@ -57,12 +60,7 @@
                         }
                           
                 </ul>
-                <!-------------------------------------
-                <div>
-                                   <InputTextArea @bind-Value="_listAnswers" class="form-control" placeholder="Add 1 item per line for answers to this question" rows="5" style="width: 420px"></InputTextArea>
-                               </div>
-
-                ------------------------------------------->
+              
                
             }
         </div>
@@ -82,33 +80,59 @@
 
 
     <div class="form-group">
+        
         <button @onclick="UpdateQuestion" class="btn btn-primary">Update</button>
-        <button @onclick="AddQuestion" class="btn btn-primary">Add to list</button>
-        <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+       
+
+        
+        <button @onclick="ShowQuestionList" class="btn btn-primary">Add question to the list</button>
+
+        <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>                                                
+
+        <!-------
+             <a href="/Add_Question_ToList?Id=@qsId">Go to Add Question List</a>
+        ----->  
     </div>
+
+   
 </EditForm>
 
+
+<EditForm Model="_listvalue">
+  
+</EditForm>
 
 
 @code {
     // Parameter used to insert the current page into as a Modal window.
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+
     [Parameter] public int qsId { get; set; }
 
+    [Parameter] public int ValuesqsId { get; set; }
+
     private QuestionField _questionField = new QuestionField();
+
     [Parameter] public int documentId { get; set; }
 
     private List<QuestionFieldType>? _questionFieldType = new();
+    private List<ListValue> _listvalue = new();
     private string ErrorMessage = string.Empty;
     private Document _document = new Document();
     private string _listAnswers = string.Empty;
 
     // Document Answer Variables
     private Type? _selectedType;
+    private int Id;
+
+
+
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
-    {
+    {   
+        //= _questionField.Id;
         _questionField.DocumentId = documentId;
         _questionField.QuestionFieldTypeId = 3;
         _questionField.IsVisible = true;
@@ -116,6 +140,14 @@
         _questionFieldType = await _questionService.GetQuestionFieldTypesAsync();
         _document = await _documentService.GetDocumentAsync(documentId)!;
         _questionFieldType = await _questionService.GetQuestionFieldTypesAsync();
+
+        /*var uri = new Uri(uriHelper.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        if(query.AllKeys.Contains("Id"))
+            {
+            Id = int.Parse(query["Id"]);
+        }*/
 
     }
 
@@ -132,22 +164,22 @@
             ErrorMessage = ex.Message;
         }
         RedirectToEdit();
-       
+
     }
     #endregion
 
     #region Modal Operations
     async Task Cancel() => await BlazoredModal.CancelAsync();
-    // async Task Close() => await BlazoredModal.CloseAsync();
+    //async Task Close() => await BlazoredModal.CloseAsync();
     #endregion
 
-    
+
 
     async void RedirectToEdit()
     {
-        
 
-    
+
+
         uriHelper.NavigateTo("Document");
     }
 
@@ -184,4 +216,30 @@
         }
     }
 
+
+    async Task NavigaToQuestionList()
+    {
+        uriHelper.NavigateTo($"/Document/Edit/Edit_Question/Add_Question_ToList/" +qsId);
+    }
+
+    async Task ShowQuestionList()
+
+    {
+
+        var parameters = new ModalParameters
+        {
+            { nameof(Add_Question_ToList.quessId), qsId}
+        };
+
+        var options = new ModalOptions()
+            {
+                DisableBackgroundCancel = true
+            };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var createForm = Modal.Show<Add_Question_ToList>("Add Question to a list", parameters, options);
+        var result = await createForm.Result;
+    }
+
+    
 }

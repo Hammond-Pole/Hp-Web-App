@@ -1,0 +1,79 @@
+﻿@page "/Add_Question_ToList"
+@page "/Document/Edit/Edit_Question/Add_Question_ToList/{quessId:int}"
+
+@using Hp_Web_App.Shared
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject IQuestionService _questionService
+@inject NavigationManager uriHelper
+@inject Microsoft.AspNetCore.Components.NavigationManager NavManager
+@inject IJSRuntime js
+
+
+<EditForm Model="_lstValue" OnValidSubmit="showspecificQuestion">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <InputNumber id="Qfield" class="form-control" @bind-Value="_lstValue.QuestionFieldId" hidden="true"/>
+    </div>
+    <div style="margin-top: 8px;"></div>
+
+    <div class="form-group">
+        <label for="description">Add Question:</label>
+        <InputText id="description" class="form-control" @bind-Value="_lstValue.Value" />
+        <ValidationMessage For="@(() => _questionField.Description)" />
+    </div>
+    <div style="margin-top: 8px;"></div>
+
+    <div class="form-group">
+
+        <button type="submit" class="btn btn-primary">Submit</button>  
+    </div>
+    </EditForm>
+
+@code 
+{
+    [Parameter] public int quessId { get; set; }
+
+    private QuestionField _questionField = new QuestionField();
+    private ListValue _lstValue = new ListValue();
+    private int qField1;
+
+    System.Uri uri;
+    private int productId;
+
+    protected async override Task OnInitializedAsync()
+    {
+        qField1 = quessId;
+
+        _lstValue.QuestionFieldId = qField1;
+    }
+
+    async Task showspecificQuestion()
+    {
+        try
+        {
+            var result = await _questionService.AddToListValueAsync(_lstValue);
+        }
+        catch(Exception ex)
+        {
+            await js.InvokeVoidAsync("alert", "Error Occured please contact your system administrator");
+        }
+
+        await js.InvokeVoidAsync("alert", $" Question successfully added to the list");
+        ClearInput();
+        RedirectTo_EditQuestion();
+    }
+
+    async Task ClearInput()
+    {
+        // Set inputValue to an empty string or null to clear the input box
+        _lstValue.Value = string.Empty;
+    }
+
+    async Task RedirectTo_EditQuestion()
+    {
+        uriHelper.NavigateTo("/Document/Edit/Edit_Question/" + quessId,true);
+    }
+
+}
