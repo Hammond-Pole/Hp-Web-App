@@ -85,7 +85,7 @@
        
 
         
-        <button @onclick="NavigaToQuestionList" class="btn btn-primary">Add question to the list</button>
+        <button @onclick="ShowQuestionList" class="btn btn-primary">Add question to the list</button>
 
         <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>                                                
 
@@ -106,6 +106,8 @@
 @code {
     // Parameter used to insert the current page into as a Modal window.
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+
     [Parameter] public int qsId { get; set; }
 
     [Parameter] public int ValuesqsId { get; set; }
@@ -124,7 +126,7 @@
     private Type? _selectedType;
     private int Id;
 
-    
+
 
 
     // Load all required data when launching the page.
@@ -143,7 +145,7 @@
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
 
         if(query.AllKeys.Contains("Id"))
-        {
+            {
             Id = int.Parse(query["Id"]);
         }*/
 
@@ -168,7 +170,7 @@
 
     #region Modal Operations
     async Task Cancel() => await BlazoredModal.CancelAsync();
-    // async Task Close() => await BlazoredModal.CloseAsync();
+    //async Task Close() => await BlazoredModal.CloseAsync();
     #endregion
 
 
@@ -214,9 +216,30 @@
         }
     }
 
-    
+
     async Task NavigaToQuestionList()
     {
         uriHelper.NavigateTo($"/Document/Edit/Edit_Question/Add_Question_ToList/" +qsId);
     }
+
+    async Task ShowQuestionList()
+
+    {
+
+        var parameters = new ModalParameters
+        {
+            { nameof(Add_Question_ToList.quessId), qsId}
+        };
+
+        var options = new ModalOptions()
+            {
+                DisableBackgroundCancel = true
+            };
+
+        // Call the add form and wait to see if there is an Ok or Cancel.
+        var createForm = Modal.Show<Add_Question_ToList>("Add Question to a list", parameters, options);
+        var result = await createForm.Result;
+    }
+
+    
 }
