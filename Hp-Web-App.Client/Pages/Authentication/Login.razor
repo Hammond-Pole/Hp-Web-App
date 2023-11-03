@@ -44,6 +44,10 @@
                 <button @onclick="async () => await ResetPassword()" class=" btn btn-outline-primary"> Forgot Password</button>
             </div>
 
+            <div class="mb-3 text-center">
+               
+                <button @onclick="async () => await NavigaToExternal()" class=" btn btn-outline-primary"> External users</button>
+            </div>
 
         </EditForm>
     </div>
@@ -129,9 +133,9 @@
                 return;
             }
 
-            
-             // await  ActivateUser();
-            
+
+            // await  ActivateUser();
+
 
             // Update the Auth State Provider with the user's information, and navigate to /uploaddocument
             var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
@@ -174,8 +178,13 @@
     {
         email = _user.Email;
         _user = await UserService.GetActiveUserByEmailAsync(email);
- 
+
     }
 
+
+    public async Task NavigaToExternal()
+    {
+        UriHelper.NavigateTo("/Client_info");
+    }
 
 }
