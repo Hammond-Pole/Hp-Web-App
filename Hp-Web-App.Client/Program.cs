@@ -16,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add environment variables to the ConfigurationBuilder
 builder.Configuration.AddEnvironmentVariables();
+builder.Environment.IsDevelopment();
 
 var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING");
 
@@ -32,6 +33,7 @@ builder.Services.AddScoped<ITrainingRequestService, TrainingRequestService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IHelperFunctions, HelperFunctions>();
 builder.Services.AddScoped<IGraphService, GraphService>();
 builder.Services.AddTransient<IGraphClientFactory, GraphClientFactory>();
@@ -59,6 +61,10 @@ builder.Services.AddAuthorizationCore();
 //    // By default, all incoming requests will be authorized according to the default policy
 //    options.FallbackPolicy = options.DefaultPolicy;
 //});
+
+
+
+
 
 var app = builder.Build();
 

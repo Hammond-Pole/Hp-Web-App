@@ -44,6 +44,16 @@ public interface IHttpClientService
     Task<HttpResponseMessage> SendResetPasswordEmailAsync(string email, string name, string token);
 
 
+    Task<HttpResponseMessage> UnSbscribeAsync(string email, string hpref, string token);
+    /// <summary>
+    /// Method to send registration email asynchronously for confirmation
+    /// </summary>
+    /// <param name="email">User email address</param>
+    /// <param name="name">User name</param>
+    /// <param name="token">Token for email validation</param>
+    /// <returns>HttpResponseMessage object</returns>
+
+
 }
 
 /// <summary>
@@ -258,6 +268,63 @@ public class HttpClientService : IHttpClientService
             Message = new
             {
                 Subject = "Confirm your email address",
+                Body = new
+                {
+                    ContentType = "Html",
+                    Content = htmlTemplate
+                },
+                ToRecipients = new[]
+                {
+                    new
+                    {
+                        EmailAddress = new
+                        {
+                            Address = email
+                        }
+                    }
+                }
+            },
+            SaveToSentItems = false
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
+
+        // Send message and return HttpResponseMessage object
+        var fullUrl = new UriBuilder(client.BaseAddress + baseUrl).ToString();
+        var response = await client.PostAsync(fullUrl, content);
+
+        return response;
+    }
+
+    public async Task<HttpResponseMessage> UnSbscribeAsync(string email, string hpref, string token)
+    {
+        var baseUrl = "users/noreply@hammondpole.co.za/sendmail";
+        var client = _clientFactory.CreateClient("graph");
+        var authenticationResult = await GetAccessTokenAsync();
+
+        // Add authorization header with access token
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationResult.ToString());
+
+        // Read email template from file system
+        var templatePath = _mountPath + @"/Templates/Client_Email.html";
+        string htmlTemplate = File.ReadAllText(templatePath);
+
+        // Replace placeholders with user details
+        htmlTemplate = htmlTemplate.Replace("{{name}}", hpref);
+        htmlTemplate = htmlTemplate.Replace("{{email}}", email);
+
+        // Build Uri for email confirmation
+        var path = "/unsubscribe/" + token.ToString();
+        var uriBuilder = new UriBuilder(_baseUrl) { Path = path };
+
+        // Build message payload
+        htmlTemplate = htmlTemplate.Replace("{{url}}", uriBuilder.ToString());
+
+        var message = new
+        {
+            Message = new
+            {
+                Subject = "Confirm subscription",
                 Body = new
                 {
                     ContentType = "Html",

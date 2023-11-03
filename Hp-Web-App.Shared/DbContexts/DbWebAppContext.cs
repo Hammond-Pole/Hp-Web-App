@@ -32,6 +32,8 @@ public class DbWebAppContext : DbContext
     public DbSet<CompanyDocument> CompanyDocuments { get; set; }
     public DbSet<DocumentsAttached> DocumentsAttached { get; set; }
 
+    public DbSet<Clients_Details> Clients { get; set; }
+
 
     // Single Page Table
     public DbSet<TrainingRequestModel> TrainingRequests { get; set; }
@@ -156,6 +158,17 @@ public class DbWebAppContext : DbContext
 
         modelBuilder.Entity<TrainingRequestModel>()
             .HasKey(k => k.Id);
+
+        // Set Client data-----//
+        modelBuilder.Entity<Clients_Details>().HasData(
+            new Clients_Details()
+            {
+                Id = -1,
+                HP_Reference = "HP7803252",
+                Email = "ErnestH@hpd.co.za",
+                SentDate = DateTime.Now,
+
+            });
 
         base.OnModelCreating(modelBuilder);
     }
