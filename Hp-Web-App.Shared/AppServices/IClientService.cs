@@ -12,4 +12,5 @@ public interface IClientService
     Task<Clients_Details> CreateUserAsync(Clients_Details user);
     Task<Clients_Details> GetClientbyTokenAsync(string RegistrationKey);
     Task<bool> VerifyToken(string token);
+    Task<bool> Client_EmailExistsAsync(string email);
 }

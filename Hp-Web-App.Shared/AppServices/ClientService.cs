@@ -17,6 +17,22 @@ public class ClientService : IClientService
         _context = context; 
     }
 
+    public async Task<bool> Client_EmailExistsAsync(string email)
+    {
+        var ClientEmail = await _context.Set<Clients_Details>()
+            
+            .Where(u => u.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (ClientEmail is not null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public async Task<Clients_Details> CreateUserAsync(Clients_Details client)
     {
