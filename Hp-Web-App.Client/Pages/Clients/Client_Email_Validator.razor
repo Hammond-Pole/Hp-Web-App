@@ -26,23 +26,36 @@
      <EditForm Model="@_clientdetails" OnValidSubmit="@CreateExternalClient" class="card-body">
 
         <div class="form-group">
-            <label for="hp_reference">Account Code:</label>
-            <InputText id="hpref" class="form-control" @bind-Value="_clientdetails.HP_Reference" />
+            <p>
+            if <i><b>@hpref</b></i>  is your reference number and <b><i>@email</i></b> is your email address, please <br />
+                click the link below to unsubscribe...Thank you..
+            </p>
+            <InputText id="hpref" class="form-control" @bind-Value="_clientdetails.HP_Reference" hidden="true" />
         </div>
+ 
 
+    <!---------------------
+    <div class="form-group">
+           <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))" @onclick="OnButtonClick">UnSubscribe</button>
+
+       </div>
+    ------------->
+   
+    <div class="form-group">
+        <button type="submit" class="btn btn-outline-primary btn btn-sm" @onclick="OnButtonClick">UnSubscribe</button>
+       
+    </div>
+    
         <div class="form-group">
-            <label for="Surname">Email:</label>
-            <InputText id="sname" class="form-control" @bind-Value="_clientdetails.Email" />
+           
+            <InputText id="sname" class="form-control" @bind-Value="_clientdetails.Email" hidden="true" />
 
         </div>
 
-        <br />
-
-
-             <div class="form-group">
-            <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))">Submit</button>
-            <button type="button" @onclick=Cancel class="btn btn-secondary">Cancel</button>
-        </div>
+        <div>
+    
+</div>
+       
 
     </EditForm>
 
@@ -70,8 +83,6 @@
     // Private properties used only in this page.
     private Clients_Details _clientdetails = new Clients_Details();
 
-    private string queryParameter;
-    private string queryParameter1;
 
     // Load all required data when launching the page.
     protected async override Task OnInitializedAsync()
@@ -80,14 +91,6 @@
         _clientdetails.HP_Reference = hpref;    
         _clientdetails.Email = email;
 
-
-
-        //string urls = "https://localhost:7089/Client_info/?account=ACME0068&email=ernesth@hammondpole.co.za";
-        //navmanager.NavigateTo(urls);
-        //CreateExternalClient();
-
-
-        
     }
 
     #region CRUD Operations
@@ -105,7 +108,7 @@
 
             if (_userEmailExists)
             {
-                throw new Exception("Email address already exists, try another email.");
+                throw new Exception("You cannot unsubscribe from this page as you are still having unsettled account with us please settle your account and unsubscribe...thank you.");
             }
 
             await _clientService.CreateUserAsync(_clientdetails);
@@ -120,8 +123,15 @@
             await js.InvokeVoidAsync("alert", $"{ex.Message}");
             return;
         }
+
+
+      
+
     }
     #endregion
+
+  
+    
 
     #region Modal Operations
     async Task Cancel() => await BlazoredModal.CancelAsync();
@@ -137,6 +147,9 @@
 
     #endregion
 
-    
-
+   async Task OnButtonClick()
+    {
+        var confirmed = await js.InvokeAsync<bool>("confirm", "You cannot unsubscribe from this page as you are still having unsettled account with us please settle your account and unsubscribe...thank you.");
+       
     }
+}
