@@ -44,11 +44,7 @@
                 <button @onclick="async () => await ResetPassword()" class=" btn btn-outline-primary"> Forgot Password</button>
             </div>
 
-            <div class="mb-3 text-center">
-               
-                <button @onclick="async () => await NavigaToExternal()" class=" btn btn-outline-primary"> External users</button>
-            </div>
-
+         
         </EditForm>
     </div>
 </div>
@@ -182,9 +178,9 @@
     }
 
 
-    public async Task NavigaToExternal()
+    /*public async Task NavigaToExternal()
     {
         UriHelper.NavigateTo("/Client_info");
-    }
+    }*/
 
 }
