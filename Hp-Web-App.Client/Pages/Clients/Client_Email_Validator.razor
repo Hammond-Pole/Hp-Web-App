@@ -17,12 +17,6 @@
 
 
 
-<!-- Display the error at the top of the form so that we know why something failed. -->
-
-
-
-<!--Add a form for me that is based on the User Class with a submit button that executes CreateUser-->
-
      <EditForm Model="@_clientdetails" OnValidSubmit="@CreateExternalClient" class="card-body">
 
         <div class="form-group">
@@ -33,14 +27,6 @@
             <InputText id="hpref" class="form-control" @bind-Value="_clientdetails.HP_Reference" hidden="true" />
         </div>
  
-
-    <!---------------------
-    <div class="form-group">
-           <button type="submit" class="btn btn-primary" disabled="@(!string.IsNullOrWhiteSpace(_errorMessage))" @onclick="OnButtonClick">UnSubscribe</button>
-
-       </div>
-    ------------->
-   
     <div class="form-group">
         <button type="submit" class="btn btn-outline-primary btn btn-sm" @onclick="OnButtonClick">UnSubscribe</button>
        
@@ -58,9 +44,6 @@
        
 
     </EditForm>
-
-
-
 
 
 @code {
