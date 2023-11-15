@@ -91,7 +91,8 @@
 
             if (_userEmailExists)
             {
-                throw new Exception("You cannot unsubscribe from this page as you are still having unsettled account with us please settle your account and unsubscribe...thank you.");
+                //throw new Exception("You cannot unsubscribe from this page as you are still having unsettled account with us please settle your account and unsubscribe...thank you.");
+                navmanager.NavigateTo("/Contact_Us");
             }
 
             await _clientService.CreateUserAsync(_clientdetails);
@@ -108,13 +109,13 @@
         }
 
 
-      
+
 
     }
     #endregion
 
-  
-    
+
+
 
     #region Modal Operations
     async Task Cancel() => await BlazoredModal.CancelAsync();
@@ -126,13 +127,14 @@
     private string _errorMessage = string.Empty;
 
 
-    
+
 
     #endregion
 
-   async Task OnButtonClick()
+    async Task OnButtonClick()
     {
-        var confirmed = await js.InvokeAsync<bool>("confirm", "You cannot unsubscribe from this page as you are still having unsettled account with us please settle your account and unsubscribe...thank you.");
-       
+        //var confirmed = await js.InvokeAsync<bool>("confirm", "You cannot unsubscribe from this page as you are still having unsettled account with us please settle your account and unsubscribe...thank you.");
+        navmanager.NavigateTo("/Contact_Us");
+
     }
 }
