@@ -21,18 +21,18 @@
 
         <div class="form-group">
             <p>
-            if <i><b>@hpref</b></i>  is your reference number and <b><i>@email</i></b> is your email address, please <br />
-                click the link below to unsubscribe...Thank you..
+            If <i><b>@hpref</b></i>  is your reference number and <b><i>@email</i></b> is your email address, please <br />
+                click the link below to unsubscribe.
             </p>
             <InputText id="hpref" class="form-control" @bind-Value="_clientdetails.HP_Reference" hidden="true" />
         </div>
  
     <div class="form-group">
-        <button type="submit" class="btn btn-outline-primary btn btn-sm" @onclick="OnButtonClick">UnSubscribe</button>
+        <button type="submit" class="btn btn-outline-primary btn btn-sm" @onclick="OnButtonClick">Unsubscribe</button>
        
     </div>
-    
-        <div class="form-group">
+
+    <div class="form-group">
            
             <InputText id="sname" class="form-control" @bind-Value="_clientdetails.Email" hidden="true" />
 

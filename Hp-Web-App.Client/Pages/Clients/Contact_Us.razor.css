@@ -1,0 +1,88 @@
+﻿.Contact {
+    background-color: #282e3f;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* Set the height to 100% of the viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h2 {
+    font-size: 24px;
+    margin: 0;
+    padding: 20px 0;
+    text-align: center;
+    color: white;
+}
+
+h3 {
+    text-align: center;
+    color: white;
+}
+
+p {
+    margin: 0;
+    padding: 0 0 20px;
+    text-align: center;
+    color: white;
+}
+
+.placeholders {
+    display: flex;
+    padding: 50px;
+    justify-content: center;
+}
+
+.placeholderscontainer {
+    padding: 10px;
+    align-content:baseline;
+    justify-items:baseline;
+}
+
+.placeholders .item {
+    height: 100%; 
+    padding: 35px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    background-color: #282e3f;
+    text-align: center;
+    background-color: grey;
+}
+
+    .placeholders .item h4 {
+        font-size: 17px;
+        margin-top: 25px;
+    }
+
+    .placeholders .item .image {
+        width: 90px;
+        height: 90px;
+        display: inline-block;
+        text-align: center;
+        line-height: 90px;
+        background-color: #333d65;
+        border-radius: 50%;
+        transition: all 0.3s;
+    }
+
+    
+
+.para {
+    padding: 50px
+}
+
+.col-lg-3{
+    margin: 3px;
+}
+
+.placeholders .item a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+

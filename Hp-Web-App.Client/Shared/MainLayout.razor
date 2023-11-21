@@ -10,7 +10,7 @@
 <PageTitle>Document Manager</PageTitle>
 
 <main style="padding:0">
-@if (NavigationManager.Uri.Contains("trainingrequest", StringComparison.OrdinalIgnoreCase))
+    @if (NavigationManager.Uri.Contains("trainingrequest", StringComparison.OrdinalIgnoreCase) || NavigationManager.Uri.Contains("Client_info", StringComparison.OrdinalIgnoreCase) || NavigationManager.Uri.Contains("Contact_Us", StringComparison.OrdinalIgnoreCase))
 {
     <article class="content">
         @Body
